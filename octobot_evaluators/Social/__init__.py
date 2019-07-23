@@ -14,5 +14,5 @@
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
 
-PROJECT_NAME = "OctoBot-Evaluators"
-VERSION = "0.0.0"  # major.minor.revision
+from .social_evaluator import *
+from tentacles.Evaluator.Social import *

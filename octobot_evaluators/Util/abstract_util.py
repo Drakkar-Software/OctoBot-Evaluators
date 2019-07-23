@@ -14,5 +14,22 @@
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
 
-PROJECT_NAME = "OctoBot-Evaluators"
-VERSION = "0.0.0"  # major.minor.revision
+from abc import ABCMeta
+
+from config import TENTACLE_UTIL_FOLDER, TENTACLES_EVALUATOR_PATH
+from tentacles_management.abstract_tentacle import AbstractTentacle
+
+
+class AbstractUtil(AbstractTentacle):
+    __metaclass__ = ABCMeta
+
+    def __init__(self):
+        super().__init__()
+
+    @classmethod
+    def get_tentacle_folder(cls) -> str:
+        return TENTACLES_EVALUATOR_PATH
+
+    @classmethod
+    def get_config_tentacle_type(cls) -> str:
+        return TENTACLE_UTIL_FOLDER
