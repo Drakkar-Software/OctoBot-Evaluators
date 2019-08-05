@@ -13,13 +13,15 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
-
 from dataclasses import dataclass, field
+
 from typing import Dict, Any
 
-from config import CONFIG_DICT_TYPE, EvaluatorMatrixTypes, TimeFrames
-from evaluator import default_matrix_value, MatrixType, MatrixValueType
-from tools.evaluators_util import check_valid_eval_note
+from octobot_commons.enums import TimeFrames
+
+from octobot_evaluators.constants import MatrixType, default_matrix_value, MatrixValueType
+from octobot_evaluators.enums import EvaluatorMatrixTypes
+from octobot_evaluators.util.evaluators_util import check_valid_eval_note
 
 
 @dataclass
@@ -27,7 +29,7 @@ class EvaluatorMatrix:
     """
     EvaluatorMatrix dataclass store evaluation data in a matrix represented by a dictionnary
     """
-    config: CONFIG_DICT_TYPE
+    config: dict
     matrix: MatrixType = field(init=False, repr=False, default_factory=default_matrix_value)
     evaluator_eval_types: Dict[str, Any] = field(init=False, repr=False, default_factory=dict)
 
@@ -37,6 +39,14 @@ class EvaluatorMatrix:
                  evaluator_name: str,
                  value: MatrixValueType,
                  time_frame: TimeFrames = None) -> None:
+        """
+
+        :param matrix_type:
+        :param evaluator_name:
+        :param value:
+        :param time_frame:
+        :return:
+        """
         if evaluator_name not in self.matrix[matrix_type]:
             self.matrix[matrix_type][evaluator_name] = {}
 
@@ -48,6 +58,11 @@ class EvaluatorMatrix:
     # getters
     def get_type_evals(self,
                        matrix_type: EvaluatorMatrixTypes):
+        """
+
+        :param matrix_type:
+        :return:
+        """
         return self.matrix[matrix_type]
 
     @staticmethod
@@ -55,6 +70,14 @@ class EvaluatorMatrix:
                       matrix_type: EvaluatorMatrixTypes,
                       evaluator_name: str,
                       time_frame: TimeFrames = None) -> MatrixValueType:
+        """
+
+        :param matrix:
+        :param matrix_type:
+        :param evaluator_name:
+        :param time_frame:
+        :return:
+        """
         if matrix_type in matrix and evaluator_name in matrix[matrix_type]:
             if time_frame is not None:
                 if isinstance(matrix[matrix_type][evaluator_name], dict) \
@@ -69,15 +92,30 @@ class EvaluatorMatrix:
         return None
 
     def get_matrix(self) -> MatrixType:
+        """
+
+        :return:
+        """
         return self.matrix
 
     def set_evaluator_eval_type(self,
                                 evaluator_name: str,
                                 evaluator_eval_type: Any) -> None:
+        """
+
+        :param evaluator_name:
+        :param evaluator_eval_type:
+        :return:
+        """
         self.evaluator_eval_types[evaluator_name] = evaluator_eval_type
 
     def get_evaluator_eval_type(self,
                                 evaluator_name: str) -> Any:
+        """
+
+        :param evaluator_name:
+        :return:
+        """
         if evaluator_name in self.evaluator_eval_types:
             return self.evaluator_eval_types[evaluator_name]
         return None

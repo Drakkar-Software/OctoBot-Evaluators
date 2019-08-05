@@ -1,3 +1,4 @@
+# cython: language_level=3
 #  Drakkar-Software OctoBot-Evaluators
 #  Copyright (c) Drakkar-Software, All rights reserved.
 #
@@ -13,6 +14,23 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
+from octobot_channels.channels.channel cimport Channel, Channels
+from octobot_channels.consumer cimport Consumer
+from octobot_channels.producer cimport Producer
 
-from .abstract_util import *
-from tentacles.Evaluator.Util import *
+cdef class EvaluatorChannel(Channel):
+    cdef public str exchange_name
+
+    cdef void _add_new_consumer_and_run(self, EvaluatorChannelConsumer consumer, str symbol =*, str time_frame =*)
+
+    cpdef void new_consumer(self, object callback, int size=*, str symbol=*, bint filter_size=*)
+    cpdef list get_consumers(self, object time_frame, str symbol)
+
+cdef class EvaluatorChannelConsumer(Consumer):
+    pass
+
+cdef class EvaluatorChannelProducer(Producer):
+    pass
+
+cdef class EvaluatorChannels(Channels):
+    pass
