@@ -14,12 +14,24 @@
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
 
-from .realtime_evaluator import *
-from .social_evaluator import *
-from .strategy_evaluator import *
-from .TA_evaluator import *
+from abc import ABCMeta
 
-from tentacles.Evaluator.RealTime import *
-from tentacles.Evaluator.Social import *
-from tentacles.Evaluator.Strategies import *
-from tentacles.Evaluator.TA import *
+from octobot_commons.tentacles_management import AbstractTentacle
+from tentacles_manager import TENTACLES_EVALUATOR_PATH
+
+from octobot_evaluators.constants import TENTACLE_UTIL_FOLDER
+
+
+class AbstractUtil(AbstractTentacle):
+    __metaclass__ = ABCMeta
+
+    def __init__(self):
+        super().__init__()
+
+    @classmethod
+    def get_tentacle_folder(cls) -> str:
+        return TENTACLES_EVALUATOR_PATH
+
+    @classmethod
+    def get_config_tentacle_type(cls) -> str:
+        return TENTACLE_UTIL_FOLDER

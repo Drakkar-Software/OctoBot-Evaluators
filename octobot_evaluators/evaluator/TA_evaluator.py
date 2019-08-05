@@ -14,12 +14,17 @@
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
 
-from .realtime_evaluator import *
-from .social_evaluator import *
-from .strategy_evaluator import *
-from .TA_evaluator import *
+from octobot_evaluators.constants import CONFIG_EVALUATOR_TA
+from octobot_evaluators.evaluator import AbstractEvaluator
 
-from tentacles.Evaluator.RealTime import *
-from tentacles.Evaluator.Social import *
-from tentacles.Evaluator.Strategies import *
-from tentacles.Evaluator.TA import *
+
+class TAEvaluator(AbstractEvaluator):
+    def __init__(self):
+        super().__init__()
+        self.time_frame = None
+        self.short_term_averages = [7, 5, 4, 3, 2, 1]
+        self.long_term_averages = [40, 30, 20, 15, 10]
+
+    @classmethod
+    def get_config_tentacle_type(cls) -> str:
+        return CONFIG_EVALUATOR_TA

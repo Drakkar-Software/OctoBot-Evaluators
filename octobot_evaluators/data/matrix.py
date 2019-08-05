@@ -21,7 +21,7 @@ from octobot_commons.enums import TimeFrames
 
 from octobot_evaluators.constants import MatrixType, default_matrix_value, MatrixValueType
 from octobot_evaluators.enums import EvaluatorMatrixTypes
-from octobot_evaluators.util.evaluators_util import check_valid_eval_note
+from octobot_evaluators.util import check_valid_eval_note
 
 
 @dataclass

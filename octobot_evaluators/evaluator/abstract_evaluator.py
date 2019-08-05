@@ -15,7 +15,7 @@
 #  License along with this library.
 
 import time
-from abc import ABCMeta, abstractmethod
+from abc import ABCMeta
 
 from octobot_commons.tentacles_management.abstract_tentacle import AbstractTentacle
 
@@ -30,6 +30,7 @@ class AbstractEvaluator(AbstractTentacle):
         super().__init__()
         self.logger = None
         self.config = None
+        self.specific_config = {}
 
         # If this indicator is enabled
         self.enabled = True
@@ -72,6 +73,13 @@ class AbstractEvaluator(AbstractTentacle):
         self.config = config
         self.enabled = self.is_enabled(config, False)
 
+    def set_default_config(self):
+        """
+        To implement in subclasses if config necessary
+        :return:
+        """
+        self.specific_config = {}
+
     async def eval(self) -> None:
         """
         Generic eval that will call the indicator eval_impl()
@@ -90,22 +98,6 @@ class AbstractEvaluator(AbstractTentacle):
             if self.eval_note == "nan":
                 self.eval_note = START_PENDING_EVAL_NOTE
                 self.logger.warning(str(self.symbol) + " evaluator returned 'nan' as eval_note, ignoring this value.")
-
-    @abstractmethod
-    async def eval_impl(self) -> None:
-        """
-        Eval new data
-        Notify if new data is relevant
-        example :
-        async def eval_impl(self):
-          for post in post_selected
-              note = sentiment_evaluator(post.text)
-              if(note > 10 || note < 0):
-                  self.need_to_notify = True
-              self.eval_note += note
-        :return: None
-        """
-        raise NotImplementedError("Eval_impl not implemented")
 
     def reset(self) -> None:
         """
@@ -211,17 +203,33 @@ class AbstractEvaluator(AbstractTentacle):
                 self.eval_note_time_to_live = None
                 self.eval_note_changed_time = None
 
-    @abstractmethod
-    async def start_task(self) -> None:
-        """
-        Async task that can be use get_data to provide real time data
-        will ONLY be called if self.is_to_be_started_as_task is set to True
-        example :
-        def start_task(self):
-            while True:
-                self.get_data()                           --> pull the new data
-                self.eval()                               --> create a notification if necessary
-                await asyncio.sleep(own_time * MINUTE_TO_SECONDS)  --> use its own refresh time
-        :return: None
-        """
-        raise NotImplementedError("start_task not implemented")
+    # @abstractmethod
+    # async def start_task(self) -> None:
+    #     """
+    #     Async task that can be use get_data to provide real time data
+    #     will ONLY be called if self.is_to_be_started_as_task is set to True
+    #     example :
+    #     def start_task(self):
+    #         while True:
+    #             self.get_data()                           --> pull the new data
+    #             self.eval()                               --> create a notification if necessary
+    #             await asyncio.sleep(own_time * MINUTE_TO_SECONDS)  --> use its own refresh time
+    #     :return: None
+    #     """
+    #     raise NotImplementedError("start_task not implemented")
+
+    # @abstractmethod
+    # async def eval_impl(self) -> None:
+    #     """
+    #     Eval new data
+    #     Notify if new data is relevant
+    #     example :
+    #     async def eval_impl(self):
+    #       for post in post_selected
+    #           note = sentiment_evaluator(post.text)
+    #           if(note > 10 || note < 0):
+    #               self.need_to_notify = True
+    #           self.eval_note += note
+    #     :return: None
+    #     """
+    #     raise NotImplementedError("Eval_impl not implemented")

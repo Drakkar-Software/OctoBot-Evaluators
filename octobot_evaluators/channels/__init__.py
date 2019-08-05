@@ -15,3 +15,5 @@
 #  License along with this library.
 
 MATRIX_CHANNEL = "Matrix"
+
+from .matrix import *
