@@ -13,13 +13,14 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
+import asyncio
 import logging
 
 from octobot_commons.constants import CONFIG_TIME_FRAME
 from octobot_commons.enums import TimeFrames
 
 from octobot_commons.logging.logging_util import get_logger
-from octobot_evaluators.api import create_all_type_evaluators
+from octobot_evaluators.api import create_all_type_evaluators, create_matrix_channels
 
 config = {
     "crypto-currencies": {
@@ -45,4 +46,11 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
     get_logger().info("starting...")
 
-    create_all_type_evaluators(config, "test", "BTC/USDT", TimeFrames.ONE_HOUR)
+    main_loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(main_loop)
+
+    main_loop.run_until_complete(create_matrix_channels())
+
+    main_loop.run_until_complete(create_all_type_evaluators(config, "test", "BTC/USDT", TimeFrames.ONE_HOUR))
+
+    main_loop.run_until_complete(asyncio.sleep(1))

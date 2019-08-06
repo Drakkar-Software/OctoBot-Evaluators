@@ -15,15 +15,17 @@
 #  License along with this library.
 
 import time
-from abc import ABCMeta
+from abc import ABCMeta, abstractmethod
 
 from octobot_commons.tentacles_management.abstract_tentacle import AbstractTentacle
+from tentacles_manager import TENTACLES_EVALUATOR_PATH  # TODO change
 
+from octobot_evaluators.channels import MatrixChannelProducer
 from octobot_evaluators.constants import START_PENDING_EVAL_NOTE, START_EVAL_PERTINENCE, EVALUATOR_EVAL_DEFAULT_TYPE, \
     INIT_EVAL_NOTE, CONFIG_EVALUATOR
 
 
-class AbstractEvaluator(AbstractTentacle):
+class AbstractEvaluator(AbstractTentacle, MatrixChannelProducer):
     __metaclass__ = ABCMeta
 
     def __init__(self):
@@ -37,6 +39,12 @@ class AbstractEvaluator(AbstractTentacle):
 
         # Symbol is the cryptocurrency symbol
         self.symbol = None
+
+        # Evaluation related exchange name
+        self.exchange_name = None
+
+        # Time_frame is the chart time frame
+        self.time_frame = None
 
         #  history time represents the period of time of the indicator
         self.history_time = None
@@ -64,6 +72,48 @@ class AbstractEvaluator(AbstractTentacle):
         """
         return EVALUATOR_EVAL_DEFAULT_TYPE
 
+    @classmethod
+    @abstractmethod
+    def get_config_tentacle_type(cls) -> str:
+        pass
+
+    @classmethod
+    def get_tentacle_folder(cls) -> str:
+        return TENTACLES_EVALUATOR_PATH
+
+    async def evaluation_completed(self, eval_note) -> None:
+        """
+        Main async method to notify matrix to update
+        :param eval_note:
+        :return: None
+        """
+        try:
+            self.ensure_eval_note_is_not_expired()
+            await self.send_eval_note(evaluator_name=self.get_name(),
+                                      evaluator_type=self.get_eval_type(),
+                                      eval_note=eval_note,
+                                      exchange_name=self.exchange_name,
+                                      symbol=self.symbol,
+                                      time_frame=self.time_frame)
+        except Exception as e:
+            # if ConfigManager.is_in_dev_mode(self.config): # TODO
+            #     raise e
+            # else:
+            self.logger.error("Exception in evaluation_completed(): " + str(e))
+            self.logger.exception(e)
+        finally:
+            if self.eval_note == "nan":
+                self.eval_note = START_PENDING_EVAL_NOTE
+                self.logger.warning(str(self.symbol) + " evaluator returned 'nan' as eval_note, ignoring this value.")
+
+    async def start_evaluator(self) -> None:
+        """
+        Start a task as matrix producer
+        :return: None
+        """
+        await self.start()
+        self.logger.info("TEST")
+
     def set_config(self, config) -> None:
         """
         Used to provide the global config
@@ -79,25 +129,6 @@ class AbstractEvaluator(AbstractTentacle):
         :return:
         """
         self.specific_config = {}
-
-    async def eval(self) -> None:
-        """
-        Generic eval that will call the indicator eval_impl()
-        :return: None
-        """
-        try:
-            self.ensure_eval_note_is_not_expired()
-            await self.eval_impl()
-        except Exception as e:
-            # if ConfigManager.is_in_dev_mode(self.config): # TODO
-            #     raise e
-            # else:
-            self.logger.error("Exception in eval_impl(): " + str(e))
-            self.logger.exception(e)
-        finally:
-            if self.eval_note == "nan":
-                self.eval_note = START_PENDING_EVAL_NOTE
-                self.logger.warning(str(self.symbol) + " evaluator returned 'nan' as eval_note, ignoring this value.")
 
     def reset(self) -> None:
         """
@@ -202,34 +233,3 @@ class AbstractEvaluator(AbstractTentacle):
                 self.eval_note = START_PENDING_EVAL_NOTE
                 self.eval_note_time_to_live = None
                 self.eval_note_changed_time = None
-
-    # @abstractmethod
-    # async def start_task(self) -> None:
-    #     """
-    #     Async task that can be use get_data to provide real time data
-    #     will ONLY be called if self.is_to_be_started_as_task is set to True
-    #     example :
-    #     def start_task(self):
-    #         while True:
-    #             self.get_data()                           --> pull the new data
-    #             self.eval()                               --> create a notification if necessary
-    #             await asyncio.sleep(own_time * MINUTE_TO_SECONDS)  --> use its own refresh time
-    #     :return: None
-    #     """
-    #     raise NotImplementedError("start_task not implemented")
-
-    # @abstractmethod
-    # async def eval_impl(self) -> None:
-    #     """
-    #     Eval new data
-    #     Notify if new data is relevant
-    #     example :
-    #     async def eval_impl(self):
-    #       for post in post_selected
-    #           note = sentiment_evaluator(post.text)
-    #           if(note > 10 || note < 0):
-    #               self.need_to_notify = True
-    #           self.eval_note += note
-    #     :return: None
-    #     """
-    #     raise NotImplementedError("Eval_impl not implemented")

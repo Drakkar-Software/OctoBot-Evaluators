@@ -14,6 +14,7 @@
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
 
-MATRIX_CHANNEL = "Matrix"
-
 from .matrix import *
+
+MATRIX_CHANNEL = "Matrix"
+BACKTESTING_MATRIX_CHANNEL = "BacktestingMatrix"

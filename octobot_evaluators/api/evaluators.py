@@ -19,6 +19,7 @@ from octobot_commons.tentacles_management.advanced_manager import AdvancedManage
 from octobot_evaluators.api.inspection import is_relevant_evaluator
 from octobot_evaluators.enums import EvaluatorMatrixTypes
 from octobot_evaluators.evaluator import TAEvaluator, SocialEvaluator, RealTimeEvaluator, StrategyEvaluator
+from octobot_evaluators.util import reload_tentacle_config
 
 EvaluatorClassTypes = {
     "TA": TAEvaluator,
@@ -28,21 +29,26 @@ EvaluatorClassTypes = {
 }
 
 
-def create_evaluators(evaluator_parent_class, config, exchange_name,
-                      symbol=None, time_frame=None, relevant_evaluators=None) -> list:
+async def create_evaluators(evaluator_parent_class, config, exchange_name,
+                            symbol=None, time_frame=None, relevant_evaluators=None) -> list:
     created_evaluators = []
     for eval_class in AdvancedManager.create_advanced_evaluator_types_list(evaluator_parent_class, config):
         try:
             eval_class_instance = eval_class()
-            eval_class_instance.config = config
-            if not relevant_evaluators or is_relevant_evaluator(eval_class_instance, relevant_evaluators):
-                eval_class_instance.set_logger(get_logger(eval_class.get_name()))
+            eval_class_instance.set_config(config)
+            # if not relevant_evaluators or is_relevant_evaluator(eval_class_instance, relevant_evaluators): TODO
+            eval_class_instance.set_logger(get_logger(eval_class.get_name()))
 
-                if symbol:
-                    eval_class_instance.symbol = symbol
+            if symbol:
+                eval_class_instance.symbol = symbol
 
-                if time_frame:
-                    eval_class_instance.time_frame = time_frame
+            if exchange_name:
+                eval_class_instance.exchange_name = exchange_name
+
+            if time_frame:
+                eval_class_instance.time_frame = time_frame
+
+            await eval_class_instance.start_evaluator()
         except Exception as e:
             get_logger().error(f"Error when creating evaluator {eval_class}: {e}")
             get_logger().exception(e)
@@ -50,21 +56,25 @@ def create_evaluators(evaluator_parent_class, config, exchange_name,
     return created_evaluators
 
 
-def create_all_type_evaluators(config, exchange_name, symbol, time_frame, relevant_evaluators=None) -> list:
+async def create_all_type_evaluators(config, exchange_name, symbol, time_frame, relevant_evaluators=None) -> list:
+    reload_tentacle_config(config)
+
+    AdvancedManager.create_class_list(config)
+
     created_evaluators = []
 
-    created_evaluators += create_evaluators(EvaluatorClassTypes[EvaluatorMatrixTypes.TA.value],
-                                            config, exchange_name, symbol=symbol, time_frame=time_frame,
-                                            relevant_evaluators=relevant_evaluators)
+    created_evaluators += await create_evaluators(EvaluatorClassTypes[EvaluatorMatrixTypes.TA.value],
+                                                  config, exchange_name, symbol=symbol, time_frame=time_frame,
+                                                  relevant_evaluators=relevant_evaluators)
 
-    created_evaluators += create_evaluators(EvaluatorClassTypes[EvaluatorMatrixTypes.SOCIAL.value], config,
-                                            exchange_name, relevant_evaluators=relevant_evaluators)
+    created_evaluators += await create_evaluators(EvaluatorClassTypes[EvaluatorMatrixTypes.SOCIAL.value], config,
+                                                  exchange_name, relevant_evaluators=relevant_evaluators)
 
-    created_evaluators += create_evaluators(EvaluatorClassTypes[EvaluatorMatrixTypes.REAL_TIME.value], config,
-                                            exchange_name, symbol=symbol, relevant_evaluators=relevant_evaluators)
+    created_evaluators += await create_evaluators(EvaluatorClassTypes[EvaluatorMatrixTypes.REAL_TIME.value], config,
+                                                  exchange_name, symbol=symbol, relevant_evaluators=relevant_evaluators)
 
-    created_evaluators += create_evaluators(EvaluatorClassTypes[EvaluatorMatrixTypes.STRATEGIES.value],
-                                            config, exchange_name, symbol=symbol, time_frame=time_frame,
-                                            relevant_evaluators=relevant_evaluators)
+    created_evaluators += await create_evaluators(EvaluatorClassTypes[EvaluatorMatrixTypes.STRATEGIES.value],
+                                                  config, exchange_name, symbol=symbol, time_frame=time_frame,
+                                                  relevant_evaluators=relevant_evaluators)
 
     return created_evaluators

@@ -13,18 +13,24 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
+from octobot_channels.util import create_all_subclasses_channel
 from octobot_commons.constants import CONFIG_TIME_FRAME
 from octobot_commons.tentacles_management.advanced_manager import AdvancedManager
 from octobot_commons.time_frame_manager import TimeFrameManager
 
-from octobot_evaluators.evaluator import StrategiesEvaluator
+from octobot_evaluators.channels import MatrixChannel, MatrixChannels
+from octobot_evaluators.evaluator import StrategyEvaluator
 
 
 def init_time_frames_from_strategies(config):
     time_frame_list = set()
-    for strategies_eval_class in AdvancedManager.create_advanced_evaluator_types_list(StrategiesEvaluator, config):
+    for strategies_eval_class in AdvancedManager.create_advanced_evaluator_types_list(StrategyEvaluator, config):
         if strategies_eval_class.is_enabled(config, False):
             for time_frame in strategies_eval_class.get_required_time_frames(config):
                 time_frame_list.add(time_frame)
     time_frame_list = TimeFrameManager.sort_time_frames(time_frame_list)
     config[CONFIG_TIME_FRAME] = time_frame_list
+
+
+async def create_matrix_channels():
+    await create_all_subclasses_channel(MatrixChannel, MatrixChannels)

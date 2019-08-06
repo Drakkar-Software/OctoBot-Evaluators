@@ -13,12 +13,12 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
-from typing import NewType, Dict, Union
+from typing import NewType, Union
 
+from octobot_commons.constants import TENTACLES_EVALUATOR_PATH, TENTACLES_PATH
 from octobot_evaluators.enums import EvaluatorMatrixTypes
 
 MatrixValueType = NewType('MatrixValueType', Union[str, int, float])
-MatrixType = NewType('MatrixType', Dict[str, Dict[str, Union[MatrixValueType, Dict[str, MatrixValueType]]]])
 
 CONFIG_EVALUATOR = "evaluator"
 CONFIG_FORCED_EVALUATOR = "forced_evaluator"
@@ -39,6 +39,8 @@ CONFIG_FORCED_TIME_FRAME = "forced_time_frame"
 TENTACLE_DEFAULT_CONFIG = "default_config"
 TENTACLE_DEFAULT_FOLDER = "Default"
 TENTACLE_UTIL_FOLDER = "Util"
+CONFIG_EVALUATOR_FILE = "evaluator_config.json"
+CONFIG_EVALUATOR_FILE_PATH = f"{TENTACLES_PATH}/{TENTACLES_EVALUATOR_PATH}/{CONFIG_EVALUATOR_FILE}"
 
 
 def default_matrix_value():

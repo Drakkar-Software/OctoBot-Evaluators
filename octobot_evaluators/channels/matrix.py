@@ -25,15 +25,18 @@ from octobot_channels.channels.channel import Channel, Channels
 from octobot_channels import CONSUMER_CALLBACK_TYPE, CHANNEL_WILDCARD
 from octobot_channels.channels.channel_instances import ChannelInstances
 
+from octobot_evaluators.data import EvaluatorMatrix
+
+MATRIX_CHANNELS = "MatrixChannels"
+
 
 class MatrixChannel(Channel):
     FILTER_SIZE = 1
     PRODUCER_CLASS = None
 
-    def __init__(self, exchange_name):
+    def __init__(self):
         super().__init__()
-        self.logger = get_logger(f"{self.__class__.__name__}[{exchange_name}]")
-        self.exchange_name = exchange_name
+        self.logger = get_logger(f"{self.__class__.__name__}")
 
     def new_consumer(self,
                      callback: CONSUMER_CALLBACK_TYPE,
@@ -75,15 +78,29 @@ class MatrixChannelConsumer(Consumer):
     async def consume(self):
         while not self.should_stop:
             try:
-                await self.callback(**(await self.queue.get()))
+                temp = (await self.queue.get())  # TODO
+                get_logger(f"CONSUMED : {temp}")
+                await self.callback(**temp)
             except Exception as e:
                 self.logger.exception(f"Exception when calling callback : {e}")
 
 
 class MatrixChannelProducer(Producer):
-    async def send_with_wildcard(self, **kwargs):
-        await self.send(**kwargs)
-        await self.send(**kwargs, is_wildcard=True)
+    async def send_eval_note(self, evaluator_name, evaluator_type, eval_note,
+                             exchange_name=None, symbol=None, time_frame=None):
+        EvaluatorMatrix.instance().set_eval(evaluator_name=evaluator_name,
+                                            evaluator_type=evaluator_type,
+                                            value=eval_note,
+                                            exchange_name=exchange_name,
+                                            symbol=symbol,
+                                            time_frame=time_frame)
+
+        await self.send(evaluator_name=evaluator_name,
+                        evaluator_type=evaluator_type,
+                        eval_note=eval_note,
+                        exchange_name=exchange_name,
+                        symbol=symbol,
+                        time_frame=time_frame)
 
 
 class MatrixChannels(Channels):
@@ -92,20 +109,20 @@ class MatrixChannels(Channels):
         chan_name = chan.get_name() if name else name
 
         try:
-            exchange_chan = ChannelInstances.instance().channels[chan.exchange_name]
+            matrix_chan = ChannelInstances.instance().channels[MATRIX_CHANNELS]
         except KeyError:
-            ChannelInstances.instance().channels[chan.exchange_name] = {}
-            exchange_chan = ChannelInstances.instance().channels[chan.exchange_name]
+            ChannelInstances.instance().channels[MATRIX_CHANNELS] = {}
+            matrix_chan = ChannelInstances.instance().channels[MATRIX_CHANNELS]
 
-        if chan_name not in exchange_chan:
-            exchange_chan[chan_name] = chan
+        if chan_name not in matrix_chan:
+            matrix_chan[chan_name] = chan
         else:
             raise ValueError(f"Channel {chan_name} already exists.")
 
     @staticmethod
-    def get_chan(chan_name: str, exchange_name: str) -> MatrixChannel:
+    def get_chan(chan_name: str) -> MatrixChannel:
         try:
-            return ChannelInstances.instance().channels[exchange_name][chan_name]
+            return ChannelInstances.instance().channels[MATRIX_CHANNELS][chan_name]
         except KeyError:
-            get_logger(__class__.__name__).error(f"Channel {chan_name} not found on {exchange_name}")
+            get_logger(__class__.__name__).error(f"Channel {chan_name} not found in {MATRIX_CHANNELS}")
             return None

@@ -13,7 +13,14 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
+from octobot_evaluators.constants import CONFIG_EVALUATOR, CONFIG_EVALUATOR_FILE_PATH
+from octobot_evaluators.util.errors import ConfigEvaluatorError
+from octobot_commons.config import load_config
 
-from .evaluators import *
-from .initialization import *
-from .inspection import *
+
+def reload_tentacle_config(config):
+    config[CONFIG_EVALUATOR] = load_config(CONFIG_EVALUATOR_FILE_PATH, False)
+    if config[CONFIG_EVALUATOR] is None:
+        raise ConfigEvaluatorError
+
+    return config

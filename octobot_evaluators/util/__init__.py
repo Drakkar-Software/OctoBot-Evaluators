@@ -15,3 +15,4 @@
 #  License along with this library.
 
 from .evaluators_util import *
+from .config_manager import *
