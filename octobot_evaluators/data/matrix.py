@@ -28,8 +28,7 @@ class EvaluatorMatrix:
     EvaluatorMatrix dataclass store evaluation data in a matrix represented by a dictionnary
     """
 
-    def __init__(self, config):
-        self.config = config
+    def __init__(self):
         self.matrix = default_matrix_value()
         self.evaluator_eval_types = {}
 

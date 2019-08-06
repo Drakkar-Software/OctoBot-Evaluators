@@ -13,7 +13,7 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
-from octobot_channels.util import create_all_subclasses_channel
+from octobot_channels.util import create_channel_instance
 from octobot_commons.constants import CONFIG_TIME_FRAME
 from octobot_commons.tentacles_management.advanced_manager import AdvancedManager
 from octobot_commons.time_frame_manager import TimeFrameManager
@@ -33,4 +33,4 @@ def init_time_frames_from_strategies(config):
 
 
 async def create_matrix_channels():
-    await create_all_subclasses_channel(MatrixChannel, MatrixChannels)
+    await create_channel_instance(MatrixChannel, MatrixChannels)

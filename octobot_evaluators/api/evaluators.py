@@ -36,19 +36,19 @@ async def create_evaluators(evaluator_parent_class, config, exchange_name,
         try:
             eval_class_instance = eval_class()
             eval_class_instance.set_config(config)
-            # if not relevant_evaluators or is_relevant_evaluator(eval_class_instance, relevant_evaluators): TODO
-            eval_class_instance.set_logger(get_logger(eval_class.get_name()))
+            if not relevant_evaluators or is_relevant_evaluator(eval_class_instance, relevant_evaluators):
+                eval_class_instance.set_logger(get_logger(eval_class.get_name()))
 
-            if symbol:
-                eval_class_instance.symbol = symbol
+                if symbol:
+                    eval_class_instance.symbol = symbol
 
-            if exchange_name:
-                eval_class_instance.exchange_name = exchange_name
+                if exchange_name:
+                    eval_class_instance.exchange_name = exchange_name
 
-            if time_frame:
-                eval_class_instance.time_frame = time_frame
+                if time_frame:
+                    eval_class_instance.time_frame = time_frame
 
-            await eval_class_instance.start_evaluator()
+                await eval_class_instance.start_evaluator()
         except Exception as e:
             get_logger().error(f"Error when creating evaluator {eval_class}: {e}")
             get_logger().exception(e)

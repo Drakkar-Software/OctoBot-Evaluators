@@ -78,7 +78,9 @@ class MatrixChannelConsumer(Consumer):
     async def consume(self):
         while not self.should_stop:
             try:
+                print("a")
                 temp = (await self.queue.get())  # TODO
+                print("t")
                 get_logger(f"CONSUMED : {temp}")
                 await self.callback(**temp)
             except Exception as e:

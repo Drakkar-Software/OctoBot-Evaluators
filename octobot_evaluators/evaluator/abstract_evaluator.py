@@ -17,10 +17,10 @@
 import time
 from abc import ABCMeta, abstractmethod
 
+from octobot_commons.constants import TENTACLES_EVALUATOR_PATH
 from octobot_commons.tentacles_management.abstract_tentacle import AbstractTentacle
-from tentacles_manager import TENTACLES_EVALUATOR_PATH  # TODO change
 
-from octobot_evaluators.channels import MatrixChannelProducer
+from octobot_evaluators.channels import MatrixChannelProducer, MatrixChannels, MATRIX_CHANNEL
 from octobot_evaluators.constants import START_PENDING_EVAL_NOTE, START_EVAL_PERTINENCE, EVALUATOR_EVAL_DEFAULT_TYPE, \
     INIT_EVAL_NOTE, CONFIG_EVALUATOR
 
@@ -29,7 +29,8 @@ class AbstractEvaluator(AbstractTentacle, MatrixChannelProducer):
     __metaclass__ = ABCMeta
 
     def __init__(self):
-        super().__init__()
+        AbstractTentacle.__init__(self)
+        MatrixChannelProducer.__init__(self, MatrixChannels.get_chan(MATRIX_CHANNEL))
         self.logger = None
         self.config = None
         self.specific_config = {}
@@ -112,7 +113,8 @@ class AbstractEvaluator(AbstractTentacle, MatrixChannelProducer):
         :return: None
         """
         await self.start()
-        self.logger.info("TEST")
+        self.logger.info("STARTED")
+        await self.evaluation_completed(1)
 
     def set_config(self, config) -> None:
         """

@@ -17,7 +17,6 @@
 
 
 cdef class EvaluatorMatrix:
-    cdef dict config
     cdef dict evaluator_eval_types
 
     cdef public dict matrix
