@@ -50,15 +50,20 @@ async def matrix_callback(evaluator_name,
                           exchange_name,
                           symbol,
                           time_frame):
-    logging.info(f"MATRIX : EXCHANGE = {exchange_name} || SYMBOL = {symbol} || TF = {time_frame} || NOTE = {eval_note}")
+    logging.info(f"MATRIX : EXCHANGE = {exchange_name} || EVALUATOR = {evaluator_name} ||"
+                 f" SYMBOL = {symbol} || TF = {time_frame} || NOTE = {eval_note}")
 
 
 async def create_evaluators_channel():
     await create_matrix_channels()
 
-    MatrixChannels.get_chan(MATRIX_CHANNEL).new_consumer(matrix_callback)
+    await MatrixChannels.get_chan(MATRIX_CHANNEL).new_consumer(matrix_callback)
 
     await create_all_type_evaluators(config, "test", "BTC/USDT", TimeFrames.ONE_HOUR)
+
+    # await MatrixChannels.get_chan(MATRIX_CHANNEL).get_internal_producer().send(evaluator_name="test",
+    #                                                                            evaluator_type="test",
+    #                                                                            eval_note=1)
 
     await asyncio.sleep(10)
 
