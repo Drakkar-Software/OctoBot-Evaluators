@@ -28,4 +28,8 @@ cdef class MatrixChannelProducer(Producer):
     pass
 
 cdef class MatrixChannels(Channels):
-    pass
+    @staticmethod
+    cdef void set_chan(MatrixChannel chan, str name)
+
+    @staticmethod
+    cdef void del_chan(str name)

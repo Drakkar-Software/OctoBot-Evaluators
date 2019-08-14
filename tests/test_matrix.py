@@ -13,7 +13,24 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
+import pytest
 
-from .matrix import *
+from octobot_evaluators.api import create_matrix_channels
+from octobot_evaluators.channels import MatrixChannels, MATRIX_CHANNEL
 
-MATRIX_CHANNEL = "Matrix"
+
+async def matrix_callback(evaluator_name,
+                          evaluator_type,
+                          eval_note,
+                          exchange_name,
+                          symbol,
+                          time_frame):
+    pass
+
+
+@pytest.mark.asyncio
+async def test_evaluator_channel_creation():
+    MatrixChannels.del_chan(MATRIX_CHANNEL)
+    await create_matrix_channels()
+    await MatrixChannels.get_chan(MATRIX_CHANNEL).new_consumer(matrix_callback)
+    await MatrixChannels.get_chan(MATRIX_CHANNEL).stop()

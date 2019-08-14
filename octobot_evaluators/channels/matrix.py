@@ -141,5 +141,8 @@ class MatrixChannels(Channels):
 
     @staticmethod
     def del_chan(name) -> None:
-        if name in ChannelInstances.instance().channels[MATRIX_CHANNELS]:
-            ChannelInstances.instance().channels[MATRIX_CHANNELS].pop(name, None)
+        try:
+            if name in ChannelInstances.instance().channels[MATRIX_CHANNELS]:
+                ChannelInstances.instance().channels[MATRIX_CHANNELS].pop(name, None)
+        except KeyError:
+            pass
