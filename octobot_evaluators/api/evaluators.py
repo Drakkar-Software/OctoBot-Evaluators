@@ -59,7 +59,7 @@ async def create_evaluators(evaluator_parent_class, config, exchange_name,
 async def create_all_type_evaluators(config, exchange_name, symbol, time_frame, relevant_evaluators=None) -> list:
     reload_tentacle_config(config)
 
-    AdvancedManager.create_class_list(config)
+    AdvancedManager.create_evaluator_classes_list(config)
 
     created_evaluators = []
 

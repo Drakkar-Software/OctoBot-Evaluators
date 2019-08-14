@@ -1,5 +1,5 @@
 # cython: language_level=3
-#  Drakkar-Software OctoBot-Matrixs
+#  Drakkar-Software OctoBot-Evaluators
 #  Copyright (c) Drakkar-Software, All rights reserved.
 #
 #  This library is free software; you can redistribute it and/or
@@ -56,12 +56,12 @@ class MatrixChannelProducer(Producer):
 
     async def send_eval_note(self, evaluator_name, evaluator_type, eval_note,
                              exchange_name=None, symbol=None, time_frame=None):
-        EvaluatorMatrix.instance().set_eval(evaluator_name=evaluator_name,
-                                            evaluator_type=evaluator_type,
-                                            value=eval_note,
-                                            exchange_name=exchange_name,
-                                            symbol=symbol,
-                                            time_frame=time_frame)
+        EvaluatorMatrix().set_eval(evaluator_name=evaluator_name,
+                                   evaluator_type=evaluator_type,
+                                   value=eval_note,
+                                   exchange_name=exchange_name,
+                                   symbol=symbol,
+                                   time_frame=time_frame)
 
         await self.send(evaluator_name=evaluator_name,
                         evaluator_type=evaluator_type,
@@ -117,7 +117,7 @@ class MatrixChannel(Channel):
 
 class MatrixChannels(Channels):
     @staticmethod
-    def set_chan(chan: MatrixChannel, name: str) -> None:
+    def set_chan(chan, name) -> None:
         chan_name = chan.get_name() if name else name
 
         try:
@@ -138,3 +138,8 @@ class MatrixChannels(Channels):
         except KeyError:
             get_logger(__class__.__name__).error(f"Channel {chan_name} not found in {MATRIX_CHANNELS}")
             return None
+
+    @staticmethod
+    def del_chan(name) -> None:
+        if name in ChannelInstances.instance().channels[MATRIX_CHANNELS]:
+            ChannelInstances.instance().channels[MATRIX_CHANNELS].pop(name, None)

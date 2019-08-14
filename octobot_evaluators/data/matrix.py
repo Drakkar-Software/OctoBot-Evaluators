@@ -13,44 +13,38 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
-
-from octobot_commons.enums import TimeFrames
-from octobot_commons.singleton import Singleton
+from octobot_commons.singleton.singleton_class import Singleton
 
 from octobot_evaluators.constants import default_matrix_value, MatrixValueType, START_PENDING_EVAL_NOTE
-from octobot_evaluators.enums import EvaluatorMatrixTypes
 from octobot_evaluators.util import check_valid_eval_note
 
 
-@Singleton
-class EvaluatorMatrix:
+class EvaluatorMatrix(Singleton):
     """
-    EvaluatorMatrix dataclass store evaluation data in a matrix represented by a dictionnary
+    EvaluatorMatrix dataclass store evaluation data in a matrix represented by a dictionary
     """
 
     def __init__(self):
         self.matrix = default_matrix_value()
         self.evaluator_eval_types = {}
 
-    # setters
     def set_eval(self,
-                 evaluator_name: str,
-                 evaluator_type: EvaluatorMatrixTypes,
-                 value: MatrixValueType,
-                 exchange_name: str = None,
-                 symbol: str = None,
-                 time_frame: TimeFrames = None) -> None:
+                 evaluator_name,
+                 evaluator_type,
+                 value,
+                 exchange_name=None,
+                 symbol=None,
+                 time_frame=None) -> None:
         """
-
-        :param evaluator_type:
-        :param evaluator_name:
-        :param value:
-        :param exchange_name:
-        :param symbol:
-        :param time_frame:
+        Set the new eval note to the matrix corresponding to evaluator note params
+        :param evaluator_type: the evaluator type ("TA", "Social", ...)
+        :param evaluator_name: the evaluator name
+        :param value: the eval note to add to the matrix
+        :param exchange_name: the evaluation exchange name
+        :param symbol: the evaluation symbol
+        :param time_frame: the evaluation time frame
         :return: None
         """
-
         evaluator_matrix: dict = self.__get_evaluator_matrix(evaluator_name, evaluator_type)
 
         try:
@@ -65,15 +59,15 @@ class EvaluatorMatrix:
             else:
                 self.matrix[evaluator_name] = value
         except KeyError:
-            self.__init_matrix(evaluator_matrix, symbol, exchange_name)
+            EvaluatorMatrix.__init_matrix(evaluator_matrix, symbol, exchange_name)
             self.set_eval(evaluator_name, evaluator_type, value, exchange_name, symbol, time_frame)
 
-    def __get_evaluator_matrix(self, evaluator_name, evaluator_type):
+    def __get_evaluator_matrix(self, evaluator_name, evaluator_type) -> dict:
         """
-
-        :param evaluator_name:
-        :param evaluator_type:
-        :return:
+        Returns the matrix of the evaluator from its type
+        :param evaluator_name: evaluator name
+        :param evaluator_type: evaluator type
+        :return: evaluator matrix
         """
         try:
             return self.matrix[evaluator_name]
@@ -85,11 +79,11 @@ class EvaluatorMatrix:
     @staticmethod
     def __init_matrix(evaluator_matrix, symbol, exchange_name) -> None:
         """
-
-        :param evaluator_matrix:
-        :param symbol:
-        :param exchange_name:
-        :return:
+        Creates the matrix corresponding to the params if not exists
+        :param evaluator_matrix: matrix evaluator dictionary
+        :param symbol: evaluator matrix symbol
+        :param exchange_name: evaluator matrix exchange name
+        :return: None
         """
 
         if symbol not in evaluator_matrix:
@@ -98,14 +92,12 @@ class EvaluatorMatrix:
         if exchange_name not in evaluator_matrix[symbol]:
             evaluator_matrix[symbol][exchange_name] = {}
 
-    def __set_evaluator_eval_type(self,
-                                  evaluator_name: str,
-                                  evaluator_eval_type: EvaluatorMatrixTypes) -> None:
+    def __set_evaluator_eval_type(self, evaluator_name, evaluator_eval_type) -> None:
         """
-
-        :param evaluator_name:
-        :param evaluator_eval_type:
-        :return:
+        Set the evaluator evaluation type in evaluator_eval_types if not exists
+        :param evaluator_name: the evaluator name
+        :param evaluator_eval_type: the evaluator evaluation type
+        :return: None
         """
         try:
             self.evaluator_eval_types[evaluator_name]
@@ -114,17 +106,17 @@ class EvaluatorMatrix:
 
     # getters
     def get_eval_note(self,
-                      evaluator_name: str,
-                      exchange_name: str = None,
-                      symbol: str = None,
-                      time_frame: TimeFrames = None) -> MatrixValueType:
+                      evaluator_name,
+                      exchange_name=None,
+                      symbol=None,
+                      time_frame=None) -> MatrixValueType:
         """
-
-        :param evaluator_name:
-        :param exchange_name:
-        :param symbol:
-        :param time_frame:
-        :return:
+        Returns the evaluator eval note corresponding to params
+        :param evaluator_name: the evaluator name
+        :param exchange_name: the evaluator exchange name
+        :param symbol: the evaluator symbol
+        :param time_frame: the evaluator time frame
+        :return: MatrixValueType
         """
         try:
             if symbol:
@@ -144,11 +136,11 @@ class EvaluatorMatrix:
             pass
         return START_PENDING_EVAL_NOTE
 
-    def get_evaluator_eval_type(self, evaluator_name: str):
+    def get_evaluator_eval_type(self, evaluator_name) -> object:
         """
-
-        :param evaluator_name:
-        :return:
+        Return the evaluator eval type from evaluator_eval_types list
+        :param evaluator_name: the evaluator name
+        :return: the evaluator eval type
         """
         try:
             return self.evaluator_eval_types[evaluator_name]

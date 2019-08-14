@@ -1,4 +1,4 @@
-# OctoBot-Evaluators [0.0.0-alpha](https://github.com/Drakkar-Software/OctoBot-Evaluators/tree/master/docs/CHANGELOG.md)
+# OctoBot-Evaluators [1.0.0-alpha](https://github.com/Drakkar-Software/OctoBot-Evaluators/tree/master/docs/CHANGELOG.md)
 [![PyPI](https://img.shields.io/pypi/v/OctoBot-Evaluators.svg)](https://pypi.python.org/pypi/OctoBot-Evaluators/)
 [![Build Status](https://api.travis-ci.com/Drakkar-Software/OctoBot-Evaluators.svg?branch=master)](https://travis-ci.org/Drakkar-Software/OctoBot-Evaluators) 
 [![Build status](https://ci.appveyor.com/api/projects/status/p68n2y6547xhw0t6?svg=true)](https://ci.appveyor.com/project/Herklos/octobot-evaluators)

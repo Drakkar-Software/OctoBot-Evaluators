@@ -1,5 +1,5 @@
 # cython: language_level=3
-#  Drakkar-Software OctoBot-Matrixs
+#  Drakkar-Software OctoBot-Evaluators
 #  Copyright (c) Drakkar-Software, All rights reserved.
 #
 #  This library is free software; you can redistribute it and/or
@@ -20,10 +20,6 @@ from octobot_channels.producer cimport Producer
 
 cdef class MatrixChannel(Channel):
     cdef public str exchange_name
-
-    cdef void _add_new_consumer_and_run(self, MatrixChannelConsumer consumer, str symbol =*, str time_frame =*)
-
-    cpdef void new_consumer(self, object callback, int size=*, str symbol=*, bint filter_size=*)
 
 cdef class MatrixChannelConsumer(Consumer):
     pass

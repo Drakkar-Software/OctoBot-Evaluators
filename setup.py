@@ -24,7 +24,8 @@ from octobot_evaluators import VERSION, PROJECT_NAME
 
 PACKAGES = find_packages(exclude=["tests"])
 
-packages_list: list = [""]
+packages_list: list = ["octobot_evaluators.channels.matrix",
+                       "octobot_evaluators.data.matrix"]
 
 ext_modules: list = [
     Extension(package, [f"{package.replace('.', '/')}.py"])
@@ -55,7 +56,7 @@ setup(
     test_suite="tests",
     zip_safe=False,
     data_files=[],
-    setup_requires=['Cython'],
+    setup_requires=REQUIRED,
     python_requires=REQUIRES_PYTHON,
     ext_modules=cythonize(ext_modules),
     classifiers=[
