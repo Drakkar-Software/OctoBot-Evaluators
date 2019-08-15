@@ -13,10 +13,11 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
+from octobot_commons.constants import START_PENDING_EVAL_NOTE
+from octobot_commons.evaluators_util import check_valid_eval_note
 from octobot_commons.singleton.singleton_class import Singleton
 
-from octobot_evaluators.constants import default_matrix_value, MatrixValueType, START_PENDING_EVAL_NOTE
-from octobot_evaluators.util import check_valid_eval_note
+from octobot_evaluators.constants import default_matrix_value, MatrixValueType, EVALUATOR_EVAL_DEFAULT_TYPE
 
 
 class EvaluatorMatrix(Singleton):
@@ -130,7 +131,7 @@ class EvaluatorMatrix(Singleton):
             else:
                 eval_note = self.matrix[evaluator_name]
 
-            if check_valid_eval_note(eval_note):
+            if check_valid_eval_note(eval_note, expected_eval_type=EVALUATOR_EVAL_DEFAULT_TYPE):
                 return eval_note
         except KeyError:
             pass
