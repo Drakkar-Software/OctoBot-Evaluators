@@ -15,14 +15,14 @@
 #  License along with this library.
 
 from octobot_commons.constants import CONFIG_WILDCARD
-from octobot_commons.tentacles_management.advanced_manager import AdvancedManager
+from octobot_commons.tentacles_management import create_advanced_types_list
 
 from octobot_evaluators.evaluator import StrategyEvaluator, TAEvaluator
 
 
 def get_relevant_evaluators_from_strategies(config):
     evaluator_list = set()
-    for strategies_eval_class in AdvancedManager.create_advanced_evaluator_types_list(StrategyEvaluator, config):
+    for strategies_eval_class in create_advanced_types_list(StrategyEvaluator, config):
         if strategies_eval_class.is_enabled(config, False):
             required_evaluators = strategies_eval_class.get_required_evaluators(config)
             if required_evaluators == CONFIG_WILDCARD:
@@ -50,7 +50,7 @@ def is_relevant_evaluator(evaluator_instance, relevant_evaluators):
 def get_relevant_TAs_for_strategy(strategy, config):
     ta_classes_list = []
     relevant_evaluators = strategy.get_required_evaluators(config)
-    for ta_eval_class in AdvancedManager.create_advanced_evaluator_types_list(TAEvaluator, config):
+    for ta_eval_class in create_advanced_evaluator_types_list(TAEvaluator, config):
         ta_eval_class_instance = ta_eval_class()
         ta_eval_class_instance.set_config(config)
         if is_relevant_evaluator(ta_eval_class_instance, relevant_evaluators):

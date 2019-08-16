@@ -15,6 +15,7 @@
 #  License along with this library.
 
 import time
+from abc import ABCMeta
 
 from octobot_commons.constants import TENTACLES_EVALUATOR_PATH, START_PENDING_EVAL_NOTE, INIT_EVAL_NOTE
 from octobot_commons.tentacles_management.abstract_tentacle import AbstractTentacle
@@ -24,6 +25,8 @@ from octobot_evaluators.constants import START_EVAL_PERTINENCE, EVALUATOR_EVAL_D
 
 
 class AbstractEvaluator(AbstractTentacle):
+    __metaclass__ = ABCMeta
+
     def __init__(self):
         super().__init__()
         self.config = None
@@ -102,7 +105,7 @@ class AbstractEvaluator(AbstractTentacle):
         Start a task as matrix producer
         :return: None
         """
-        await self.start()
+        # await self.start()
         self.logger.info("STARTED")
         await self.evaluation_completed(1)
 
