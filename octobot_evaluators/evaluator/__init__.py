@@ -15,6 +15,7 @@
 #  License along with this library.
 from octobot_commons.logging.logging_util import get_logger
 
+from .abstract_evaluator import *
 from .realtime_evaluator import *
 from .social_evaluator import *
 from .strategy_evaluator import *

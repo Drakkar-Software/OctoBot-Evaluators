@@ -15,22 +15,17 @@
 #  License along with this library.
 
 import time
-from abc import ABCMeta, abstractmethod
 
 from octobot_commons.constants import TENTACLES_EVALUATOR_PATH, START_PENDING_EVAL_NOTE, INIT_EVAL_NOTE
 from octobot_commons.tentacles_management.abstract_tentacle import AbstractTentacle
 
-from octobot_evaluators.channels import MatrixChannelProducer, MatrixChannels, MATRIX_CHANNEL
+from octobot_evaluators.channels import MATRIX_CHANNEL, get_chan
 from octobot_evaluators.constants import START_EVAL_PERTINENCE, EVALUATOR_EVAL_DEFAULT_TYPE, CONFIG_EVALUATOR
 
 
-class AbstractEvaluator(AbstractTentacle, MatrixChannelProducer):
-    __metaclass__ = ABCMeta
-
+class AbstractEvaluator(AbstractTentacle):
     def __init__(self):
-        AbstractTentacle.__init__(self)
-        MatrixChannelProducer.__init__(self, MatrixChannels.get_chan(MATRIX_CHANNEL))
-        self.logger = None
+        super().__init__()
         self.config = None
         self.specific_config = {}
 
@@ -73,11 +68,6 @@ class AbstractEvaluator(AbstractTentacle, MatrixChannelProducer):
         return EVALUATOR_EVAL_DEFAULT_TYPE
 
     @classmethod
-    @abstractmethod
-    def get_config_tentacle_type(cls) -> str:
-        pass
-
-    @classmethod
     def get_tentacle_folder(cls) -> str:
         return TENTACLES_EVALUATOR_PATH
 
@@ -89,12 +79,13 @@ class AbstractEvaluator(AbstractTentacle, MatrixChannelProducer):
         """
         try:
             self.ensure_eval_note_is_not_expired()
-            await self.send_eval_note(evaluator_name=self.get_name(),
-                                      evaluator_type=self.get_eval_type(),
-                                      eval_note=eval_note,
-                                      exchange_name=self.exchange_name,
-                                      symbol=self.symbol,
-                                      time_frame=self.time_frame)
+            await get_chan(MATRIX_CHANNEL).get_internal_producer().send_eval_note(
+                evaluator_name=self.get_name(),
+                evaluator_type=self.get_eval_type(),
+                eval_note=eval_note,
+                exchange_name=self.exchange_name,
+                symbol=self.symbol,
+                time_frame=self.time_frame)
         except Exception as e:
             # if ConfigManager.is_in_dev_mode(self.config): # TODO
             #     raise e

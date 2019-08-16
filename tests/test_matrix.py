@@ -16,7 +16,7 @@
 import pytest
 
 from octobot_evaluators.api import create_matrix_channels
-from octobot_evaluators.channels import MatrixChannels, MATRIX_CHANNEL
+from octobot_evaluators.channels import MATRIX_CHANNEL, get_chan, del_chan
 
 
 async def matrix_callback(evaluator_name,
@@ -30,7 +30,7 @@ async def matrix_callback(evaluator_name,
 
 @pytest.mark.asyncio
 async def test_evaluator_channel_creation():
-    MatrixChannels.del_chan(MATRIX_CHANNEL)
+    del_chan(MATRIX_CHANNEL)
     await create_matrix_channels()
-    await MatrixChannels.get_chan(MATRIX_CHANNEL).new_consumer(matrix_callback)
-    await MatrixChannels.get_chan(MATRIX_CHANNEL).stop()
+    await get_chan(MATRIX_CHANNEL).new_consumer(matrix_callback)
+    await get_chan(MATRIX_CHANNEL).stop()
