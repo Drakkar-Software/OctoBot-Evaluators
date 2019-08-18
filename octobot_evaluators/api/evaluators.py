@@ -20,6 +20,7 @@ from octobot_evaluators.api.inspection import is_relevant_evaluator
 from octobot_evaluators.enums import EvaluatorMatrixTypes
 from octobot_evaluators.evaluator import TAEvaluator, SocialEvaluator, RealTimeEvaluator, StrategyEvaluator, \
     AbstractEvaluator
+from octobot_evaluators.evaluator.abstract_util import AbstractUtil
 from octobot_evaluators.util import reload_tentacle_config
 
 EvaluatorClassTypes = {
@@ -61,6 +62,7 @@ async def create_all_type_evaluators(config, exchange_name, symbol, time_frame, 
     reload_tentacle_config(config)
 
     create_classes_list(config, AbstractEvaluator)
+    create_classes_list(config, AbstractUtil)
 
     created_evaluators = []
 

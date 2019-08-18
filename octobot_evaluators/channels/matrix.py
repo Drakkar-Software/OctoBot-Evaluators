@@ -31,7 +31,7 @@ class MatrixChannelConsumer(Consumer):
     async def consume(self):
         while not self.should_stop:
             try:
-                await self.callback(**(self.queue.get()))
+                await self.callback(**(await self.queue.get()))
             except Exception as e:
                 self.logger.exception(f"Exception when calling callback : {e}")
 
@@ -45,7 +45,7 @@ class MatrixChannelProducer(Producer):
                    symbol=CHANNEL_WILDCARD,
                    time_frame=None):
         for consumer in self.channel.get_consumers(symbol=CHANNEL_WILDCARD):
-            consumer.queue.put({
+            await consumer.queue.put({
                 "evaluator_name": evaluator_name,
                 "evaluator_type": evaluator_type,
                 "eval_note": eval_note,
