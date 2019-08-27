@@ -13,15 +13,18 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
+from octobot_commons.constants import CONFIG_EVALUATOR_FILE_PATH
+from octobot_commons.errors import ConfigEvaluatorError
 from octobot_commons.logging.logging_util import get_logger
 from octobot_commons.tentacles_management import create_classes_list, create_advanced_types_list
+from octobot_commons.tentacles_management.config_manager import reload_tentacle_config
 
 from octobot_evaluators.api.inspection import is_relevant_evaluator
+from octobot_evaluators.constants import CONFIG_EVALUATOR
 from octobot_evaluators.enums import EvaluatorMatrixTypes
 from octobot_evaluators.evaluator import TAEvaluator, SocialEvaluator, RealTimeEvaluator, StrategyEvaluator, \
     AbstractEvaluator
 from octobot_evaluators.evaluator.abstract_util import AbstractUtil
-from octobot_evaluators.util import reload_tentacle_config
 
 EvaluatorClassTypes = {
     "TA": TAEvaluator,
@@ -59,7 +62,7 @@ async def create_evaluators(evaluator_parent_class, config, exchange_name,
 
 
 async def create_all_type_evaluators(config, exchange_name, symbol, time_frame, relevant_evaluators=None) -> list:
-    reload_tentacle_config(config)
+    reload_tentacle_config(config, CONFIG_EVALUATOR, CONFIG_EVALUATOR_FILE_PATH, ConfigEvaluatorError)
 
     create_classes_list(config, AbstractEvaluator)
     create_classes_list(config, AbstractUtil)
