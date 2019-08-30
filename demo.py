@@ -20,7 +20,7 @@ from octobot_commons.constants import CONFIG_TIME_FRAME
 from octobot_commons.enums import TimeFrames
 
 from octobot_commons.logging.logging_util import get_logger
-from octobot_evaluators.api import create_all_type_evaluators, create_matrix_channels
+from octobot_evaluators.api import create_all_type_evaluators, create_matrix_channels, initialize_evaluators
 from octobot_evaluators.channels import MATRIX_CHANNEL, get_chan
 
 config = {
@@ -59,6 +59,7 @@ async def create_evaluators_channel():
 
     await get_chan(MATRIX_CHANNEL).new_consumer(matrix_callback)
 
+    await initialize_evaluators(config)
     await create_all_type_evaluators(config, "test", "BTC/USDT", TimeFrames.ONE_HOUR)
 
     # await get_chan(MATRIX_CHANNEL).get_internal_producer().send(evaluator_name="test",

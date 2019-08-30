@@ -13,12 +13,16 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
+import copy
+
 from octobot_commons.constants import CONFIG_EVALUATOR_FILE_PATH
 from octobot_commons.errors import ConfigEvaluatorError
 from octobot_commons.logging.logging_util import get_logger
 from octobot_commons.tentacles_management import create_classes_list, create_advanced_types_list
 from octobot_commons.tentacles_management.config_manager import reload_tentacle_config
+from octobot_commons.time_frame_manager import TimeFrameManager
 
+from octobot_evaluators.api.initialization import init_time_frames_from_strategies
 from octobot_evaluators.api.inspection import is_relevant_evaluator
 from octobot_evaluators.constants import CONFIG_EVALUATOR
 from octobot_evaluators.enums import EvaluatorMatrixTypes
@@ -61,12 +65,31 @@ async def create_evaluators(evaluator_parent_class, config, exchange_name,
     return created_evaluators
 
 
-async def create_all_type_evaluators(config, exchange_name, symbol, time_frame, relevant_evaluators=None) -> list:
+async def initialize_evaluators(config) -> None:
     reload_tentacle_config(config, CONFIG_EVALUATOR, CONFIG_EVALUATOR_FILE_PATH, ConfigEvaluatorError)
 
     create_classes_list(config, AbstractEvaluator)
     create_classes_list(config, AbstractUtil)
 
+    __init_time_frames(config)
+
+
+def __init_time_frames(config) -> list:
+    # Init time frames using enabled strategies
+    init_time_frames_from_strategies(config)
+    time_frames = copy.copy(TimeFrameManager.get_config_time_frame(config))
+
+    # Init display time frame
+    config_time_frames = TimeFrameManager.get_config_time_frame(config)
+
+    # if TimeFrames.ONE_HOUR not in config_time_frames and not backtesting_enabled(config):
+    #     config_time_frames.append(TimeFrames.ONE_HOUR)
+    #     TimeFrameManager.sort_config_time_frames(config)
+
+    return time_frames
+
+
+async def create_all_type_evaluators(config, exchange_name, symbol, time_frame, relevant_evaluators=None) -> list:
     created_evaluators = []
 
     created_evaluators += await create_evaluators(EvaluatorClassTypes[EvaluatorMatrixTypes.TA.value],
