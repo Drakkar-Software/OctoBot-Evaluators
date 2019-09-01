@@ -15,4 +15,4 @@
 #  License along with this library.
 
 PROJECT_NAME = "OctoBot-Evaluators"
-VERSION = "1.0.0"  # major.minor.revision
+VERSION = "1.1.0"  # major.minor.revision
