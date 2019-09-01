@@ -106,7 +106,7 @@ class AbstractEvaluator(AbstractTentacle):
         :return: None
         """
         # await self.start()
-        self.logger.info("STARTED")
+        self.logger.debug("Evaluator started")
         await self.evaluation_completed(1)
 
     def set_config(self, config) -> None:

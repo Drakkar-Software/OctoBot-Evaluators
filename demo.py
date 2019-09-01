@@ -37,10 +37,6 @@ config = {
         }
     },
     "exchanges": {},
-    CONFIG_TIME_FRAME: {
-        TimeFrames.ONE_MINUTE,
-        TimeFrames.ONE_HOUR
-    }
 }
 
 

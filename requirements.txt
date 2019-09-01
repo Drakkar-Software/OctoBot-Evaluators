@@ -3,3 +3,4 @@ cython
 # Drakkar-Software requirements
 OctoBot-Channels
 OctoBot-Commons
+OctoBot-Tentacles-Manager>=1.0.10

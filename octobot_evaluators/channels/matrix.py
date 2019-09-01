@@ -112,7 +112,7 @@ class MatrixChannel(Channel):
         else:
             self.consumers[CHANNEL_WILDCARD] = [consumer]
         await consumer.run()
-        self.logger.info(f"Consumer started for symbol {symbol} on {time_frame}")
+        self.logger.debug(f"Consumer started for symbol {symbol} on {time_frame}")
 
 
 def set_chan(chan, name) -> None:
