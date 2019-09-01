@@ -113,34 +113,3 @@ class MatrixChannel(Channel):
             self.consumers[CHANNEL_WILDCARD] = [consumer]
         await consumer.run()
         self.logger.debug(f"Consumer started for symbol {symbol} on {time_frame}")
-
-
-def set_chan(chan, name) -> None:
-    chan_name = chan.get_name() if name else name
-
-    try:
-        matrix_chan = ChannelInstances.instance().channels[MATRIX_CHANNELS]
-    except KeyError:
-        ChannelInstances.instance().channels[MATRIX_CHANNELS] = {}
-        matrix_chan = ChannelInstances.instance().channels[MATRIX_CHANNELS]
-
-    if chan_name not in matrix_chan:
-        matrix_chan[chan_name] = chan
-    else:
-        raise ValueError(f"Channel {chan_name} already exists.")
-
-
-def get_chan(chan_name) -> MatrixChannel:
-    try:
-        return ChannelInstances.instance().channels[MATRIX_CHANNELS][chan_name]
-    except KeyError:
-        get_logger(MatrixChannel.__name__).error(f"Channel {chan_name} not found in {MATRIX_CHANNELS}")
-    return None
-
-
-def del_chan(name) -> None:
-    try:
-        if name in ChannelInstances.instance().channels[MATRIX_CHANNELS]:
-            ChannelInstances.instance().channels[MATRIX_CHANNELS].pop(name, None)
-    except KeyError:
-        pass

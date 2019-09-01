@@ -16,12 +16,13 @@
 import asyncio
 import logging
 
+from octobot_channels.channels import get_chan
 from octobot_commons.constants import CONFIG_TIME_FRAME
 from octobot_commons.enums import TimeFrames
 
 from octobot_commons.logging.logging_util import get_logger
 from octobot_evaluators.api import create_all_type_evaluators, create_matrix_channels, initialize_evaluators
-from octobot_evaluators.channels import MATRIX_CHANNEL, get_chan
+from octobot_evaluators.channels import MATRIX_CHANNEL
 
 config = {
     "crypto-currencies": {

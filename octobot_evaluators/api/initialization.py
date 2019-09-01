@@ -13,12 +13,13 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
+from octobot_channels.channels import set_chan
 from octobot_channels.util import create_channel_instance
 from octobot_commons.constants import CONFIG_TIME_FRAME
 from octobot_commons.tentacles_management import create_advanced_types_list
 from octobot_commons.time_frame_manager import TimeFrameManager
 
-from octobot_evaluators.channels import MatrixChannel, set_chan
+from octobot_evaluators.channels import MatrixChannel
 from octobot_evaluators.evaluator import StrategyEvaluator
 
 

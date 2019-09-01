@@ -17,10 +17,11 @@
 import time
 from abc import ABCMeta
 
+from octobot_channels.channels import get_chan
 from octobot_commons.constants import TENTACLES_EVALUATOR_PATH, START_PENDING_EVAL_NOTE, INIT_EVAL_NOTE
 from octobot_commons.tentacles_management.abstract_tentacle import AbstractTentacle
 
-from octobot_evaluators.channels import MATRIX_CHANNEL, get_chan
+from octobot_evaluators.channels import MATRIX_CHANNEL
 from octobot_evaluators.constants import START_EVAL_PERTINENCE, EVALUATOR_EVAL_DEFAULT_TYPE, CONFIG_EVALUATOR
 
 

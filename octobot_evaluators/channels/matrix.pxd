@@ -26,7 +26,3 @@ cdef class MatrixChannelConsumer(Consumer):
 
 cdef class MatrixChannelProducer(Producer):
     pass
-
-cpdef MatrixChannel get_chan(str chan_name)
-cpdef void set_chan(MatrixChannel chan, str name)
-cpdef void del_chan(str name)
