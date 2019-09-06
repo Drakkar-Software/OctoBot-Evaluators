@@ -15,7 +15,7 @@
 #  License along with this library.
 
 import time
-from abc import ABCMeta
+from abc import ABCMeta, abstractmethod
 
 from octobot_channels.channels import get_chan
 from octobot_commons.constants import TENTACLES_EVALUATOR_PATH, START_PENDING_EVAL_NOTE, INIT_EVAL_NOTE
@@ -75,13 +75,24 @@ class AbstractEvaluator(AbstractTentacle):
     def get_tentacle_folder(cls) -> str:
         return TENTACLES_EVALUATOR_PATH
 
-    async def evaluation_completed(self, eval_note) -> None:
+    @classmethod
+    def get_is_symbol_widlcard(cls) -> bool:
+        return True
+
+    @classmethod
+    def get_is_time_frame_widlcard(cls) -> bool:
+        return True
+
+    async def evaluation_completed(self, eval_note=None) -> None:
         """
         Main async method to notify matrix to update
-        :param eval_note:
+        :param eval_note: if None = self.eval_note
         :return: None
         """
         try:
+            if not eval_note:
+                eval_note = self.eval_note
+
             self.ensure_eval_note_is_not_expired()
             await get_chan(MATRIX_CHANNEL).get_internal_producer().send_eval_note(
                 evaluator_name=self.get_name(),
@@ -101,14 +112,17 @@ class AbstractEvaluator(AbstractTentacle):
                 self.eval_note = START_PENDING_EVAL_NOTE
                 self.logger.warning(str(self.symbol) + " evaluator returned 'nan' as eval_note, ignoring this value.")
 
+    @abstractmethod
+    async def start(self) -> None:
+        raise NotImplementedError("start is not implemented")
+
     async def start_evaluator(self) -> None:
         """
         Start a task as matrix producer
         :return: None
         """
-        # await self.start()
+        await self.start()
         self.logger.debug("Evaluator started")
-        await self.evaluation_completed(1)
 
     def set_config(self, config) -> None:
         """
@@ -229,3 +243,13 @@ class AbstractEvaluator(AbstractTentacle):
                 self.eval_note = START_PENDING_EVAL_NOTE
                 self.eval_note_time_to_live = None
                 self.eval_note_changed_time = None
+
+    def __get_exchange_manager_from_name(self, exchange_name):
+        try:
+            from octobot_trading.exchanges.exchanges import Exchanges
+            return Exchanges.instance().get_exchange(exchange_name).exchange_manager
+        except (ImportError, KeyError):
+            self.logger.error(f"Can't get {exchange_name} from exchanges instances")
+
+    def get_exchange_symbol_data(self, exchange_name, symbol):
+        return self.__get_exchange_manager_from_name(exchange_name).exchange_symbols_data.get_exchange_symbol_data(symbol)
