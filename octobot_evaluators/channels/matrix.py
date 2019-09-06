@@ -15,7 +15,7 @@
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
 
-from octobot_channels import CONSUMER_CALLBACK_TYPE, CHANNEL_WILDCARD
+from octobot_channels import CHANNEL_WILDCARD
 from octobot_channels.channels.channel import Channel
 from octobot_channels.channels.channel_instances import ChannelInstances
 from octobot_channels.consumer import Consumer
@@ -81,13 +81,19 @@ class MatrixChannel(Channel):
         self.logger = get_logger(f"{self.__class__.__name__}")
 
     async def new_consumer(self,
-                           callback: CONSUMER_CALLBACK_TYPE,
+                           callback: object,
                            size=0,
                            symbol=CHANNEL_WILDCARD,
+                           evaluator_name=CHANNEL_WILDCARD,
+                           evaluator_type=CHANNEL_WILDCARD,
+                           exchange_name=CHANNEL_WILDCARD,
                            time_frame=None,
                            filter_size=False):
         await self.__add_new_consumer_and_run(MatrixChannelConsumer(callback, size=size, filter_size=filter_size),
                                               symbol=symbol,
+                                              evaluator_name=evaluator_name,
+                                              evaluator_type=evaluator_type,
+                                              exchange_name=exchange_name,
                                               time_frame=time_frame)
 
     def get_consumers(self, symbol=None):
@@ -99,7 +105,12 @@ class MatrixChannel(Channel):
             Channel.init_consumer_if_necessary(self.consumers, symbol)
             return self.consumers[symbol]
 
-    async def __add_new_consumer_and_run(self, consumer, symbol=CHANNEL_WILDCARD, time_frame=None):
+    async def __add_new_consumer_and_run(self, consumer,
+                                         symbol=CHANNEL_WILDCARD,
+                                         evaluator_name=CHANNEL_WILDCARD,
+                                         evaluator_type=CHANNEL_WILDCARD,
+                                         exchange_name=CHANNEL_WILDCARD,
+                                         time_frame=None):
         if symbol:
             if time_frame:
                 # create dict and list if required

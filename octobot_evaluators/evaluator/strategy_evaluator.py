@@ -13,10 +13,11 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
-
+from octobot_channels.channels.channel import get_chan
 from octobot_commons.constants import CONFIG_WILDCARD
 from octobot_commons.time_frame_manager import TimeFrameManager
 
+from octobot_evaluators.channels import MATRIX_CHANNEL
 from octobot_evaluators.constants import CONFIG_EVALUATOR_STRATEGIES, CONFIG_FORCED_EVALUATOR, \
     STRATEGIES_REQUIRED_TIME_FRAME, CONFIG_FORCED_TIME_FRAME, STRATEGIES_REQUIRED_EVALUATORS, TENTACLE_DEFAULT_CONFIG
 from octobot_evaluators.evaluator import AbstractEvaluator
@@ -29,6 +30,24 @@ class StrategyEvaluator(AbstractEvaluator):
     @classmethod
     def get_config_tentacle_type(cls) -> str:
         return CONFIG_EVALUATOR_STRATEGIES
+
+    async def start(self) -> None:
+        """
+        Default Strategy start: to be overwritten
+        Subscribe to Matrix notification from self.symbols and self.time_frames
+        :return: None
+        """
+        await get_chan(MATRIX_CHANNEL).new_consumer(self.matrix_callback)   # TODO filter
+
+    async def matrix_callback(self,
+                              evaluator_name,
+                              evaluator_type,
+                              eval_note,
+                              exchange_name,
+                              symbol,
+                              time_frame):
+        # To be used to trigger an evaluation
+        pass
 
     @classmethod
     def get_required_time_frames(cls, config):

@@ -13,6 +13,7 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
+from octobot_commons.channels_name import OctoBotTradingChannelsName
 
 from octobot_evaluators.constants import CONFIG_EVALUATOR_TA
 from octobot_evaluators.evaluator import AbstractEvaluator
@@ -22,9 +23,29 @@ class TAEvaluator(AbstractEvaluator):
     def __init__(self):
         super().__init__()
         self.time_frame = None
-        self.short_term_averages = [7, 5, 4, 3, 2, 1]
-        self.long_term_averages = [40, 30, 20, 15, 10]
+        self.short_term_averages = [7, 5, 4, 3, 2, 1]  # TODO remove
+        self.long_term_averages = [40, 30, 20, 15, 10]  # TODO remove
 
     @classmethod
     def get_config_tentacle_type(cls) -> str:
         return CONFIG_EVALUATOR_TA
+
+    def get_candle_manager(self, exchange_name, symbol, time_frame):
+        return self.get_exchange_symbol_data(exchange_name, symbol).get_candle_data(time_frame)
+
+    async def start(self) -> None:
+        """
+        Default TA start: to be overwritten
+        Subscribe to OHLCV notification from self.symbols and self.time_frames
+        :return: None
+        """
+        try:
+            from octobot_trading.channels.exchange_channel import get_chan as get_trading_chan
+            await get_trading_chan(OctoBotTradingChannelsName.OHLCV_CHANNEL.value, self.exchange_name).new_consumer(
+                self.ohlcv_callback)  # TODO filter
+        except ImportError:
+            self.logger.error("Can't connect to OHLCV trading channel")
+
+    async def ohlcv_callback(self, exchange, symbol, time_frame, candle):
+        # To be used to trigger an evaluation
+        pass

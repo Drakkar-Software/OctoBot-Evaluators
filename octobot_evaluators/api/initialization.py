@@ -13,7 +13,7 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
-from octobot_channels.channels import set_chan
+from octobot_channels.channels.channel import set_chan
 from octobot_channels.util import create_channel_instance
 from octobot_commons.constants import CONFIG_TIME_FRAME
 from octobot_commons.tentacles_management import create_advanced_types_list

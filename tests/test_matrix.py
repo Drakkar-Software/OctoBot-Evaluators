@@ -14,7 +14,7 @@
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
 import pytest
-from octobot_channels.channels import del_chan, get_chan
+from octobot_channels.channels.channel import del_chan, get_chan
 
 from octobot_evaluators.api import create_matrix_channels
 from octobot_evaluators.channels import MATRIX_CHANNEL
