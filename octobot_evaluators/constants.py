@@ -48,3 +48,12 @@ def default_matrix_value():
         EvaluatorMatrixTypes.REAL_TIME: {},
         EvaluatorMatrixTypes.STRATEGIES: {}
     }
+
+
+EVALUATOR_CLASS_TYPE_MRO_INDEX = -4
+evaluator_class_str_to_matrix_type_dict = {
+    "TAEvaluator": EvaluatorMatrixTypes.TA,
+    "SocialEvaluator": EvaluatorMatrixTypes.SOCIAL,
+    "RealTimeEvaluator": EvaluatorMatrixTypes.REAL_TIME,
+    "StrategyEvaluator": EvaluatorMatrixTypes.STRATEGIES
+}

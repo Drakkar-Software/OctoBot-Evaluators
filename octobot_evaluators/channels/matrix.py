@@ -21,6 +21,7 @@ from octobot_channels.channels.channel_instances import ChannelInstances
 from octobot_channels.consumer import Consumer
 from octobot_channels.producer import Producer
 from octobot_commons.logging.logging_util import get_logger
+from octobot_evaluators.constants import EVALUATOR_EVAL_DEFAULT_TYPE
 
 from octobot_evaluators.data import EvaluatorMatrix
 
@@ -41,24 +42,31 @@ class MatrixChannelProducer(Producer):
                    evaluator_name,
                    evaluator_type,
                    eval_note,
+                   eval_note_type=EVALUATOR_EVAL_DEFAULT_TYPE,
                    exchange_name=None,
                    symbol=CHANNEL_WILDCARD,
                    time_frame=None):
-        for consumer in self.channel.get_filtered_consumers(symbol=symbol, evaluator_type=evaluator_type):
+        for consumer in self.channel.get_filtered_consumers(symbol=symbol,
+                                                            time_frame=time_frame,
+                                                            evaluator_type=evaluator_type,
+                                                            evaluator_name=evaluator_name,
+                                                            exchange_name=exchange_name):
             await consumer.queue.put({
                 "evaluator_name": evaluator_name,
                 "evaluator_type": evaluator_type,
                 "eval_note": eval_note,
+                "eval_note_type": eval_note_type,
                 "exchange_name": exchange_name,
                 "symbol": symbol,
                 "time_frame": time_frame
             })
 
-    async def send_eval_note(self, evaluator_name, evaluator_type, eval_note,
+    async def send_eval_note(self, evaluator_name, evaluator_type, eval_note, eval_note_type,
                              exchange_name=None, symbol=None, time_frame=None):
         EvaluatorMatrix().set_eval(evaluator_name=evaluator_name,
                                    evaluator_type=evaluator_type,
                                    value=eval_note,
+                                   eval_note_type=eval_note_type,
                                    exchange_name=exchange_name,
                                    symbol=symbol,
                                    time_frame=time_frame)
@@ -66,6 +74,7 @@ class MatrixChannelProducer(Producer):
         await self.send(evaluator_name=evaluator_name,
                         evaluator_type=evaluator_type,
                         eval_note=eval_note,
+                        eval_note_type=eval_note_type,
                         exchange_name=exchange_name,
                         symbol=symbol,
                         time_frame=time_frame)
@@ -77,7 +86,10 @@ class MatrixChannel(Channel):
     CONSUMER_CLASS = MatrixChannelConsumer
 
     SYMBOL_KEY = "symbol"
+    TIME_FRAME_KEY = "time_frame"
     EVALUATOR_TYPE_KEY = "evaluator_type"
+    EXCHANGE_NAME_KEY = "exchange_name"
+    EVALUATOR_NAME_KEY = "evaluator_name"
 
     def __init__(self):
         super().__init__()
@@ -90,7 +102,7 @@ class MatrixChannel(Channel):
                            evaluator_name=CHANNEL_WILDCARD,
                            evaluator_type=CHANNEL_WILDCARD,
                            exchange_name=CHANNEL_WILDCARD,
-                           time_frame=None,
+                           time_frame=CHANNEL_WILDCARD,
                            filter_size=False):
         await self.__add_new_consumer_and_run(MatrixChannelConsumer(callback, size=size, filter_size=filter_size),
                                               symbol=symbol,
@@ -99,10 +111,18 @@ class MatrixChannel(Channel):
                                               exchange_name=exchange_name,
                                               time_frame=time_frame)
 
-    def get_filtered_consumers(self, symbol=CHANNEL_WILDCARD, evaluator_type=CHANNEL_WILDCARD):
+    def get_filtered_consumers(self,
+                               symbol=CHANNEL_WILDCARD,
+                               evaluator_type=CHANNEL_WILDCARD,
+                               time_frame=CHANNEL_WILDCARD,
+                               evaluator_name=CHANNEL_WILDCARD,
+                               exchange_name=CHANNEL_WILDCARD):
         return self.get_consumer_from_filters({
             self.SYMBOL_KEY: symbol,
-            self.EVALUATOR_TYPE_KEY: evaluator_type
+            self.TIME_FRAME_KEY: time_frame,
+            self.EVALUATOR_TYPE_KEY: evaluator_type,
+            self.EVALUATOR_NAME_KEY: evaluator_name,
+            self.EXCHANGE_NAME_KEY: exchange_name
         })
 
     async def __add_new_consumer_and_run(self, consumer,
@@ -116,6 +136,9 @@ class MatrixChannel(Channel):
 
         consumer_filters: dict = {
             self.SYMBOL_KEY: symbol,
+            self.TIME_FRAME_KEY: time_frame,
+            self.EVALUATOR_NAME_KEY: evaluator_name,
+            self.EXCHANGE_NAME_KEY: exchange_name,
             self.EVALUATOR_TYPE_KEY: evaluator_type
         }
 

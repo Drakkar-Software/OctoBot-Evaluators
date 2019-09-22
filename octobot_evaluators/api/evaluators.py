@@ -24,7 +24,8 @@ from octobot_commons.time_frame_manager import TimeFrameManager
 
 from octobot_evaluators.api.initialization import init_time_frames_from_strategies
 from octobot_evaluators.api.inspection import is_relevant_evaluator
-from octobot_evaluators.constants import CONFIG_EVALUATOR
+from octobot_evaluators.constants import CONFIG_EVALUATOR, EVALUATOR_CLASS_TYPE_MRO_INDEX, \
+    evaluator_class_str_to_matrix_type_dict
 from octobot_evaluators.enums import EvaluatorMatrixTypes
 from octobot_evaluators.evaluator import TAEvaluator, SocialEvaluator, RealTimeEvaluator, StrategyEvaluator, \
     AbstractEvaluator
@@ -71,6 +72,8 @@ async def create_evaluator(evaluator_class, config, exchange_name,
             eval_class_instance.exchange_name = exchange_name if exchange_name else None
             eval_class_instance.symbol = symbol if symbol else None
             eval_class_instance.time_frame = time_frame if time_frame else None
+            eval_class_instance.evaluator_type = evaluator_class_str_to_matrix_type_dict[
+                eval_class_instance.__class__.mro()[EVALUATOR_CLASS_TYPE_MRO_INDEX].__name__]
 
             await eval_class_instance.start_evaluator()
             return eval_class_instance

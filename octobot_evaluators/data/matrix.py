@@ -33,6 +33,7 @@ class EvaluatorMatrix(Singleton):
                  evaluator_name,
                  evaluator_type,
                  value,
+                 eval_note_type,
                  exchange_name=None,
                  symbol=None,
                  time_frame=None) -> None:
@@ -41,6 +42,7 @@ class EvaluatorMatrix(Singleton):
         :param evaluator_type: the evaluator type ("TA", "Social", ...)
         :param evaluator_name: the evaluator name
         :param value: the eval note to add to the matrix
+        :param eval_note_type: the eval note type
         :param exchange_name: the evaluation exchange name
         :param symbol: the evaluation symbol
         :param time_frame: the evaluation time frame
@@ -61,7 +63,7 @@ class EvaluatorMatrix(Singleton):
                 self.matrix[evaluator_name] = value
         except KeyError:
             EvaluatorMatrix.__init_matrix(evaluator_matrix, symbol, exchange_name)
-            self.set_eval(evaluator_name, evaluator_type, value, exchange_name, symbol, time_frame)
+            self.set_eval(evaluator_name, evaluator_type, value, eval_note_type, exchange_name, symbol, time_frame)
 
     def __get_evaluator_matrix(self, evaluator_name, evaluator_type) -> dict:
         """

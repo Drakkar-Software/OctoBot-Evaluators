@@ -48,6 +48,9 @@ class AbstractEvaluator(AbstractTentacle):
         #  history time represents the period of time of the indicator
         self.history_time = None
 
+        # Evaluator category
+        self.evaluator_type = None
+
         #  Eval note will be set by the eval_impl at each call
         self.eval_note = START_PENDING_EVAL_NOTE
 
@@ -98,8 +101,9 @@ class AbstractEvaluator(AbstractTentacle):
             self.ensure_eval_note_is_not_expired()
             await get_chan(MATRIX_CHANNEL).get_internal_producer().send_eval_note(
                 evaluator_name=self.get_name(),
-                evaluator_type=self.get_eval_type(),
+                evaluator_type=self.evaluator_type,
                 eval_note=eval_note,
+                eval_note_type=self.get_eval_type(),
                 exchange_name=self.exchange_name,
                 symbol=symbol,
                 time_frame=time_frame)
