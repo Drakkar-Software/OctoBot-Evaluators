@@ -37,7 +37,7 @@ class StrategyEvaluator(AbstractEvaluator):
         Subscribe to Matrix notification from self.symbols and self.time_frames
         :return: None
         """
-        await get_chan(MATRIX_CHANNEL).new_consumer(self.matrix_callback)   # TODO filter
+        await get_chan(MATRIX_CHANNEL).new_consumer(self.matrix_callback)
 
     async def matrix_callback(self,
                               evaluator_name,
@@ -48,6 +48,7 @@ class StrategyEvaluator(AbstractEvaluator):
                               symbol,
                               time_frame):
         # To be used to trigger an evaluation
+        # Do not forget to check if evaluator_name is self.name
         pass
 
     @classmethod

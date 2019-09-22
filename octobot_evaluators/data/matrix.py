@@ -61,7 +61,7 @@ class EvaluatorMatrix(Singleton):
                     self.matrix[evaluator_name][symbol] = value
             else:
                 self.matrix[evaluator_name] = value
-        except KeyError:
+        except KeyError as e:
             EvaluatorMatrix.__init_matrix(evaluator_matrix, symbol, exchange_name)
             self.set_eval(evaluator_name, evaluator_type, value, eval_note_type, exchange_name, symbol, time_frame)
 
@@ -138,6 +138,39 @@ class EvaluatorMatrix(Singleton):
         except KeyError:
             pass
         return START_PENDING_EVAL_NOTE
+
+    # TODO improve following methods
+    def get_evaluators_name_from_symbol(self, symbol) -> list:
+        return [
+            evaluator_name
+            for evaluator_name, symbols in self.matrix.items()
+            if symbol in symbols
+        ]
+
+    def get_evaluators_name_from_and_exchange(self, exchange_name) -> list:
+        return [
+            evaluator_name
+            for evaluator_name, symbols in self.matrix.items()
+            for symbol, exchange_names in symbols.items()
+            if exchange_name in exchange_names
+        ]
+
+    def get_evaluators_name_from_symbol_and_exchange(self, symbol, exchange_name) -> list:
+        return [
+            evaluator_name
+            for evaluator_name, symbols in self.matrix.items()
+            for symbol, exchange_names in symbols.items()
+            if symbol in symbols and exchange_name in exchange_names
+        ]
+
+    def get_evaluators_name_from_symbol_exchange_and_time_frame(self, symbol, exchange_name, time_frame) -> list:
+        return [
+            evaluator_name
+            for evaluator_name, symbols in self.matrix.items()
+            for symbol, exchange_names in symbols.items()
+            for exchange_name, time_frames in exchange_names.items()
+            if symbol in symbols and exchange_name in exchange_names and time_frame in time_frames
+        ]
 
     def get_evaluator_eval_type(self, evaluator_name) -> object:
         """

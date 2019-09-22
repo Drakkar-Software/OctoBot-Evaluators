@@ -63,13 +63,13 @@ class MatrixChannelProducer(Producer):
 
     async def send_eval_note(self, evaluator_name, evaluator_type, eval_note, eval_note_type,
                              exchange_name=None, symbol=None, time_frame=None):
-        EvaluatorMatrix().set_eval(evaluator_name=evaluator_name,
-                                   evaluator_type=evaluator_type,
-                                   value=eval_note,
-                                   eval_note_type=eval_note_type,
-                                   exchange_name=exchange_name,
-                                   symbol=symbol,
-                                   time_frame=time_frame)
+        EvaluatorMatrix.instance().set_eval(evaluator_name=evaluator_name,
+                                            evaluator_type=evaluator_type,
+                                            value=eval_note,
+                                            eval_note_type=eval_note_type,
+                                            exchange_name=exchange_name,
+                                            symbol=symbol,
+                                            time_frame=time_frame)
 
         await self.send(evaluator_name=evaluator_name,
                         evaluator_type=evaluator_type,
