@@ -44,7 +44,7 @@ class MatrixChannelProducer(Producer):
                    exchange_name=None,
                    symbol=CHANNEL_WILDCARD,
                    time_frame=None):
-        for consumer in self.channel.get_filtered_consumers():
+        for consumer in self.channel.get_filtered_consumers(symbol=symbol, evaluator_type=evaluator_type):
             await consumer.queue.put({
                 "evaluator_name": evaluator_name,
                 "evaluator_type": evaluator_type,
