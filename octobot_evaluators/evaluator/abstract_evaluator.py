@@ -83,9 +83,11 @@ class AbstractEvaluator(AbstractTentacle):
     def get_is_time_frame_widlcard(cls) -> bool:
         return True
 
-    async def evaluation_completed(self, eval_note=None) -> None:
+    async def evaluation_completed(self, symbol, time_frame, eval_note=None) -> None:
         """
         Main async method to notify matrix to update
+        :param symbol: evaluated symbol
+        :param time_frame: evaluated time frame
         :param eval_note: if None = self.eval_note
         :return: None
         """
@@ -99,8 +101,8 @@ class AbstractEvaluator(AbstractTentacle):
                 evaluator_type=self.get_eval_type(),
                 eval_note=eval_note,
                 exchange_name=self.exchange_name,
-                symbol=self.symbol,
-                time_frame=self.time_frame)
+                symbol=symbol,
+                time_frame=time_frame)
         except Exception as e:
             # if ConfigManager.is_in_dev_mode(self.config): # TODO
             #     raise e

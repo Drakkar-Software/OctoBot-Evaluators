@@ -44,7 +44,7 @@ class MatrixChannelProducer(Producer):
                    exchange_name=None,
                    symbol=CHANNEL_WILDCARD,
                    time_frame=None):
-        for consumer in self.channel.get_consumers(symbol=CHANNEL_WILDCARD):
+        for consumer in self.channel.get_filtered_consumers():
             await consumer.queue.put({
                 "evaluator_name": evaluator_name,
                 "evaluator_type": evaluator_type,
@@ -76,6 +76,9 @@ class MatrixChannel(Channel):
     PRODUCER_CLASS = MatrixChannelProducer
     CONSUMER_CLASS = MatrixChannelConsumer
 
+    SYMBOL_KEY = "symbol"
+    EVALUATOR_TYPE_KEY = "evaluator_type"
+
     def __init__(self):
         super().__init__()
         self.logger = get_logger(f"{self.__class__.__name__}")
@@ -96,14 +99,11 @@ class MatrixChannel(Channel):
                                               exchange_name=exchange_name,
                                               time_frame=time_frame)
 
-    def get_consumers(self, symbol=None):
-        if not symbol:
-            symbol = CHANNEL_WILDCARD
-        try:
-            return [consumer for consumer in self.consumers[symbol]]
-        except KeyError:
-            Channel.init_consumer_if_necessary(self.consumers, symbol)
-            return self.consumers[symbol]
+    def get_filtered_consumers(self, symbol=CHANNEL_WILDCARD, evaluator_type=CHANNEL_WILDCARD):
+        return self.get_consumer_from_filters({
+            self.SYMBOL_KEY: symbol,
+            self.EVALUATOR_TYPE_KEY: evaluator_type
+        })
 
     async def __add_new_consumer_and_run(self, consumer,
                                          symbol=CHANNEL_WILDCARD,
@@ -112,15 +112,13 @@ class MatrixChannel(Channel):
                                          exchange_name=CHANNEL_WILDCARD,
                                          time_frame=None):
         if symbol:
-            if time_frame:
-                # create dict and list if required
-                Channel.init_consumer_if_necessary(self.consumers, symbol, is_dict=True)
+            symbol = CHANNEL_WILDCARD
 
-                Channel.init_consumer_if_necessary(self.consumers[symbol], time_frame)
-                self.consumers[symbol][time_frame].append(consumer)
-            else:
-                self.consumers[symbol].append(consumer)
-        else:
-            self.consumers[CHANNEL_WILDCARD] = [consumer]
+        consumer_filters: dict = {
+            self.SYMBOL_KEY: symbol,
+            self.EVALUATOR_TYPE_KEY: evaluator_type
+        }
+
+        self.add_new_consumer(consumer, consumer_filters)
         await consumer.run()
-        self.logger.debug(f"Consumer started for symbol {symbol} on {time_frame}")
+        self.logger.debug(f"Consumer started for symbol {symbol}")
