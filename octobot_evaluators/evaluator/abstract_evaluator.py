@@ -26,7 +26,7 @@ from octobot_evaluators.constants import START_EVAL_PERTINENCE, EVALUATOR_EVAL_D
 
 
 class AbstractEvaluator(AbstractTentacle):
-    __metaclass__ = ABCMeta
+    __metaclass__ = AbstractTentacle
 
     def __init__(self):
         super().__init__()
@@ -75,6 +75,10 @@ class AbstractEvaluator(AbstractTentacle):
         return EVALUATOR_EVAL_DEFAULT_TYPE
 
     @classmethod
+    def get_name(cls) -> str:
+        return cls.__name__
+
+    @classmethod
     def get_tentacle_folder(cls) -> str:
         return TENTACLES_EVALUATOR_PATH
 
@@ -96,7 +100,7 @@ class AbstractEvaluator(AbstractTentacle):
         """
         try:
             if not eval_note:
-                eval_note = self.eval_note
+                eval_note = self.eval_note if self.eval_note else START_PENDING_EVAL_NOTE
 
             self.ensure_eval_note_is_not_expired()
             await get_chan(MATRIX_CHANNEL).get_internal_producer().send_eval_note(

@@ -20,11 +20,17 @@ from octobot_evaluators.evaluator import AbstractEvaluator
 
 
 class TAEvaluator(AbstractEvaluator):
+    __metaclass__ = AbstractEvaluator
+
     def __init__(self):
         super().__init__()
         self.time_frame = None
         self.short_term_averages = [7, 5, 4, 3, 2, 1]  # TODO remove
         self.long_term_averages = [40, 30, 20, 15, 10]  # TODO remove
+
+    @classmethod
+    def get_name(cls) -> str:
+        return cls.__name__
 
     @classmethod
     def get_config_tentacle_type(cls) -> str:

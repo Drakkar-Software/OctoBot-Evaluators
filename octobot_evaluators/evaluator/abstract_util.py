@@ -23,7 +23,7 @@ from octobot_evaluators.constants import TENTACLE_UTIL_FOLDER
 
 
 class AbstractUtil(AbstractTentacle):
-    __metaclass__ = ABCMeta
+    __metaclass__ = AbstractTentacle
 
     def __init__(self):
         super().__init__()

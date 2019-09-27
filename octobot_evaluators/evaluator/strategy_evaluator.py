@@ -24,8 +24,7 @@ from octobot_evaluators.evaluator import AbstractEvaluator
 
 
 class StrategyEvaluator(AbstractEvaluator):
-    def __init__(self):
-        super().__init__()
+    __metaclass__ = AbstractEvaluator
 
     @classmethod
     def get_config_tentacle_type(cls) -> str:

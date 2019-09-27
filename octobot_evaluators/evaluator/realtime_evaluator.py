@@ -23,6 +23,8 @@ from octobot_evaluators.evaluator.abstract_evaluator import AbstractEvaluator
 
 
 class RealTimeEvaluator(AbstractEvaluator):
+    __metaclass__ = AbstractEvaluator
+
     def __init__(self):
         super().__init__()
         self.load_config()

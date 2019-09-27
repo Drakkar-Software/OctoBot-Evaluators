@@ -31,6 +31,7 @@ cdef class EvaluatorMatrix(Singleton):
                       str evaluator_name,
                       object evaluator_type,    # EvaluatorMatrixTypes object
                       object value,             # MatrixValueType object
+                      object eval_note_type,
                       str exchange_name = *,
                       str symbol = *,
                       object time_frame = *)    # TimeFrames object
@@ -43,6 +44,5 @@ cdef class EvaluatorMatrix(Singleton):
 
     cpdef object get_evaluator_eval_type(self, str evaluator_name)
     cpdef list get_evaluators_name_from_symbol(self, str symbol)
-    cpdef list get_evaluators_name_from_exchange(self, str exchange_name)
     cpdef list get_evaluators_name_from_symbol_and_exchange(self, str symbol, str exchange_name)
     cpdef list get_evaluators_name_from_symbol_exchange_and_time_frame(self, str symbol, str exchange_name, object time_frame)
