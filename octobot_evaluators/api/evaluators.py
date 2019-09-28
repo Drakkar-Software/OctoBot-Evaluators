@@ -92,6 +92,10 @@ async def initialize_evaluators(config) -> None:
     __init_time_frames(config)
 
 
+def get_evaluators_time_frames(config) -> list:
+    return TimeFrameManager.get_config_time_frame(config)
+
+
 def __init_time_frames(config) -> list:
     # Init time frames using enabled strategies
     init_time_frames_from_strategies(config)
