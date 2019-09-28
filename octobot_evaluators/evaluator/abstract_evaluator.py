@@ -105,7 +105,7 @@ class AbstractEvaluator(AbstractTentacle):
             self.ensure_eval_note_is_not_expired()
             await get_chan(MATRIX_CHANNEL).get_internal_producer().send_eval_note(
                 evaluator_name=self.get_name(),
-                evaluator_type=self.evaluator_type,
+                evaluator_type=self.evaluator_type.value,
                 eval_note=eval_note,
                 eval_note_type=self.get_eval_type(),
                 exchange_name=self.exchange_name,

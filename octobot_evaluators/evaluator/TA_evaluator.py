@@ -14,6 +14,7 @@
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
 from octobot_commons.channels_name import OctoBotTradingChannelsName
+from octobot_commons.enums import TimeFrames
 
 from octobot_evaluators.constants import CONFIG_EVALUATOR_TA
 from octobot_evaluators.evaluator import AbstractEvaluator
@@ -37,7 +38,7 @@ class TAEvaluator(AbstractEvaluator):
         return CONFIG_EVALUATOR_TA
 
     def get_candle_manager(self, exchange_name, symbol, time_frame):
-        return self.get_exchange_symbol_data(exchange_name, symbol).get_candle_data(time_frame)
+        return self.get_exchange_symbol_data(exchange_name, symbol).get_candle_data(TimeFrames(time_frame))
 
     async def start(self) -> None:
         """
