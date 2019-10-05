@@ -54,10 +54,9 @@ matrix:
         - ls
       deploy:
         - provider: pypi
-          username:
-            secure: f+YjNk1H7XA01PRrnc0vgXBFRDNmOlkM27s2rpmGeNgARTiwVqKyDKmwLkQdZmba71Ew4+BQyqbhPu3hySM+nncM34av/ZkSDJgvp/f0kcvk8htT+IgisJRgwyTHhsKqtWPbGWBcr2mlSJ2iAzJNtgoxnj+v8LIB5rZZvPC0Q6YjwMwBHGfaYwI2eRXtc8RcYXtqqFPyVRLCP10I206PgS4GwPLG6wU+5g3qMzkFOrsTHyjkaM6/GkPrgfoNimY0lPGZqP2qHuthGoT0AdgjNxwGIIn3/G7Jiq4kHMAuxybHmCX9rJWpZwArrJDtbV4WdWbZPmsdDlnd7Cjkh0GEY0luiTK/uQ/axD4KuwzREU8AgcQlDq89hfK3icp9OfRVkHZOoKbt9rpAOef5ea6odMHI9RI9tlXHyXz4LL+YP9rQ2fITGovV6AvcJocLfNSYiWqlYZoYNodkGu4j03hm49FR20rMQlkpfI5JbwTUF7k+/WKGX96Kr/9LF6kRd5FOAFNJdum2r2W8F68d2JsaHZyYQLVfo8Kby8VW1VAUcmv2iTOxP6YZSXYtvr9Zau2KsNQkr8QavQefOR2QzR9jStqXXMx5LovzE5ngLPazTHO30F5hqEqveygtPI9J/wx+tPj1vDk04fXP6zrGUBURfuKebNpt1dlqz9m+3aNdg8I=
+          user: "__token__"
           password:
-            secure: Dq/LPcdduzDJg5Sw4ToptECcp0JXCl6Zx8vOm8jfXGBX2ccoGMBik3TelvU3aKQIHL8nFLm9t0+QBle4wP8fZyNvfABDITBAYDeof2q1G5jRBu4BSOfk8lRmtQKWApcOSOiWE9tqcrIXHGhoOlj7FabrYBdFXQ9F+zd3XmLHq+JdZM0pOXAq1FkiCvc1iVltLccopyevXgbg4mGpfMl6ojiz5wDWt5eMrQIRnDvKMrvKMMzxgHF3uhUzaxxTRIEJs7sLpRULbwhw87Yt1WL4N5HXLZRIH/Lbx9dDLZ1cbv7a4MNunxLtycgMntJiyVXOePDWEaRsh4Cad4Nct8JItCBiji9Tp0CKX9mGCZnXFe9FicbcMWTuS/Y4Ml+e99jUxg1PZC6z1xenN+xyr6TIuXdE3okxoPMM6UE6V+Qmhb7ds6OcdAmqE5SglQHQaPQtN7ix9pCJ/QbgvSQYMgkT8Si0cRqbfGHRU7Q+zzM55O+X/lzX/85VDmHn+S9bld62Z7bu5axUwEJNfaMFIVxRZjlkHFCHn0NW9mC50BMoFeq5zOLw2kuYnyHk5xVyfaI3Wml6n1FZ4NBZfdXtJwC93K168PXg/qHL4j8UvD+GOMGCfK9Ub/GdERSqCewexBvjup4mqgzeS10HM8+hye/0+jvtLnk178oHdX7vT93d9B4=
+            secure: HHlsEgI/sKI1iG5y571xXlokPZN6nwT4wCeG1oLFX6gEJTMnyWDq8wSiqaaIiOMcs6MWA/pQI6wf4yL0a2lXZMiNQIEC+Q64Iln1leNBXbDDsNYXPHPhsb2ZIPkVf2PFFIUCp+7kNQk7+h/5Px3wmoLs2WZbqy2vMHA4fGKwA3/xrwbjovQTJbDkonyZPzPCo30jsbl5jH/IzH1Lv2hn1xK7yS2w3y+iSV9tj2Wchcfz18OAVrb59PgaQptEzlKqujP6Khj6qV+04cTldzYh2Vd0kyYlSxmSN57EKYVyZfUkXCLm/AcJ55YfNwbrGslmPC/0g8rbmlMVGwB9cHQwBLARu3QwJZ7wW1PDiCXvJ2BTbeihh8dzOneGkgwfOe3HXD1F/7zA0I4NOuucPhcyD+EA3XVzFhNSqCOrK1E9D8pMqxn3c08+ORazdcebVojF7OAODxDOt1cldPwRjjflZ2AV6vOpZZvSKq43A9n3aXDnyTmzJF5y/Q1RjdmAgqb/bCchtUQ3COq5RA7BWtYCWnZURWy3lnjBB99G24v3dR2d1L730mjN72AIqx86bvKYU7YEiwz0ZTzlWaSXUjz78I7oDkYHuQwEnEeQ8AdA78+IJU3/lgac2XuRjkVr4MDwfJm52Y1GrayOC+JvFj9axVA6jgKOfk0WSN0qZwsTim8=
           skip_existing: true
           skip_cleanup: true
           distributions: "sdist"

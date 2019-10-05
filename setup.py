@@ -74,7 +74,7 @@ setup(
     ext_modules=cythonize(ext_modules, gdb_debug=CYTHON_DEBUG),
     python_requires=REQUIRES_PYTHON,
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Cython',
     ],
