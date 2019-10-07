@@ -16,9 +16,13 @@
 # from distutils.extension import Extension
 import os
 
+from setuptools import dist
+dist.Distribution().fetch_build_eggs(['Cython>=0.15.1', 'numpy>=1.10'])
+
 try:
     from Cython.Distutils import build_ext
     from Cython.Build import cythonize
+    import numpy as np
 except ImportError:
     # create closure for deferred import
     def cythonize(*args, **kwargs):
@@ -31,7 +35,6 @@ except ImportError:
 
 from setuptools import find_packages
 from setuptools import setup, Extension
-import numpy as np
 
 from octobot_evaluators import VERSION, PROJECT_NAME
 
@@ -70,7 +73,7 @@ setup(
     zip_safe=False,
     data_files=[],
     setup_requires=REQUIRED if not CYTHON_DEBUG else [],
-    install_requires=[],
+    install_requires=[REQUIRED],
     ext_modules=cythonize(ext_modules, gdb_debug=CYTHON_DEBUG),
     python_requires=REQUIRES_PYTHON,
     classifiers=[
