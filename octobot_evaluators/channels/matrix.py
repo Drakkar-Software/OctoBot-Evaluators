@@ -14,6 +14,7 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
+from asyncio import CancelledError
 
 from octobot_channels import CHANNEL_WILDCARD
 from octobot_channels.channels.channel import Channel
@@ -33,6 +34,8 @@ class MatrixChannelConsumer(Consumer):
         while not self.should_stop:
             try:
                 await self.callback(**(await self.queue.get()))
+            except CancelledError:
+                self.logger.warning("Cancelled task")
             except Exception as e:
                 self.logger.exception(f"Exception when calling callback : {e}")
 
