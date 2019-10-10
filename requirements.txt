@@ -1,7 +1,8 @@
-cython
-numpy
+# Setup requirements
+cython==0.29.13
+numpy==1.17.2
 
 # Drakkar-Software requirements
-OctoBot-Channels
-OctoBot-Commons
-OctoBot-Tentacles-Manager==1.0.11
+OctoBot-Channels==1.3.13
+OctoBot-Commons==1.1.46
+OctoBot-Tentacles-Manager==1.0.12

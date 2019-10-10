@@ -54,7 +54,7 @@ class StrategyEvaluator(AbstractEvaluator):
     def get_required_time_frames(cls, config):
         if CONFIG_FORCED_TIME_FRAME in config:
             return TimeFrameManager.parse_time_frames(config[CONFIG_FORCED_TIME_FRAME])
-        strategy_config = cls.get_specific_config(True, False)
+        strategy_config = cls.get_specific_config()
         if STRATEGIES_REQUIRED_TIME_FRAME in strategy_config:
             return TimeFrameManager.parse_time_frames(strategy_config[STRATEGIES_REQUIRED_TIME_FRAME])
         else:

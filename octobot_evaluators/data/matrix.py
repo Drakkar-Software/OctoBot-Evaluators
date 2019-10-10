@@ -61,7 +61,7 @@ class EvaluatorMatrix(Singleton):
                     self.matrix[evaluator_name][symbol] = value
             else:
                 self.matrix[evaluator_name] = value
-        except KeyError as e:
+        except KeyError:
             EvaluatorMatrix.__init_matrix(evaluator_matrix, symbol, exchange_name)
             self.set_eval(evaluator_name, evaluator_type, value, eval_note_type, exchange_name, symbol, time_frame)
 
