@@ -18,12 +18,10 @@ from asyncio import CancelledError
 
 from octobot_channels import CHANNEL_WILDCARD
 from octobot_channels.channels.channel import Channel
-from octobot_channels.channels.channel_instances import ChannelInstances
 from octobot_channels.consumer import Consumer
 from octobot_channels.producer import Producer
 from octobot_commons.logging.logging_util import get_logger
 from octobot_evaluators.constants import EVALUATOR_EVAL_DEFAULT_TYPE
-
 from octobot_evaluators.data import EvaluatorMatrix
 
 MATRIX_CHANNELS = "MatrixChannels"
