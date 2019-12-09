@@ -13,172 +13,88 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
-from octobot_commons.constants import START_PENDING_EVAL_NOTE
-from octobot_commons.evaluators_util import check_valid_eval_note
+
+from octobot_commons.event_tree import EventTree
 from octobot_commons.singleton.singleton_class import Singleton
 
-from octobot_evaluators.constants import default_matrix_value, MatrixValueType, EVALUATOR_EVAL_DEFAULT_TYPE
 
-
-class EvaluatorMatrix(Singleton):
+class Matrix(Singleton):
     """
-    EvaluatorMatrix dataclass store evaluation data in a matrix represented by a dictionary
+    Matrix dataclass store tentacles data in a EventTree
     """
+    __slots__ = ['matrix']
 
     def __init__(self):
-        self.matrix = default_matrix_value()
-        self.evaluator_eval_types = {}
-
-    def set_eval(self,
-                 evaluator_name,
-                 evaluator_type,
-                 value,
-                 eval_note_type,
-                 exchange_name=None,
-                 symbol=None,
-                 time_frame=None) -> None:
         """
-        Set the new eval note to the matrix corresponding to evaluator note params
-        :param evaluator_type: the evaluator type ("TA", "Social", ...)
-        :param evaluator_name: the evaluator name
-        :param value: the eval note to add to the matrix
-        :param eval_note_type: the eval note type
-        :param exchange_name: the evaluation exchange name
-        :param symbol: the evaluation symbol
-        :param time_frame: the evaluation time frame
-        :return: None
+        Initialize the matrix as an EventTree instance
         """
-        evaluator_matrix: dict = self.__get_evaluator_matrix(evaluator_name, evaluator_type)
+        self.matrix = EventTree()
 
-        try:
-            if symbol:
-                if exchange_name:
-                    if time_frame:
-                        self.matrix[evaluator_name][symbol][exchange_name][time_frame] = value
-                    else:
-                        self.matrix[evaluator_name][symbol][exchange_name] = value
-                else:
-                    self.matrix[evaluator_name][symbol] = value
-            else:
-                self.matrix[evaluator_name] = value
-        except KeyError:
-            EvaluatorMatrix.__init_matrix(evaluator_matrix, symbol, exchange_name)
-            self.set_eval(evaluator_name, evaluator_type, value, eval_note_type, exchange_name, symbol, time_frame)
+    def set_tentacle_value(self, value, value_type, value_path):
+        self.matrix.set_node_at_path(value, value_type, value_path)
 
-    def __get_evaluator_matrix(self, evaluator_name, evaluator_type) -> dict:
+    def get_node_children_at_path(self, node_path, starting_node=None):
+        return list(self.matrix.get_node(node_path, starting_node=starting_node).children.values())
+
+    def get_node_at_path(self, node_path, starting_node=None):
+        return self.matrix.get_node(node_path, starting_node=starting_node)
+
+    def get_tentacle_nodes(self, exchange_name=None, tentacle_type=None, tentacle_name=None):
         """
-        Returns the matrix of the evaluator from its type
-        :param evaluator_name: evaluator name
-        :param evaluator_type: evaluator type
-        :return: evaluator matrix
+        Returns the list of nodes related to the exchange_name, tentacle_type and tentacle_name, ignored if None
+        :param exchange_name: the exchange name to search for in the matrix
+        :param tentacle_type: the tentacle type to search for in the matrix
+        :param tentacle_name: the tentacle name to search for in the matrix
+        :return: nodes linked to the given params
         """
-        try:
-            return self.matrix[evaluator_name]
-        except KeyError:
-            self.matrix[evaluator_name] = {}
-            self.__set_evaluator_eval_type(evaluator_name, evaluator_type)
-            return self.matrix[evaluator_name]
+        return self.get_node_children_at_path(get_tentacle_path(exchange_name=exchange_name,
+                                                                tentacle_type=tentacle_type,
+                                                                tentacle_name=tentacle_name))
 
-    @staticmethod
-    def __init_matrix(evaluator_matrix, symbol, exchange_name) -> None:
+    def get_tentacles_value_nodes(self, tentacle_nodes, symbol=None, time_frame=None):
         """
-        Creates the matrix corresponding to the params if not exists
-        :param evaluator_matrix: matrix evaluator dictionary
-        :param symbol: evaluator matrix symbol
-        :param exchange_name: evaluator matrix exchange name
-        :return: None
+        Returns the list of nodes related to the symbol and / or time_frame from the given tentacle_nodes list
+        :param tentacle_nodes: the exchange name to search for in the matrix
+        :param symbol: the symbol to search for in the given node list
+        :param time_frame: the time frame to search for in the given nodes list
+        :return: nodes linked to the given params
         """
+        return [node_at_path for node_at_path in [
+            self.get_node_at_path(get_tentacle_value_path(symbol=symbol,
+                                                          time_frame=time_frame),
+                                  starting_node=n)
+            for n in tentacle_nodes
+        ] if node_at_path is not None]
 
-        if symbol not in evaluator_matrix:
-            evaluator_matrix[symbol] = {}
 
-        if exchange_name not in evaluator_matrix[symbol]:
-            evaluator_matrix[symbol][exchange_name] = {}
+def get_tentacle_path(exchange_name=None, tentacle_type=None, tentacle_name=None) -> list:
+    """
+    Returns the path related to the tentacle name, type and exchange name
+    :param tentacle_type: the tentacle type to add in the path, ignored if None
+    :param tentacle_name: the tentacle name to add in the path, ignored if None
+    :param exchange_name: the exchange name to add in the path (as the first element), ignored if None
+    :return: a list of string that represents the path of the given params
+    """
+    node_path = []
+    if exchange_name is not None:
+        node_path.append(exchange_name)
+    if tentacle_type is not None:
+        node_path.append(tentacle_type)
+    if tentacle_name is not None:
+        node_path.append(tentacle_name)
+    return node_path
 
-    def __set_evaluator_eval_type(self, evaluator_name, evaluator_eval_type) -> None:
-        """
-        Set the evaluator evaluation type in evaluator_eval_types if not exists
-        :param evaluator_name: the evaluator name
-        :param evaluator_eval_type: the evaluator evaluation type
-        :return: None
-        """
-        try:
-            self.evaluator_eval_types[evaluator_name]
-        except KeyError:
-            self.evaluator_eval_types[evaluator_name] = evaluator_eval_type
 
-    # getters
-    def get_eval_note(self,
-                      evaluator_name,
-                      exchange_name=None,
-                      symbol=None,
-                      time_frame=None) -> MatrixValueType:
-        """
-        Returns the evaluator eval note corresponding to params
-        :param evaluator_name: the evaluator name
-        :param exchange_name: the evaluator exchange name
-        :param symbol: the evaluator symbol
-        :param time_frame: the evaluator time frame
-        :return: MatrixValueType
-        """
-        try:
-            if symbol:
-                if exchange_name:
-                    if time_frame:
-                        eval_note = self.matrix[evaluator_name][symbol][exchange_name][time_frame]
-                    else:
-                        eval_note = self.matrix[evaluator_name][symbol][exchange_name]
-                else:
-                    eval_note = self.matrix[evaluator_name][symbol]
-            else:
-                eval_note = self.matrix[evaluator_name]
-
-            if check_valid_eval_note(eval_note, expected_eval_type=EVALUATOR_EVAL_DEFAULT_TYPE):
-                return eval_note
-        except KeyError:
-            pass
-        return START_PENDING_EVAL_NOTE
-
-    # TODO improve following methods
-    def get_evaluators_name_from_symbol(self, symbol) -> list:
-        return [
-            evaluator_name
-            for evaluator_name, symbols in self.matrix.items()
-            if symbol in symbols
-        ]
-
-    def get_evaluators_name_from_and_exchange(self, exchange_name) -> list:
-        return [
-            evaluator_name
-            for evaluator_name, symbols in self.matrix.items()
-            for symbol, exchange_names in symbols.items()
-            if exchange_name in exchange_names
-        ]
-
-    def get_evaluators_name_from_symbol_and_exchange(self, symbol, exchange_name) -> list:
-        return [
-            evaluator_name
-            for evaluator_name, symbols in self.matrix.items()
-            for symbol, exchange_names in symbols.items()
-            if symbol in symbols and exchange_name in exchange_names
-        ]
-
-    def get_evaluators_name_from_symbol_exchange_and_time_frame(self, symbol, exchange_name, time_frame) -> list:
-        return [
-            evaluator_name
-            for evaluator_name, symbols in self.matrix.items()
-            for symbol, exchange_names in symbols.items()
-            for exchange_name, time_frames in exchange_names.items()
-            if symbol in symbols and exchange_name in exchange_names and time_frame in time_frames
-        ]
-
-    def get_evaluator_eval_type(self, evaluator_name) -> object:
-        """
-        Return the evaluator eval type from evaluator_eval_types list
-        :param evaluator_name: the evaluator name
-        :return: the evaluator eval type
-        """
-        try:
-            return self.evaluator_eval_types[evaluator_name]
-        except KeyError:
-            return None
+def get_tentacle_value_path(symbol=None, time_frame=None) -> list:
+    """
+    Returns the path related to symbol and / or time_frame values
+    :param symbol: the symbol to add in the path, ignored if None
+    :param time_frame: the time frame to add in the path, ignored if None
+    :return: a list of string that represents the path of the given params
+    """
+    node_path: list = []
+    if symbol is not None:
+        node_path.append(symbol)
+    if time_frame is not None:
+        node_path.append(time_frame)
+    return node_path
