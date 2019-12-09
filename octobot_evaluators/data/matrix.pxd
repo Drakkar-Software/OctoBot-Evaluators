@@ -14,35 +14,19 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
+from octobot_commons.event_tree cimport EventTree
+from octobot_commons.event_tree cimport EventTreeNode
 from octobot_commons.singleton.singleton_class cimport Singleton
 
-cdef class EvaluatorMatrix(Singleton):
-    cdef dict evaluator_eval_types
 
-    cdef public dict matrix
+cdef class Matrix(Singleton):
+    cdef public EventTree matrix
 
-    cdef dict __get_evaluator_matrix(self, str evaluator_name, str evaluator_type)
-    cdef void __set_evaluator_eval_type(self, str evaluator_name, object evaluator_eval_type)
+    cpdef void set_tentacle_value(self, object value, object value_type, list value_path)
+    cpdef list get_node_children_at_path(self, list node_path, EventTreeNode starting_node=*)
+    cpdef EventTreeNode get_node_at_path(self, list node_path, EventTreeNode starting_node=*)
+    cpdef list get_tentacle_nodes(self, str exchange_name=*, object tentacle_type=*, str tentacle_name=*)
+    cpdef list get_tentacles_value_nodes(self, list tentacle_nodes, str symbol=*, str time_frame=*)
 
-    @staticmethod
-    cdef void __init_matrix(dict evaluator_matrix, str symbol, str exchange_name)
-
-    cpdef void set_eval(self,
-                      str evaluator_name,
-                      object evaluator_type,    # EvaluatorMatrixTypes object
-                      object value,             # MatrixValueType object
-                      object eval_note_type,
-                      str exchange_name = *,
-                      str symbol = *,
-                      object time_frame = *)    # TimeFrames object
-
-    cpdef object get_eval_note(self,
-                      str evaluator_name,
-                      str exchange_name = *,
-                      str symbol = *,
-                      object time_frame = *)
-
-    cpdef object get_evaluator_eval_type(self, str evaluator_name)
-    cpdef list get_evaluators_name_from_symbol(self, str symbol)
-    cpdef list get_evaluators_name_from_symbol_and_exchange(self, str symbol, str exchange_name)
-    cpdef list get_evaluators_name_from_symbol_exchange_and_time_frame(self, str symbol, str exchange_name, object time_frame)
+cpdef list get_tentacle_path(str exchange_name=*, object tentacle_type=*, str tentacle_name=*)
+cpdef list get_tentacle_value_path(str symbol=*, str time_frame=*)

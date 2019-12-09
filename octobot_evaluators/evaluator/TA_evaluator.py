@@ -38,7 +38,7 @@ class TAEvaluator(AbstractEvaluator):
         return CONFIG_EVALUATOR_TA
 
     def get_candle_manager(self, exchange_name, symbol, time_frame):
-        return self.get_exchange_symbol_data(exchange_name, symbol).get_candle_data(TimeFrames(time_frame))
+        return self.get_exchange_symbol_data(exchange_name, symbol).symbol_candles[TimeFrames(time_frame)]
 
     async def start(self) -> None:
         """

@@ -40,16 +40,6 @@ TENTACLE_UTIL_FOLDER = "Util"
 CONFIG_EVALUATOR_FILE = "evaluator_config.json"
 CONFIG_EVALUATOR_FILE_PATH = f"{TENTACLES_PATH}/{TENTACLES_EVALUATOR_PATH}/{CONFIG_EVALUATOR_FILE}"
 
-
-def default_matrix_value():
-    return {
-        EvaluatorMatrixTypes.TA: {},
-        EvaluatorMatrixTypes.SOCIAL: {},
-        EvaluatorMatrixTypes.REAL_TIME: {},
-        EvaluatorMatrixTypes.STRATEGIES: {}
-    }
-
-
 EVALUATOR_CLASS_TYPE_MRO_INDEX = -4
 evaluator_class_str_to_matrix_type_dict = {
     "TAEvaluator": EvaluatorMatrixTypes.TA,

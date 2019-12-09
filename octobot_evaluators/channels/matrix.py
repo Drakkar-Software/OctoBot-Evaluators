@@ -22,7 +22,7 @@ from octobot_channels.consumer import Consumer
 from octobot_channels.producer import Producer
 from octobot_commons.logging.logging_util import get_logger
 from octobot_evaluators.constants import EVALUATOR_EVAL_DEFAULT_TYPE
-from octobot_evaluators.data import EvaluatorMatrix
+from octobot_evaluators.data.matrix import get_tentacle_path, get_tentacle_value_path, Matrix
 
 MATRIX_CHANNELS = "MatrixChannels"
 
@@ -64,13 +64,14 @@ class MatrixChannelProducer(Producer):
 
     async def send_eval_note(self, evaluator_name, evaluator_type, eval_note, eval_note_type,
                              exchange_name=None, symbol=None, time_frame=None):
-        EvaluatorMatrix.instance().set_eval(evaluator_name=evaluator_name,
-                                            evaluator_type=evaluator_type,
-                                            value=eval_note,
-                                            eval_note_type=eval_note_type,
-                                            exchange_name=exchange_name,
-                                            symbol=symbol,
-                                            time_frame=time_frame)
+        Matrix.instance().set_tentacle_value(
+            value_type=eval_note_type,
+            value=eval_note,
+            value_path=get_tentacle_path(exchange_name=exchange_name,
+                                         tentacle_type=evaluator_type,
+                                         tentacle_name=evaluator_name) + get_tentacle_value_path(symbol=symbol,
+                                                                                                 time_frame=time_frame)
+        )
 
         await self.send(evaluator_name=evaluator_name,
                         evaluator_type=evaluator_type,

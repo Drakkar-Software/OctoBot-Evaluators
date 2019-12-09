@@ -17,7 +17,6 @@ import asyncio
 import logging
 
 from octobot_channels.channels.channel import get_chan
-from octobot_commons.constants import CONFIG_TIME_FRAME
 from octobot_commons.enums import TimeFrames
 
 from octobot_commons.logging.logging_util import get_logger
@@ -60,9 +59,9 @@ async def create_evaluators_channel():
     await initialize_evaluators(config)
     await create_all_type_evaluators(config, "test", ["BTC/USDT"], [TimeFrames.ONE_HOUR])
 
-    # await get_chan(MATRIX_CHANNEL).get_internal_producer().send(evaluator_name="test",
-    #                                                                            evaluator_type="test",
-    #                                                                            eval_note=1)
+    await get_chan(MATRIX_CHANNEL).get_internal_producer().send(evaluator_name="test",
+                                                                               evaluator_type="test",
+                                                                               eval_note=1)
 
     await asyncio.sleep(10)
 
