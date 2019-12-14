@@ -15,6 +15,7 @@
 #  License along with this library.
 import pytest
 
+from octobot_commons.event_tree import NodeExistsError
 from octobot_evaluators.data.matrix import Matrix, get_tentacle_path, get_tentacle_value_path
 
 
@@ -81,9 +82,8 @@ async def test_get_tentacle_nodes_on_root():
                                            matrix.get_node_at_path(get_tentacle_path(exchange_name="binance")),
                                            created_node_3]
 
-    with pytest.raises(AttributeError):
-        assert matrix.get_tentacle_nodes(tentacle_type="TA")
-        assert matrix.get_tentacle_nodes(exchange_name="bitfinex")
+    assert matrix.get_tentacle_nodes(tentacle_type="TA") == []
+    assert matrix.get_tentacle_nodes(exchange_name="bitfinex") == []
     assert matrix.get_tentacle_nodes(tentacle_type="NO_TYPE") == [created_node_1]
     assert matrix.get_tentacle_nodes(exchange_name="binance") == [created_node_2]
 
@@ -96,8 +96,7 @@ async def test_get_tentacle_nodes_on_tentacle_type():
     created_node_2 = matrix.matrix.get_or_create_node(
         get_tentacle_path(tentacle_type="TEST_TYPE", tentacle_name="Test-TA-2"))
 
-    with pytest.raises(AttributeError):
-        assert matrix.get_tentacle_nodes(tentacle_type="TA") == []
+    assert matrix.get_tentacle_nodes(tentacle_type="TA") == []
     assert matrix.get_tentacle_nodes(tentacle_type="NO_TYPE") == [created_node_1]
     assert matrix.get_tentacle_nodes(tentacle_type="TEST_TYPE") == [created_node_2]
 
@@ -118,9 +117,7 @@ async def test_get_tentacle_nodes_on_exchange_name_and_tentacle_type():
                                                   tentacle_type="TEST_TYPE"))]
     assert matrix.get_tentacle_nodes(exchange_name="binance", tentacle_type="NO_TYPE") == [created_node_1]
     assert matrix.get_tentacle_nodes(exchange_name="binance", tentacle_type="TEST_TYPE") == [created_node_2]
-
-    with pytest.raises(AttributeError):
-        assert matrix.get_tentacle_nodes(exchange_name="bitfinex") == []
+    assert matrix.get_tentacle_nodes(exchange_name="bitfinex") == []
 
 
 @pytest.mark.asyncio
@@ -131,9 +128,8 @@ async def test_get_tentacle_nodes_on_exchange_name():
     created_node_2 = matrix.matrix.get_or_create_node(get_tentacle_path(tentacle_name="Test-TA-2",
                                                                         exchange_name="binance"))
 
-    with pytest.raises(AttributeError):
-        assert matrix.get_tentacle_nodes(exchange_name="bitfinex") == []
-        assert matrix.get_tentacle_nodes(tentacle_type="NO_TYPE") == []
+    assert matrix.get_tentacle_nodes(exchange_name="bitfinex") == []
+    assert matrix.get_tentacle_nodes(tentacle_type="NO_TYPE") == []
     assert matrix.get_tentacle_nodes(exchange_name="binance") == [created_node_1, created_node_2]
 
 
@@ -219,22 +215,95 @@ async def test_get_tentacles_value_nodes_with_symbol():
     assert matrix.get_tentacles_value_nodes(tentacle_nodes=[created_node, created_node_2],
                                             symbol="ETH") == [eth_node]
 
-# @pytest.mark.asyncio
-# async def test_get_tentacles_value_nodes_with_time_frame():
-#     matrix = Matrix()
-#     assert get_tentacle_value_path(time_frame="1m") == ["1m"]
-#     created_node_1 = matrix.get_node_at_path(get_tentacle_path(tentacle_type="TA", tentacle_name="Test-TA"))
-#     created_node_2 = matrix.get_node_at_path(get_tentacle_path(tentacle_type="TA", tentacle_name="Test-TA-2"))
-#     created_node_3 = matrix.get_node_at_path(get_tentacle_path(tentacle_type="TA", tentacle_name="Test-TA-3"))
-#     assert matrix.get_tentacle_nodes(tentacle_type="TA") == [created_node_1, created_node_2, created_node_3]
-#
-#
-# @pytest.mark.asyncio
-# async def test_get_tentacles_value_nodes_with_symbol_and_time_frame():
-#     matrix = Matrix()
-#     assert get_tentacle_value_path(symbol="ETH", time_frame="1h") == ["ETH", "1h"]
-#
-#     created_node_1 = matrix.get_node_at_path(get_tentacle_path(tentacle_type="TA", tentacle_name="Test-TA"))
-#     created_node_2 = matrix.get_node_at_path(get_tentacle_path(tentacle_type="TA", tentacle_name="Test-TA-2"))
-#     created_node_3 = matrix.get_node_at_path(get_tentacle_path(tentacle_type="TA", tentacle_name="Test-TA-3"))
-#     assert matrix.get_tentacle_nodes(tentacle_type="TA") == [created_node_1, created_node_2, created_node_3]
+
+@pytest.mark.asyncio
+async def test_get_tentacles_value_nodes_with_time_frame():
+    matrix = Matrix()
+    assert get_tentacle_value_path(time_frame="1m") == ["1m"]
+    created_node = matrix.matrix.get_or_create_node(get_tentacle_path(tentacle_type="TA", tentacle_name="Test-TA"))
+    created_node_2 = matrix.matrix.get_or_create_node(get_tentacle_path(tentacle_type="TA", tentacle_name="Test-TA-2"))
+    m_node = matrix.matrix.get_or_create_node(get_tentacle_value_path(time_frame="1m"), starting_node=created_node)
+    h_node = matrix.matrix.get_or_create_node(get_tentacle_value_path(time_frame="1h"), starting_node=created_node)
+    h_node_2 = matrix.matrix.get_or_create_node(get_tentacle_value_path(time_frame="1h"), starting_node=created_node_2)
+    assert matrix.get_tentacles_value_nodes(tentacle_nodes=[created_node, created_node_2],
+                                            time_frame="1h") == [h_node, h_node_2]
+    assert matrix.get_tentacles_value_nodes(tentacle_nodes=[created_node, created_node_2],
+                                            symbol="1m") == [m_node]
+
+
+@pytest.mark.asyncio
+async def test_get_tentacles_value_nodes_with_symbol_and_time_frame():
+    matrix = Matrix()
+    assert get_tentacle_value_path(symbol="ETH", time_frame="1h") == ["ETH", "1h"]
+
+    created_node = matrix.matrix.get_or_create_node(get_tentacle_path(tentacle_type="TA", tentacle_name="Test-TA"))
+    created_node_2 = matrix.matrix.get_or_create_node(get_tentacle_path(tentacle_type="TA", tentacle_name="Test-TA-2"))
+    created_node_3 = matrix.matrix.get_or_create_node(get_tentacle_path(tentacle_type="TA", tentacle_name="Test-TA-3"))
+    btc_h_node = matrix.matrix.get_or_create_node(get_tentacle_value_path(symbol="BTC", time_frame="1h"),
+                                                  starting_node=created_node)
+    btc_m_node = matrix.matrix.get_or_create_node(get_tentacle_value_path(symbol="BTC", time_frame="1m"),
+                                                  starting_node=created_node_2)
+    eth_h_node = matrix.matrix.get_or_create_node(get_tentacle_value_path(symbol="ETH", time_frame="1h"),
+                                                  starting_node=created_node_3)
+    eth_m_node = matrix.matrix.get_or_create_node(get_tentacle_value_path(symbol="ETH", time_frame="1m"),
+                                                  starting_node=created_node_2)
+    eth_d_node = matrix.matrix.get_or_create_node(get_tentacle_value_path(symbol="ETH", time_frame="1d"),
+                                                  starting_node=created_node)
+    ltc_h_node = matrix.matrix.get_or_create_node(get_tentacle_value_path(symbol="LTC", time_frame="1h"),
+                                                  starting_node=created_node_2)
+    assert matrix.get_tentacles_value_nodes(tentacle_nodes=[created_node, created_node_2, created_node_3],
+                                            symbol="BTC", time_frame="1h") == [btc_h_node]
+    assert matrix.get_tentacles_value_nodes(tentacle_nodes=[created_node, created_node_2, created_node_3],
+                                            symbol="BTC") == [
+               matrix.get_node_at_path(get_tentacle_value_path(symbol="BTC"), starting_node=created_node),
+               matrix.get_node_at_path(get_tentacle_value_path(symbol="BTC"), starting_node=created_node_2)]
+    assert matrix.get_tentacles_value_nodes(tentacle_nodes=[created_node, created_node_3],
+                                            symbol="BTC") == [
+               matrix.get_node_at_path(get_tentacle_value_path(symbol="BTC"), starting_node=created_node)]
+    assert matrix.get_tentacles_value_nodes(tentacle_nodes=[created_node, created_node_3],
+                                            symbol="BTC", time_frame="1m") == []
+    assert matrix.get_tentacles_value_nodes(tentacle_nodes=[created_node_3],
+                                            symbol="BTC") == []
+    assert matrix.get_tentacles_value_nodes(tentacle_nodes=[created_node, created_node_2, created_node_3],
+                                            symbol="ETH") == [
+               matrix.get_node_at_path(get_tentacle_value_path(symbol="ETH"), starting_node=created_node),
+               matrix.get_node_at_path(get_tentacle_value_path(symbol="ETH"), starting_node=created_node_2),
+               matrix.get_node_at_path(get_tentacle_value_path(symbol="ETH"), starting_node=created_node_3)]
+
+
+@pytest.mark.asyncio
+async def test_get_tentacles_value_nodes_mixed():
+    matrix = Matrix()
+
+    created_node = matrix.matrix.get_or_create_node(get_tentacle_path(tentacle_type="TA", tentacle_name="Test-TA"))
+    created_node_2 = matrix.matrix.get_or_create_node(get_tentacle_path(tentacle_type="TA", tentacle_name="Test-TA-2"))
+    created_node_3 = matrix.matrix.get_or_create_node(get_tentacle_path(tentacle_type="TA", tentacle_name="Test-TA-3"))
+    btc_h_node = matrix.matrix.get_or_create_node(get_tentacle_value_path(symbol="BTC", time_frame="1h"),
+                                                  starting_node=created_node)
+    btc_node = matrix.matrix.get_or_create_node(get_tentacle_value_path(symbol="BTC"), starting_node=created_node_2)
+    eth_node = matrix.matrix.get_or_create_node(get_tentacle_value_path(symbol="ETH"), starting_node=created_node_3)
+    eth_m_node = matrix.matrix.get_or_create_node(get_tentacle_value_path(symbol="ETH", time_frame="1m"),
+                                                  starting_node=created_node_2)
+    eth_d_node = matrix.matrix.get_or_create_node(get_tentacle_value_path(symbol="ETH", time_frame="1d"),
+                                                  starting_node=created_node)
+    ltc_h_node = matrix.matrix.get_or_create_node(get_tentacle_value_path(symbol="LTC", time_frame="1h"),
+                                                  starting_node=created_node_2)
+
+    assert matrix.get_tentacles_value_nodes(tentacle_nodes=[created_node, created_node_2, created_node_3],
+                                            symbol="BTC", time_frame="1h") == [btc_h_node]
+    assert matrix.get_tentacles_value_nodes(tentacle_nodes=[created_node, created_node_2, created_node_3],
+                                            symbol="BTC") == [
+               matrix.get_node_at_path(get_tentacle_value_path(symbol="BTC"), starting_node=created_node),
+               matrix.get_node_at_path(get_tentacle_value_path(symbol="BTC"), starting_node=created_node_2)]
+    assert matrix.get_tentacles_value_nodes(tentacle_nodes=[created_node, created_node_3],
+                                            symbol="BTC") == [
+               matrix.get_node_at_path(get_tentacle_value_path(symbol="BTC"), starting_node=created_node)]
+    assert matrix.get_tentacles_value_nodes(tentacle_nodes=[created_node, created_node_3],
+                                            symbol="BTC", time_frame="1m") == []
+    assert matrix.get_tentacles_value_nodes(tentacle_nodes=[created_node_3],
+                                            symbol="BTC") == []
+    assert matrix.get_tentacles_value_nodes(tentacle_nodes=[created_node, created_node_2, created_node_3],
+                                            symbol="ETH") == [
+               matrix.get_node_at_path(get_tentacle_value_path(symbol="ETH"), starting_node=created_node),
+               matrix.get_node_at_path(get_tentacle_value_path(symbol="ETH"), starting_node=created_node_2),
+               matrix.get_node_at_path(get_tentacle_value_path(symbol="ETH"), starting_node=created_node_3)]
