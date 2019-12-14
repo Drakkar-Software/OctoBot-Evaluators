@@ -17,6 +17,7 @@ import pytest
 
 from octobot_channels.channels.channel import del_chan, get_chan
 
+from octobot_commons.event_tree import NodeExistsError
 from octobot_evaluators.api import create_matrix_channels
 from octobot_evaluators.channels import MATRIX_CHANNEL
 from octobot_evaluators.data.matrix import get_tentacle_path, Matrix

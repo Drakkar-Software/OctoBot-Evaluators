@@ -14,7 +14,7 @@
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
 
-from octobot_commons.event_tree import EventTree
+from octobot_commons.event_tree import EventTree, NodeExistsError
 from octobot_commons.singleton.singleton_class import Singleton
 
 
@@ -34,10 +34,16 @@ class Matrix(Singleton):
         self.matrix.set_node_at_path(value, value_type, value_path)
 
     def get_node_children_at_path(self, node_path, starting_node=None):
-        return list(self.matrix.get_node(node_path, starting_node=starting_node).children.values())
+        try:
+            return list(self.matrix.get_node(node_path, starting_node=starting_node).children.values())
+        except NodeExistsError:
+            return []
 
     def get_node_at_path(self, node_path, starting_node=None):
-        return self.matrix.get_node(node_path, starting_node=starting_node)
+        try:
+            return self.matrix.get_node(node_path, starting_node=starting_node)
+        except NodeExistsError:
+            return None
 
     def get_tentacle_nodes(self, exchange_name=None, tentacle_type=None, tentacle_name=None):
         """
