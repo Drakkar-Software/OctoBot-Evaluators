@@ -20,7 +20,7 @@ from octobot_commons.errors import ConfigEvaluatorError
 from octobot_commons.logging.logging_util import get_logger
 from octobot_commons.tentacles_management import create_classes_list, create_advanced_types_list
 from octobot_commons.tentacles_management.config_manager import reload_tentacle_config
-from octobot_commons.time_frame_manager import TimeFrameManager
+from octobot_commons.time_frame_manager import get_config_time_frame
 
 from octobot_evaluators.api.initialization import init_time_frames_from_strategies
 from octobot_evaluators.api.inspection import is_relevant_evaluator
@@ -93,20 +93,20 @@ async def initialize_evaluators(config) -> None:
 
 
 def get_evaluators_time_frames(config) -> list:
-    return TimeFrameManager.get_config_time_frame(config)
+    return get_config_time_frame(config)
 
 
 def __init_time_frames(config) -> list:
     # Init time frames using enabled strategies
     init_time_frames_from_strategies(config)
-    time_frames = copy.copy(TimeFrameManager.get_config_time_frame(config))
+    time_frames = copy.copy(get_config_time_frame(config))
 
     # Init display time frame
-    # config_time_frames = TimeFrameManager.get_config_time_frame(config)
+    # config_time_frames = get_config_time_frame(config)
 
     # if TimeFrames.ONE_HOUR not in config_time_frames and not backtesting_enabled(config):
     #     config_time_frames.append(TimeFrames.ONE_HOUR)
-    #     TimeFrameManager.sort_config_time_frames(config)
+    #     sort_config_time_frames(config)
 
     return time_frames
 

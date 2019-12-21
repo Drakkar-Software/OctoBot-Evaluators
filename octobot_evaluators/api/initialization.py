@@ -17,7 +17,7 @@ from octobot_channels.channels.channel import set_chan
 from octobot_channels.util import create_channel_instance
 from octobot_commons.constants import CONFIG_TIME_FRAME
 from octobot_commons.tentacles_management import create_advanced_types_list
-from octobot_commons.time_frame_manager import TimeFrameManager
+from octobot_commons.time_frame_manager import sort_time_frames
 
 from octobot_evaluators.channels import MatrixChannel
 from octobot_evaluators.evaluator import StrategyEvaluator
@@ -29,7 +29,7 @@ def init_time_frames_from_strategies(config):
         if strategies_eval_class.is_enabled(config, False):
             for time_frame in strategies_eval_class.get_required_time_frames(config):
                 time_frame_list.add(time_frame)
-    time_frame_list = TimeFrameManager.sort_time_frames(time_frame_list)
+    time_frame_list = sort_time_frames(time_frame_list)
     config[CONFIG_TIME_FRAME] = time_frame_list
 
 

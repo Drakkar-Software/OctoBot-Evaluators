@@ -15,7 +15,7 @@
 #  License along with this library.
 from octobot_channels.channels.channel import get_chan
 from octobot_commons.constants import CONFIG_WILDCARD
-from octobot_commons.time_frame_manager import TimeFrameManager
+from octobot_commons.time_frame_manager import parse_time_frames
 
 from octobot_evaluators.channels import MATRIX_CHANNEL
 from octobot_evaluators.constants import CONFIG_EVALUATOR_STRATEGIES, CONFIG_FORCED_EVALUATOR, \
@@ -53,10 +53,10 @@ class StrategyEvaluator(AbstractEvaluator):
     @classmethod
     def get_required_time_frames(cls, config: dict):
         if CONFIG_FORCED_TIME_FRAME in config:
-            return TimeFrameManager.parse_time_frames(config[CONFIG_FORCED_TIME_FRAME])
+            return parse_time_frames(config[CONFIG_FORCED_TIME_FRAME])
         strategy_config: dict = cls.get_specific_config()
         if STRATEGIES_REQUIRED_TIME_FRAME in strategy_config:
-            return TimeFrameManager.parse_time_frames(strategy_config[STRATEGIES_REQUIRED_TIME_FRAME])
+            return parse_time_frames(strategy_config[STRATEGIES_REQUIRED_TIME_FRAME])
         else:
             raise Exception(f"'{STRATEGIES_REQUIRED_TIME_FRAME}' is missing in {cls.get_config_file_name()}")
 
