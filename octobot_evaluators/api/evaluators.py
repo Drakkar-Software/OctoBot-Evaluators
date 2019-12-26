@@ -32,10 +32,10 @@ from octobot_evaluators.evaluator import TAEvaluator, SocialEvaluator, RealTimeE
 from octobot_evaluators.evaluator.abstract_util import AbstractUtil
 
 EvaluatorClassTypes = {
-    "TA": TAEvaluator,
-    "SOCIAL": SocialEvaluator,
-    "REAL_TIME": RealTimeEvaluator,
-    "STRATEGIES": StrategyEvaluator
+    EvaluatorMatrixTypes.TA.value: TAEvaluator,
+    EvaluatorMatrixTypes.SOCIAL.value: SocialEvaluator,
+    EvaluatorMatrixTypes.REAL_TIME.value: RealTimeEvaluator,
+    EvaluatorMatrixTypes.STRATEGIES.value: StrategyEvaluator
 }
 
 
