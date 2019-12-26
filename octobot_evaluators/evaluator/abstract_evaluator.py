@@ -23,6 +23,8 @@ from octobot_commons.tentacles_management.abstract_tentacle import AbstractTenta
 
 from octobot_evaluators.channels import MATRIX_CHANNEL
 from octobot_evaluators.constants import START_EVAL_PERTINENCE, EVALUATOR_EVAL_DEFAULT_TYPE, CONFIG_EVALUATOR
+from octobot_trading.api.exchange import get_exchange_manager_from_exchange_name
+from octobot_trading.api.symbol_data import get_symbol_data
 
 
 class AbstractEvaluator(AbstractTentacle):
@@ -273,12 +275,10 @@ class AbstractEvaluator(AbstractTentacle):
                 self.eval_note_time_to_live = None
                 self.eval_note_changed_time = None
 
-    def __get_exchange_manager_from_name(self, exchange_name):
+    def get_exchange_symbol_data(self, exchange_name, symbol):
         try:
-            from octobot_trading.exchanges.exchanges import Exchanges
-            return Exchanges.instance().get_exchange(exchange_name).exchange_manager
+            exchange_manager = get_exchange_manager_from_exchange_name(exchange_name)
+            return get_symbol_data(exchange_manager, symbol)
         except (ImportError, KeyError):
             self.logger.error(f"Can't get {exchange_name} from exchanges instances")
-
-    def get_exchange_symbol_data(self, exchange_name, symbol):
-        return self.__get_exchange_manager_from_name(exchange_name).exchange_symbols_data.get_exchange_symbol_data(symbol)
+        return

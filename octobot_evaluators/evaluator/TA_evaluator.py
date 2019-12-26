@@ -18,6 +18,7 @@ from octobot_commons.enums import TimeFrames
 
 from octobot_evaluators.constants import CONFIG_EVALUATOR_TA
 from octobot_evaluators.evaluator import AbstractEvaluator
+from octobot_trading.api.symbol_data import get_symbol_candles_manager
 
 
 class TAEvaluator(AbstractEvaluator):
@@ -37,8 +38,8 @@ class TAEvaluator(AbstractEvaluator):
     def get_config_tentacle_type(cls) -> str:
         return CONFIG_EVALUATOR_TA
 
-    def get_candle_manager(self, exchange_name, symbol, time_frame):
-        return self.get_exchange_symbol_data(exchange_name, symbol).symbol_candles[TimeFrames(time_frame)]
+    def get_symbol_candles(self, exchange_name, symbol, time_frame):
+        return get_symbol_candles_manager(self.get_exchange_symbol_data(exchange_name, symbol), time_frame)
 
     async def start(self) -> None:
         """
