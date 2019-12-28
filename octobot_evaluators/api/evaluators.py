@@ -100,6 +100,10 @@ async def initialize_evaluators(config) -> None:
     __init_time_frames(config)
 
 
+def get_evaluator_config(config):
+    return config[CONFIG_EVALUATOR]
+
+
 def get_evaluators_time_frames(config) -> list:
     return get_config_time_frame(config)
 
