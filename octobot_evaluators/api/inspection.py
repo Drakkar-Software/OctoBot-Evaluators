@@ -20,7 +20,7 @@ from octobot_commons.tentacles_management import create_advanced_types_list
 from octobot_evaluators.evaluator import StrategyEvaluator, TAEvaluator
 
 
-def get_relevant_evaluators_from_strategies(config):
+def get_relevant_evaluators_from_strategies(config) -> list:
     evaluator_list = set()
     for strategies_eval_class in create_advanced_types_list(StrategyEvaluator, config):
         if strategies_eval_class.is_enabled(config, False):
@@ -47,7 +47,7 @@ def is_relevant_evaluator(evaluator_instance, relevant_evaluators) -> bool:
     return False
 
 
-def get_relevant_TAs_for_strategy(strategy, config):
+def get_relevant_TAs_for_strategy(strategy, config) -> list:
     ta_classes_list = []
     relevant_evaluators = strategy.get_required_evaluators(config)
     for ta_eval_class in create_advanced_evaluator_types_list(TAEvaluator, config):

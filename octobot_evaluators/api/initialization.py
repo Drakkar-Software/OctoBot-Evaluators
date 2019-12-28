@@ -23,7 +23,7 @@ from octobot_evaluators.channels import MatrixChannel
 from octobot_evaluators.evaluator import StrategyEvaluator
 
 
-def init_time_frames_from_strategies(config):
+def init_time_frames_from_strategies(config) -> None:
     time_frame_list = set()
     for strategies_eval_class in create_advanced_types_list(StrategyEvaluator, config):
         if strategies_eval_class.is_enabled(config, False):
@@ -33,5 +33,5 @@ def init_time_frames_from_strategies(config):
     config[CONFIG_TIME_FRAME] = time_frame_list
 
 
-async def create_matrix_channels():
+async def create_matrix_channels() -> None:
     await create_channel_instance(MatrixChannel, set_chan)
