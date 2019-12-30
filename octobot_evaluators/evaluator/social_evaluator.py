@@ -15,15 +15,19 @@
 #  License along with this library.
 
 import os
+from abc import abstractmethod
 
+from octobot_channels.channels.channel import get_chan
 from octobot_commons.config import load_config
 
 from octobot_evaluators.constants import CONFIG_EVALUATOR_SOCIAL
 from octobot_evaluators.evaluator import AbstractEvaluator
+from octobot_services.api.service_feeds import get_service_feed
 
 
 class SocialEvaluator(AbstractEvaluator):
     __metaclass__ = AbstractEvaluator
+    SERVICE_FEED_CLASS = None
 
     def __init__(self):
         super().__init__()
@@ -32,6 +36,10 @@ class SocialEvaluator(AbstractEvaluator):
     @classmethod
     def get_config_tentacle_type(cls) -> str:
         return CONFIG_EVALUATOR_SOCIAL
+
+    @classmethod
+    def get_is_symbol_widlcard(cls) -> bool:
+        return False
 
     def load_config(self):
         config_file = self.get_config_file_name()
@@ -48,3 +56,15 @@ class SocialEvaluator(AbstractEvaluator):
         # set default config if nothing found
         if not self.specific_config:
             self.set_default_config()
+
+    # Override if no service feed is required for a social evaluator
+    async def start(self) -> None:
+        if self.SERVICE_FEED_CLASS is None:
+            self.logger.error("SERVICE_FEED_CLASS is required to use a service feed. Consumer can't start.")
+        else:
+            get_service_feed(self.SERVICE_FEED_CLASS).update_feed_config(self.specific_config)
+            await get_chan(self.SERVICE_FEED_CLASS.FEED_CHANNEL.get_name()).new_consumer(self._feed_callback)
+
+    @abstractmethod
+    async def _feed_callback(self, *args):
+        raise NotImplemented("_feed_callback is not implemented")
