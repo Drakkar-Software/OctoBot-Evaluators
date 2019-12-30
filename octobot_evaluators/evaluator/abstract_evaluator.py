@@ -147,6 +147,13 @@ class AbstractEvaluator(AbstractTentacle):
     async def start(self) -> None:
         raise NotImplementedError("start is not implemented")
 
+    async def prepare(self) -> None:
+        """
+        Called just before start(), implement if necessary
+        :return: None
+        """
+        pass
+
     async def start_evaluator(self) -> None:
         """
         Start a task as matrix producer

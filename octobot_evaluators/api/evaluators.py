@@ -82,6 +82,7 @@ async def create_evaluator(evaluator_class, config, exchange_name,
             eval_class_instance.time_frame = time_frame if time_frame else None
             eval_class_instance.evaluator_type = evaluator_class_str_to_matrix_type_dict[
                 eval_class_instance.__class__.mro()[EVALUATOR_CLASS_TYPE_MRO_INDEX].__name__]
+            await eval_class_instance.prepare()
 
             await eval_class_instance.start_evaluator()
             return eval_class_instance
@@ -97,7 +98,7 @@ async def initialize_evaluators(config) -> None:
     create_classes_list(config, AbstractEvaluator)
     create_classes_list(config, AbstractUtil)
 
-    __init_time_frames(config)
+    _init_time_frames(config)
 
 
 def get_evaluator_config(config) -> dict:
@@ -108,7 +109,7 @@ def get_evaluators_time_frames(config) -> list:
     return get_config_time_frame(config)
 
 
-def __init_time_frames(config) -> list:
+def _init_time_frames(config) -> list:
     # Init time frames using enabled strategies
     init_time_frames_from_strategies(config)
     time_frames = copy.copy(get_config_time_frame(config))
