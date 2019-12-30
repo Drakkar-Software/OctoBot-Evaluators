@@ -53,11 +53,11 @@ async def create_evaluators(evaluator_parent_class, config, exchange_name,
 
 
 def __get_symbols_to_create(evaluator_class, symbols):  # TODO replace with python 3.8 by :=
-    return symbols if symbols and not evaluator_class.get_is_symbol_widlcard() else [None]
+    return symbols if symbols and not evaluator_class.get_is_symbol_wildcard() else [None]
 
 
 def __get_time_frames_to_create(evaluator_class, time_frames):  # TODO replace with python 3.8 by :=
-    return time_frames if time_frames and not evaluator_class.get_is_time_frame_widlcard() else [None]
+    return time_frames if time_frames and not evaluator_class.get_is_time_frame_wildcard() else [None]
 
 
 async def create_evaluator(evaluator_class, config, exchange_name,

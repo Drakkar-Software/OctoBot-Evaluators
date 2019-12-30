@@ -83,11 +83,11 @@ class AbstractEvaluator(AbstractTentacle):
         return TENTACLES_EVALUATOR_PATH
 
     @classmethod
-    def get_is_symbol_widlcard(cls) -> bool:
+    def get_is_symbol_wildcard(cls) -> bool:
         return True
 
     @classmethod
-    def get_is_time_frame_widlcard(cls) -> bool:
+    def get_is_time_frame_wildcard(cls) -> bool:
         return True
 
     async def evaluation_completed(self, symbol, time_frame, eval_note=None) -> None:
