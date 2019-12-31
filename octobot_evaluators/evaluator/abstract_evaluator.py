@@ -30,19 +30,22 @@ class AbstractEvaluator(AbstractTentacle):
 
     def __init__(self):
         super().__init__()
+        # Global OctoBot configuration
         self.config = None
+
+        # Evaluator specific config (Is loaded from tentacle specific file)
         self.specific_config = {}
 
         # If this indicator is enabled
         self.enabled = True
 
-        # Symbol is the cryptocurrency symbol
+        # Symbol is the cryptocurrency pair (Should be None if wildcard)
         self.symbol = None
 
         # Evaluation related exchange name
         self.exchange_name = None
 
-        # Time_frame is the chart time frame
+        # Time_frame is the chart time frame (Should be None if wildcard)
         self.time_frame = None
 
         #  history time represents the period of time of the indicator
@@ -84,10 +87,16 @@ class AbstractEvaluator(AbstractTentacle):
 
     @classmethod
     def get_is_symbol_wildcard(cls) -> bool:
+        """
+        :return: True if the evaluator is not symbol dependant else False
+        """
         return True
 
     @classmethod
     def get_is_time_frame_wildcard(cls) -> bool:
+        """
+        :return: True if the evaluator is not time_frame dependant else False
+        """
         return True
 
     async def evaluation_completed(self, symbol, time_frame, eval_note=None) -> None:
