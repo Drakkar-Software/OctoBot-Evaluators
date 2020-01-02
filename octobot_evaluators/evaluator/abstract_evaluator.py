@@ -39,6 +39,9 @@ class AbstractEvaluator(AbstractTentacle):
         # If this indicator is enabled
         self.enabled = True
 
+        # Specified Cryptocurrency for this instance (Should be None if wildcard)
+        self.cryptocurrency = None
+
         # Symbol is the cryptocurrency pair (Should be None if wildcard)
         self.symbol = None
 
@@ -84,6 +87,13 @@ class AbstractEvaluator(AbstractTentacle):
     @classmethod
     def get_tentacle_folder(cls) -> str:
         return TENTACLES_EVALUATOR_PATH
+
+    @classmethod
+    def get_is_cryptocurrencies_wildcard(cls) -> bool:
+        """
+        :return: True if the evaluator is not cryptocurrency dependant else False
+        """
+        return True
 
     @classmethod
     def get_is_symbol_wildcard(cls) -> bool:
