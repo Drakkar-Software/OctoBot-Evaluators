@@ -15,7 +15,7 @@
 #  License along with this library.
 
 import time
-from abc import ABCMeta, abstractmethod
+from abc import abstractmethod
 
 from octobot_channels.channels.channel import get_chan
 from octobot_commons.constants import TENTACLES_EVALUATOR_PATH, START_PENDING_EVAL_NOTE, INIT_EVAL_NOTE
@@ -23,8 +23,6 @@ from octobot_commons.tentacles_management.abstract_tentacle import AbstractTenta
 
 from octobot_evaluators.channels import MATRIX_CHANNEL
 from octobot_evaluators.constants import START_EVAL_PERTINENCE, EVALUATOR_EVAL_DEFAULT_TYPE, CONFIG_EVALUATOR
-from octobot_trading.api.exchange import get_exchange_manager_from_exchange_name
-from octobot_trading.api.symbol_data import get_symbol_data
 
 
 class AbstractEvaluator(AbstractTentacle):
@@ -284,6 +282,8 @@ class AbstractEvaluator(AbstractTentacle):
 
     def get_exchange_symbol_data(self, exchange_name, symbol):
         try:
+            from octobot_trading.api.exchange import get_exchange_manager_from_exchange_name
+            from octobot_trading.api.symbol_data import get_symbol_data
             exchange_manager = get_exchange_manager_from_exchange_name(exchange_name)
             return get_symbol_data(exchange_manager, symbol)
         except (ImportError, KeyError):

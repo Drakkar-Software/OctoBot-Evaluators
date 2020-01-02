@@ -14,11 +14,9 @@
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
 from octobot_commons.channels_name import OctoBotTradingChannelsName
-from octobot_commons.enums import TimeFrames
 
 from octobot_evaluators.constants import CONFIG_EVALUATOR_TA
 from octobot_evaluators.evaluator import AbstractEvaluator
-from octobot_trading.api.symbol_data import get_symbol_candles_manager
 
 
 class TAEvaluator(AbstractEvaluator):
@@ -39,7 +37,11 @@ class TAEvaluator(AbstractEvaluator):
         return CONFIG_EVALUATOR_TA
 
     def get_symbol_candles(self, exchange_name, symbol, time_frame):
-        return get_symbol_candles_manager(self.get_exchange_symbol_data(exchange_name, symbol), time_frame)
+        try:
+            from octobot_trading.api.symbol_data import get_symbol_candles_manager
+            return get_symbol_candles_manager(self.get_exchange_symbol_data(exchange_name, symbol), time_frame)
+        except ImportError:
+            self.logger.error(f"Can't get OHLCV: requires OctoBot-Trading package installed")
 
     async def start(self) -> None:
         """
