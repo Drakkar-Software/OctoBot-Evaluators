@@ -40,16 +40,22 @@ EvaluatorClassTypes = {
 
 
 async def create_evaluators(evaluator_parent_class, config, exchange_name,
-                            symbols=None, time_frames=None, relevant_evaluators=CONFIG_WILDCARD) -> list:
+                            cryptocurrencies=None, symbols=None, time_frames=None, relevant_evaluators=CONFIG_WILDCARD) -> list:
     return [
         await create_evaluator(evaluator_class, config, exchange_name,
+                               cryptocurrency=cryptocurrency,
                                symbol=symbol,
                                time_frame=time_frame,
                                relevant_evaluators=relevant_evaluators)
         for evaluator_class in create_advanced_types_list(evaluator_parent_class, config)
+        for cryptocurrency in __get_cryptocurrencies_to_create(evaluator_class, cryptocurrencies)
         for symbol in __get_symbols_to_create(evaluator_class, symbols)
         for time_frame in __get_time_frames_to_create(evaluator_class, time_frames)
     ]
+
+
+def __get_cryptocurrencies_to_create(evaluator_class, cryptocurrencies):  # TODO replace with python 3.8 by :=
+    return cryptocurrencies if cryptocurrencies and not evaluator_class.get_is_cryptocurrencies_wildcard() else [None]
 
 
 def __get_symbols_to_create(evaluator_class, symbols):  # TODO replace with python 3.8 by :=
@@ -61,6 +67,7 @@ def __get_time_frames_to_create(evaluator_class, time_frames):  # TODO replace w
 
 
 async def create_evaluator(evaluator_class, config, exchange_name,
+                           cryptocurrency=None,
                            symbol=None,
                            time_frame=None,
                            relevant_evaluators=CONFIG_WILDCARD):
@@ -70,6 +77,7 @@ async def create_evaluator(evaluator_class, config, exchange_name,
         if is_relevant_evaluator(eval_class_instance, relevant_evaluators):
             eval_class_instance.logger = get_logger(evaluator_class.get_name())
             eval_class_instance.exchange_name = exchange_name if exchange_name else None
+            eval_class_instance.cryptocurrency = cryptocurrency if cryptocurrency else None
             eval_class_instance.symbol = symbol if symbol else None
             eval_class_instance.time_frame = time_frame if time_frame else None
             eval_class_instance.evaluator_type = evaluator_class_str_to_matrix_type_dict[
@@ -111,23 +119,31 @@ def __init_time_frames(config) -> list:
     return time_frames
 
 
-async def create_all_type_evaluators(config, exchange_name, symbols, time_frames,
+async def create_all_type_evaluators(config, exchange_name,
+                                     cryptocurrencies=None,
+                                     symbols=None,
+                                     time_frames=None,
                                      relevant_evaluators=CONFIG_WILDCARD) -> list:
     created_evaluators = []
 
     created_evaluators += await create_evaluators(EvaluatorClassTypes[EvaluatorMatrixTypes.TA.value],
                                                   config, exchange_name, symbols=symbols, time_frames=time_frames,
+                                                  cryptocurrencies=cryptocurrencies,
                                                   relevant_evaluators=relevant_evaluators)
 
-    created_evaluators += await create_evaluators(EvaluatorClassTypes[EvaluatorMatrixTypes.SOCIAL.value], config,
-                                                  exchange_name, relevant_evaluators=relevant_evaluators)
+    created_evaluators += await create_evaluators(EvaluatorClassTypes[EvaluatorMatrixTypes.SOCIAL.value],
+                                                  config, exchange_name, symbols=symbols, time_frames=time_frames,
+                                                  cryptocurrencies=cryptocurrencies,
+                                                  relevant_evaluators=relevant_evaluators)
 
     created_evaluators += await create_evaluators(EvaluatorClassTypes[EvaluatorMatrixTypes.REAL_TIME.value],
-                                                  config, exchange_name, symbols=symbols,
+                                                  config, exchange_name, symbols=symbols, time_frames=time_frames,
+                                                  cryptocurrencies=cryptocurrencies,
                                                   relevant_evaluators=relevant_evaluators)
 
     created_evaluators += await create_evaluators(EvaluatorClassTypes[EvaluatorMatrixTypes.STRATEGIES.value],
                                                   config, exchange_name, symbols=symbols, time_frames=time_frames,
+                                                  cryptocurrencies=cryptocurrencies,
                                                   relevant_evaluators=relevant_evaluators)
 
     return created_evaluators
