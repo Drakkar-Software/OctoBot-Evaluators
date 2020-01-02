@@ -22,7 +22,6 @@ from octobot_commons.config import load_config
 
 from octobot_evaluators.constants import CONFIG_EVALUATOR_SOCIAL
 from octobot_evaluators.evaluator import AbstractEvaluator
-from octobot_services.api.service_feeds import get_service_feed
 
 
 class SocialEvaluator(AbstractEvaluator):
@@ -62,8 +61,13 @@ class SocialEvaluator(AbstractEvaluator):
         if self.SERVICE_FEED_CLASS is None:
             self.logger.error("SERVICE_FEED_CLASS is required to use a service feed. Consumer can't start.")
         else:
-            get_service_feed(self.SERVICE_FEED_CLASS).update_feed_config(self.specific_config)
-            await get_chan(self.SERVICE_FEED_CLASS.FEED_CHANNEL.get_name()).new_consumer(self._feed_callback)
+            try:
+                from octobot_services.api.service_feeds import get_service_feed
+                get_service_feed(self.SERVICE_FEED_CLASS).update_feed_config(self.specific_config)
+                await get_chan(self.SERVICE_FEED_CLASS.FEED_CHANNEL.get_name()).new_consumer(self._feed_callback)
+            except ImportError as e:
+                self.logger.error("Can't start: requires OctoBot-Services package installed")
+                self.logger.exception(e)
 
     @abstractmethod
     async def _feed_callback(self, *args):
