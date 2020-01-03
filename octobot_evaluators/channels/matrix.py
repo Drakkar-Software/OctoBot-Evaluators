@@ -48,7 +48,7 @@ class MatrixChannelProducer(Producer):
                    symbol=CHANNEL_WILDCARD,
                    time_frame=None):
         for consumer in self.channel.get_filtered_consumers(symbol=symbol,
-                                                            time_frame=time_frame,
+                                                            time_frame=time_frame.value,
                                                             evaluator_type=evaluator_type,
                                                             evaluator_name=evaluator_name,
                                                             exchange_name=exchange_name):
