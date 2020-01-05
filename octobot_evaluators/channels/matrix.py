@@ -113,7 +113,7 @@ class MatrixChannel(Channel):
                            exchange_name=CHANNEL_WILDCARD,
                            time_frame=CHANNEL_WILDCARD,
                            filter_size=False):
-        await self.__add_new_consumer_and_run(MatrixChannelConsumer(callback, size=size, filter_size=filter_size),
+        await self._add_new_consumer_and_run(MatrixChannelConsumer(callback, size=size, filter_size=filter_size),
                                               cryptocurrency=cryptocurrency,
                                               symbol=symbol,
                                               evaluator_name=evaluator_name,
@@ -137,7 +137,7 @@ class MatrixChannel(Channel):
             self.EXCHANGE_NAME_KEY: exchange_name
         })
 
-    async def __add_new_consumer_and_run(self, consumer,
+    async def _add_new_consumer_and_run(self, consumer,
                                          cryptocurrency=CHANNEL_WILDCARD,
                                          symbol=CHANNEL_WILDCARD,
                                          evaluator_name=CHANNEL_WILDCARD,

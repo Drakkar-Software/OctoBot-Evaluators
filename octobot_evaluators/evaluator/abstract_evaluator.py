@@ -280,7 +280,7 @@ class AbstractEvaluator(AbstractTentacle):
                 self.eval_note_time_to_live = None
                 self.eval_note_changed_time = None
 
-    def get_exchange_symbol_data(self, exchange_name, exchange_id, symbol):
+    def get_exchange_symbol_data(self, exchange_name: str, exchange_id: str, symbol: str):
         try:
             from octobot_trading.api.exchange import get_exchange_manager_from_exchange_name_and_id
             from octobot_trading.api.symbol_data import get_symbol_data
