@@ -50,9 +50,10 @@ def is_relevant_evaluator(evaluator_instance, relevant_evaluators) -> bool:
 def get_relevant_TAs_for_strategy(strategy, config) -> list:
     ta_classes_list = []
     relevant_evaluators = strategy.get_required_evaluators(config)
-    for ta_eval_class in create_advanced_evaluator_types_list(TAEvaluator, config):
+    for ta_eval_class in create_advanced_types_list(TAEvaluator, config):
         ta_eval_class_instance = ta_eval_class()
         ta_eval_class_instance.set_config(config)
-        if is_relevant_evaluator(ta_eval_class_instance, relevant_evaluators):
+        if CONFIG_WILDCARD in relevant_evaluators or \
+                is_relevant_evaluator(ta_eval_class_instance, relevant_evaluators):
             ta_classes_list.append(ta_eval_class)
     return ta_classes_list
