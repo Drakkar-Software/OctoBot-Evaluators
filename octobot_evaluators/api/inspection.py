@@ -33,8 +33,8 @@ def get_relevant_evaluators_from_strategies(config):
     return evaluator_list
 
 
-def is_relevant_evaluator(evaluator_instance, relevant_evaluators):
-    if evaluator_instance.get_is_enabled():
+def is_relevant_evaluator(evaluator_instance, relevant_evaluators) -> bool:
+    if evaluator_instance.enabled:
         if relevant_evaluators == CONFIG_WILDCARD or \
                 evaluator_instance.get_name() in relevant_evaluators:
             return True
