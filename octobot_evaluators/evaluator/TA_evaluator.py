@@ -36,7 +36,7 @@ class TAEvaluator(AbstractEvaluator):
     def get_config_tentacle_type(cls) -> str:
         return CONFIG_EVALUATOR_TA
 
-    def get_symbol_candles(self, exchange_name, exchange_id, symbol, time_frame):
+    def get_symbol_candles(self, exchange_name: str, exchange_id: str, symbol: str, time_frame):
         try:
             from octobot_trading.api.symbol_data import get_symbol_candles_manager
             return get_symbol_candles_manager(self.get_exchange_symbol_data(exchange_name, exchange_id, symbol),
@@ -57,6 +57,6 @@ class TAEvaluator(AbstractEvaluator):
         except ImportError:
             self.logger.error("Can't connect to OHLCV trading channel")
 
-    async def ohlcv_callback(self, exchange, exchange_id, symbol, time_frame, candle):
+    async def ohlcv_callback(self, exchange: str, exchange_id: str, symbol: str,  time_frame, candle):
         # To be used to trigger an evaluation
         pass
