@@ -15,7 +15,7 @@
 #  License along with this library.
 import copy
 
-from octobot_commons.constants import CONFIG_EVALUATOR_FILE_PATH
+from octobot_commons.constants import CONFIG_EVALUATOR_FILE_PATH, CONFIG_CRYPTO_CURRENCIES, CONFIG_WILDCARD
 from octobot_commons.errors import ConfigEvaluatorError
 from octobot_commons.logging.logging_util import get_logger
 from octobot_commons.tentacles_management import create_classes_list, create_advanced_types_list
@@ -40,7 +40,7 @@ EvaluatorClassTypes = {
 
 
 async def create_evaluators(evaluator_parent_class, config, exchange_name,
-                            symbols=None, time_frames=None, relevant_evaluators=None) -> list:
+                            symbols=None, time_frames=None, relevant_evaluators=CONFIG_WILDCARD) -> list:
     return [
         await create_evaluator(evaluator_class, config, exchange_name,
                                symbol=symbol,
@@ -63,11 +63,11 @@ def __get_time_frames_to_create(evaluator_class, time_frames):  # TODO replace w
 async def create_evaluator(evaluator_class, config, exchange_name,
                            symbol=None,
                            time_frame=None,
-                           relevant_evaluators=None):
+                           relevant_evaluators=CONFIG_WILDCARD):
     try:
         eval_class_instance = evaluator_class()
         eval_class_instance.set_config(config)
-        if not relevant_evaluators or is_relevant_evaluator(eval_class_instance, relevant_evaluators):
+        if is_relevant_evaluator(eval_class_instance, relevant_evaluators):
             eval_class_instance.logger = get_logger(evaluator_class.get_name())
             eval_class_instance.exchange_name = exchange_name if exchange_name else None
             eval_class_instance.symbol = symbol if symbol else None
@@ -111,7 +111,8 @@ def __init_time_frames(config) -> list:
     return time_frames
 
 
-async def create_all_type_evaluators(config, exchange_name, symbols, time_frames, relevant_evaluators=None) -> list:
+async def create_all_type_evaluators(config, exchange_name, symbols, time_frames,
+                                     relevant_evaluators=CONFIG_WILDCARD) -> list:
     created_evaluators = []
 
     created_evaluators += await create_evaluators(EvaluatorClassTypes[EvaluatorMatrixTypes.TA.value],
