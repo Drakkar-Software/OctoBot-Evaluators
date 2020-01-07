@@ -36,10 +36,11 @@ class TAEvaluator(AbstractEvaluator):
     def get_config_tentacle_type(cls) -> str:
         return CONFIG_EVALUATOR_TA
 
-    def get_symbol_candles(self, exchange_name, symbol, time_frame):
+    def get_symbol_candles(self, exchange_name, exchange_id, symbol, time_frame):
         try:
             from octobot_trading.api.symbol_data import get_symbol_candles_manager
-            return get_symbol_candles_manager(self.get_exchange_symbol_data(exchange_name, symbol), time_frame)
+            return get_symbol_candles_manager(self.get_exchange_symbol_data(exchange_name, exchange_id, symbol),
+                                              time_frame)
         except ImportError:
             self.logger.error(f"Can't get OHLCV: requires OctoBot-Trading package installed")
 
