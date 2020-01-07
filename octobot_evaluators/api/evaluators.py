@@ -66,6 +66,10 @@ def __get_time_frames_to_create(evaluator_class, time_frames):  # TODO replace w
     return time_frames if time_frames and not evaluator_class.get_is_time_frame_wildcard() else [None]
 
 
+def get_evaluator_classes_from_type(evaluator_type, config) -> list:
+    return create_advanced_types_list(EvaluatorClassTypes[evaluator_type], config)
+
+
 async def create_evaluator(evaluator_class, config, exchange_name,
                            cryptocurrency=None,
                            symbol=None,
