@@ -28,6 +28,7 @@ async def matrix_callback(evaluator_name,
                           eval_note,
                           eval_note_type,
                           exchange_name,
+                          cryptocurrency,
                           symbol,
                           time_frame):
     pass

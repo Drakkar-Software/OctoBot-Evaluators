@@ -45,9 +45,11 @@ class MatrixChannelProducer(Producer):
                    eval_note,
                    eval_note_type=EVALUATOR_EVAL_DEFAULT_TYPE,
                    exchange_name=None,
+                   cryptocurrency=CHANNEL_WILDCARD,
                    symbol=CHANNEL_WILDCARD,
                    time_frame=None):
-        for consumer in self.channel.get_filtered_consumers(symbol=symbol,
+        for consumer in self.channel.get_filtered_consumers(cryptocurrency=cryptocurrency,
+                                                            symbol=symbol,
                                                             time_frame=time_frame,
                                                             evaluator_type=evaluator_type,
                                                             evaluator_name=evaluator_name,
@@ -58,18 +60,20 @@ class MatrixChannelProducer(Producer):
                 "eval_note": eval_note,
                 "eval_note_type": eval_note_type,
                 "exchange_name": exchange_name,
+                "cryptocurrency": cryptocurrency,
                 "symbol": symbol,
                 "time_frame": time_frame
             })
 
     async def send_eval_note(self, evaluator_name, evaluator_type, eval_note, eval_note_type,
-                             exchange_name=None, symbol=None, time_frame=None):
+                             exchange_name=None, cryptocurrency=None, symbol=None, time_frame=None):
         Matrix.instance().set_tentacle_value(
             value_type=eval_note_type,
             value=eval_note,
             value_path=get_tentacle_path(exchange_name=exchange_name,
                                          tentacle_type=evaluator_type,
-                                         tentacle_name=evaluator_name) + get_tentacle_value_path(symbol=symbol,
+                                         tentacle_name=evaluator_name) + get_tentacle_value_path(cryptocurrency=cryptocurrency,
+                                                                                                 symbol=symbol,
                                                                                                  time_frame=time_frame)
         )
 
@@ -78,6 +82,7 @@ class MatrixChannelProducer(Producer):
                         eval_note=eval_note,
                         eval_note_type=eval_note_type,
                         exchange_name=exchange_name,
+                        cryptocurrency=cryptocurrency,
                         symbol=symbol,
                         time_frame=time_frame)
 
@@ -87,6 +92,7 @@ class MatrixChannel(Channel):
     PRODUCER_CLASS = MatrixChannelProducer
     CONSUMER_CLASS = MatrixChannelConsumer
 
+    CRYPTOCURRENCY_KEY = "cryptocurrency"
     SYMBOL_KEY = "symbol"
     TIME_FRAME_KEY = "time_frame"
     EVALUATOR_TYPE_KEY = "evaluator_type"
@@ -100,6 +106,7 @@ class MatrixChannel(Channel):
     async def new_consumer(self,
                            callback: object,
                            size=0,
+                           cryptocurrency=CHANNEL_WILDCARD,
                            symbol=CHANNEL_WILDCARD,
                            evaluator_name=CHANNEL_WILDCARD,
                            evaluator_type=CHANNEL_WILDCARD,
@@ -107,6 +114,7 @@ class MatrixChannel(Channel):
                            time_frame=CHANNEL_WILDCARD,
                            filter_size=False):
         await self.__add_new_consumer_and_run(MatrixChannelConsumer(callback, size=size, filter_size=filter_size),
+                                              cryptocurrency=cryptocurrency,
                                               symbol=symbol,
                                               evaluator_name=evaluator_name,
                                               evaluator_type=evaluator_type,
@@ -114,12 +122,14 @@ class MatrixChannel(Channel):
                                               time_frame=time_frame)
 
     def get_filtered_consumers(self,
+                               cryptocurrency=CHANNEL_WILDCARD,
                                symbol=CHANNEL_WILDCARD,
                                evaluator_type=CHANNEL_WILDCARD,
                                time_frame=CHANNEL_WILDCARD,
                                evaluator_name=CHANNEL_WILDCARD,
                                exchange_name=CHANNEL_WILDCARD):
         return self.get_consumer_from_filters({
+            self.CRYPTOCURRENCY_KEY: cryptocurrency,
             self.SYMBOL_KEY: symbol,
             self.TIME_FRAME_KEY: time_frame,
             self.EVALUATOR_TYPE_KEY: evaluator_type,
@@ -128,15 +138,14 @@ class MatrixChannel(Channel):
         })
 
     async def __add_new_consumer_and_run(self, consumer,
+                                         cryptocurrency=CHANNEL_WILDCARD,
                                          symbol=CHANNEL_WILDCARD,
                                          evaluator_name=CHANNEL_WILDCARD,
                                          evaluator_type=CHANNEL_WILDCARD,
                                          exchange_name=CHANNEL_WILDCARD,
                                          time_frame=None):
-        if symbol:
-            symbol = CHANNEL_WILDCARD
-
         consumer_filters: dict = {
+            self.CRYPTOCURRENCY_KEY: cryptocurrency,
             self.SYMBOL_KEY: symbol,
             self.TIME_FRAME_KEY: time_frame,
             self.EVALUATOR_NAME_KEY: evaluator_name,

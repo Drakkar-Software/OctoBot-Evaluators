@@ -45,10 +45,11 @@ async def matrix_callback(evaluator_name,
                           eval_note,
                           eval_note_type,
                           exchange_name,
+                          cryptocurrency,
                           symbol,
                           time_frame):
     logging.info(f"MATRIX : EXCHANGE = {exchange_name} || EVALUATOR = {evaluator_name} ||"
-                 f" SYMBOL = {symbol} || TF = {time_frame} || NOTE = {eval_note}")
+                 f" CRYPTOCURRENCY = {cryptocurrency} || SYMBOL = {symbol} || TF = {time_frame} || NOTE = {eval_note}")
 
 
 async def create_evaluators_channel():
