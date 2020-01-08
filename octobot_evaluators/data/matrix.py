@@ -57,16 +57,18 @@ class Matrix(Singleton):
                                                                 tentacle_type=tentacle_type,
                                                                 tentacle_name=tentacle_name))
 
-    def get_tentacles_value_nodes(self, tentacle_nodes, symbol=None, time_frame=None):
+    def get_tentacles_value_nodes(self, tentacle_nodes, cryptocurrency=None, symbol=None, time_frame=None):
         """
         Returns the list of nodes related to the symbol and / or time_frame from the given tentacle_nodes list
         :param tentacle_nodes: the exchange name to search for in the matrix
+        :param cryptocurrency: the cryptocurrency to search for in the given node list
         :param symbol: the symbol to search for in the given node list
         :param time_frame: the time frame to search for in the given nodes list
         :return: nodes linked to the given params
         """
         return [node_at_path for node_at_path in [
-            self.get_node_at_path(get_tentacle_value_path(symbol=symbol,
+            self.get_node_at_path(get_tentacle_value_path(cryptocurrency=cryptocurrency,
+                                                          symbol=symbol,
                                                           time_frame=time_frame),
                                   starting_node=n)
             for n in tentacle_nodes
@@ -91,14 +93,17 @@ def get_tentacle_path(exchange_name=None, tentacle_type=None, tentacle_name=None
     return node_path
 
 
-def get_tentacle_value_path(symbol=None, time_frame=None) -> list:
+def get_tentacle_value_path(cryptocurrency=None, symbol=None, time_frame=None) -> list:
     """
     Returns the path related to symbol and / or time_frame values
+    :param cryptocurrency: the cryptocurrency to add in the path, ignored if None
     :param symbol: the symbol to add in the path, ignored if None
     :param time_frame: the time frame to add in the path, ignored if None
     :return: a list of string that represents the path of the given params
     """
     node_path: list = []
+    if cryptocurrency is not None:
+        node_path.append(cryptocurrency)
     if symbol is not None:
         node_path.append(symbol)
     if time_frame is not None:

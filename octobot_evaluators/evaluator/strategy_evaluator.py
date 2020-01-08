@@ -44,6 +44,7 @@ class StrategyEvaluator(AbstractEvaluator):
                               eval_note,
                               eval_note_type,
                               exchange_name,
+                              cryptocurrency,
                               symbol,
                               time_frame):
         # To be used to trigger an evaluation
