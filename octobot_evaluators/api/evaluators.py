@@ -66,7 +66,10 @@ def __get_time_frames_to_create(evaluator_class, time_frames):  # TODO replace w
     return time_frames if time_frames and not evaluator_class.get_is_time_frame_wildcard() else [None]
 
 
-def get_evaluator_classes_from_type(evaluator_type, config) -> list:
+def get_evaluator_classes_from_type(evaluator_type, config, activated_only=True) -> list:
+    if activated_only:
+        return [cls for cls in create_advanced_types_list(EvaluatorClassTypes[evaluator_type], config)
+                if cls.is_enabled(config, False)]
     return create_advanced_types_list(EvaluatorClassTypes[evaluator_type], config)
 
 
