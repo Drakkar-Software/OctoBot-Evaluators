@@ -136,26 +136,6 @@ async def create_all_type_evaluators(config, exchange_name,
                                      symbols=None,
                                      time_frames=None,
                                      relevant_evaluators=CONFIG_WILDCARD) -> list:
-    created_evaluators = []
-
-    created_evaluators += await create_evaluators(EvaluatorClassTypes[EvaluatorMatrixTypes.TA.value],
-                                                  config, exchange_name, symbols=symbols, time_frames=time_frames,
-                                                  cryptocurrencies=cryptocurrencies,
-                                                  relevant_evaluators=relevant_evaluators)
-
-    created_evaluators += await create_evaluators(EvaluatorClassTypes[EvaluatorMatrixTypes.SOCIAL.value],
-                                                  config, exchange_name, symbols=symbols, time_frames=time_frames,
-                                                  cryptocurrencies=cryptocurrencies,
-                                                  relevant_evaluators=relevant_evaluators)
-
-    created_evaluators += await create_evaluators(EvaluatorClassTypes[EvaluatorMatrixTypes.REAL_TIME.value],
-                                                  config, exchange_name, symbols=symbols, time_frames=time_frames,
-                                                  cryptocurrencies=cryptocurrencies,
-                                                  relevant_evaluators=relevant_evaluators)
-
-    created_evaluators += await create_evaluators(EvaluatorClassTypes[EvaluatorMatrixTypes.STRATEGIES.value],
-                                                  config, exchange_name, symbols=symbols, time_frames=time_frames,
-                                                  cryptocurrencies=cryptocurrencies,
-                                                  relevant_evaluators=relevant_evaluators)
-
-    return created_evaluators
+    return [await create_evaluators(evaluator_type, config, exchange_name, symbols=symbols, time_frames=time_frames,
+                                    cryptocurrencies=cryptocurrencies, relevant_evaluators=relevant_evaluators)
+            for evaluator_type in EvaluatorClassTypes.values()]
