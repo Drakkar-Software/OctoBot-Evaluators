@@ -40,7 +40,8 @@ config = {
 }
 
 
-async def matrix_callback(evaluator_name,
+async def matrix_callback(matrix_id,
+                          evaluator_name,
                           evaluator_type,
                           eval_note,
                           eval_note_type,
@@ -57,10 +58,15 @@ async def create_evaluators_channel():
 
     await get_chan(MATRIX_CHANNEL).new_consumer(matrix_callback)
 
-    await initialize_evaluators(config)
-    await create_all_type_evaluators(config, "test", ["BTC/USDT"], [TimeFrames.ONE_HOUR])
+    matrix_id: str = await initialize_evaluators(config)
+    await create_all_type_evaluators(config,
+                                     matrix_id=matrix_id,
+                                     exchange_name="test",
+                                     symbols=["BTC/USDT"],
+                                     time_frames=[TimeFrames.ONE_HOUR])
 
-    await get_chan(MATRIX_CHANNEL).get_internal_producer().send(evaluator_name="test",
+    await get_chan(MATRIX_CHANNEL).get_internal_producer().send(matrix_id=matrix_id,
+                                                                evaluator_name="test",
                                                                 evaluator_type="test",
                                                                 eval_note=1)
 

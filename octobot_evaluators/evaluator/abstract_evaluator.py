@@ -30,23 +30,26 @@ class AbstractEvaluator(AbstractTentacle):
 
     def __init__(self):
         super().__init__()
+        # Evaluator matrix id
+        self.matrix_id: str = None
+
         # Global OctoBot configuration
-        self.config = None
+        self.config: dict = {}
 
         # Evaluator specific config (Is loaded from tentacle specific file)
-        self.specific_config = {}
+        self.specific_config: dict = {}
 
         # If this indicator is enabled
-        self.enabled = True
+        self.enabled: bool = True
 
         # Specified Cryptocurrency for this instance (Should be None if wildcard)
-        self.cryptocurrency = None
+        self.cryptocurrency: str = None
 
         # Symbol is the cryptocurrency pair (Should be None if wildcard)
-        self.symbol = None
+        self.symbol: str = None
 
         # Evaluation related exchange name
-        self.exchange_name = None
+        self.exchange_name: str = None
 
         # Time_frame is the chart time frame (Should be None if wildcard)
         self.time_frame = None
@@ -64,7 +67,7 @@ class AbstractEvaluator(AbstractTentacle):
         self.pertinence = START_EVAL_PERTINENCE
 
         # Active tells if this evaluator is currently activated (an evaluator can be paused)
-        self.is_active = True
+        self.is_active: bool = True
 
         # set to true if start_task has to be called to start evaluator
         self.is_to_be_started_as_task = False
@@ -109,9 +112,14 @@ class AbstractEvaluator(AbstractTentacle):
         """
         return True
 
-    async def evaluation_completed(self, symbol, time_frame, eval_note=None) -> None:
+    async def evaluation_completed(self,
+                                   cryptocurrency: str = None,
+                                   symbol: str = None,
+                                   time_frame=None,
+                                   eval_note=None) -> None:
         """
         Main async method to notify matrix to update
+        :param cryptocurrency: evaluated cryptocurrency
         :param symbol: evaluated symbol
         :param time_frame: evaluated time frame
         :param eval_note: if None = self.eval_note
@@ -123,11 +131,13 @@ class AbstractEvaluator(AbstractTentacle):
 
             self.ensure_eval_note_is_not_expired()
             await get_chan(MATRIX_CHANNEL).get_internal_producer().send_eval_note(
+                matrix_id=self.matrix_id,
                 evaluator_name=self.get_name(),
                 evaluator_type=self.evaluator_type.value,
                 eval_note=eval_note,
                 eval_note_type=self.get_eval_type(),
                 exchange_name=self.exchange_name,
+                cryptocurrency=cryptocurrency,
                 symbol=symbol,
                 time_frame=time_frame)
         except Exception as e:

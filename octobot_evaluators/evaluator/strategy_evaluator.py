@@ -39,6 +39,7 @@ class StrategyEvaluator(AbstractEvaluator):
         await get_chan(MATRIX_CHANNEL).new_consumer(self.matrix_callback)
 
     async def matrix_callback(self,
+                              matrix_id,
                               evaluator_name,
                               evaluator_type,
                               eval_note,

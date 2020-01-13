@@ -13,21 +13,22 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
+import uuid
 
 from octobot_commons.event_tree import EventTree, NodeExistsError
-from octobot_commons.singleton.singleton_class import Singleton
 
 
-class Matrix(Singleton):
+class Matrix:
     """
     Matrix dataclass store tentacles data in a EventTree
     """
-    __slots__ = ['matrix']
+    __slots__ = ['id', 'matrix']
 
     def __init__(self):
         """
         Initialize the matrix as an EventTree instance
         """
+        self.id = str(uuid.uuid4())
         self.matrix = EventTree()
 
     def set_tentacle_value(self, value, value_type, value_path):

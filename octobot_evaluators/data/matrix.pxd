@@ -16,10 +16,10 @@
 #  License along with this library.
 from octobot_commons.event_tree cimport EventTree
 from octobot_commons.event_tree cimport EventTreeNode
-from octobot_commons.singleton.singleton_class cimport Singleton
 
 
-cdef class Matrix(Singleton):
+cdef class Matrix:
+    cdef public str id
     cdef public EventTree matrix
 
     cpdef void set_tentacle_value(self, object value, object value_type, list value_path)
