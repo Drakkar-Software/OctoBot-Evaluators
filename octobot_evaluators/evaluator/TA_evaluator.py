@@ -52,7 +52,9 @@ class TAEvaluator(AbstractEvaluator):
         """
         try:
             from octobot_trading.channels.exchange_channel import get_chan as get_trading_chan
-            await get_trading_chan(OctoBotTradingChannelsName.OHLCV_CHANNEL.value, self.exchange_name).new_consumer(
+            from octobot_trading.api.exchange import get_exchange_id_from_matrix_id
+            exchange_id = get_exchange_id_from_matrix_id(self.exchange_name, self.matrix_id)
+            await get_trading_chan(OctoBotTradingChannelsName.OHLCV_CHANNEL.value, exchange_id).new_consumer(
                 self.ohlcv_callback)  # TODO filter
         except ImportError:
             self.logger.error("Can't connect to OHLCV trading channel")
