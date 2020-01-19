@@ -40,6 +40,13 @@ class Matrix:
         except NodeExistsError:
             return []
 
+    def get_node_children_by_names_at_path(self, node_path, starting_node=None):
+        try:
+            return {key: val
+                    for key, val in self.matrix.get_node(node_path, starting_node=starting_node).children.items()}
+        except NodeExistsError:
+            return {}
+
     def get_node_at_path(self, node_path, starting_node=None):
         try:
             return self.matrix.get_node(node_path, starting_node=starting_node)
