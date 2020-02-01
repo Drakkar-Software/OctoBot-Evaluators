@@ -176,4 +176,11 @@ class MatrixChannel(Channel):
 
         self.add_new_consumer(consumer, consumer_filters)
         await consumer.run()
-        self.logger.debug(f"Consumer started for symbol {symbol}")
+        self.logger.debug(f"Consumer started for : "
+                          f"[matrix_id={matrix_id},"
+                          f" cryptocurrency={cryptocurrency},"
+                          f" symbol={symbol},"
+                          f" time_frame={time_frame},"
+                          f" evaluator_name={evaluator_name},"
+                          f" exchange_name={exchange_name},"
+                          f" evaluator_type={evaluator_type}]")
