@@ -15,7 +15,7 @@
 #  License along with this library.
 import copy
 
-from octobot_commons.constants import CONFIG_EVALUATOR_FILE_PATH, CONFIG_CRYPTO_CURRENCIES, CONFIG_WILDCARD
+from octobot_commons.constants import CONFIG_EVALUATOR_FILE_PATH, CONFIG_WILDCARD
 from octobot_commons.errors import ConfigEvaluatorError
 from octobot_commons.logging.logging_util import get_logger
 from octobot_commons.tentacles_management import create_classes_list, create_advanced_types_list
@@ -74,6 +74,10 @@ def __get_symbols_to_create(evaluator_class, symbols):  # TODO replace with pyth
 
 def __get_time_frames_to_create(evaluator_class, time_frames):  # TODO replace with python 3.8 by :=
     return time_frames if time_frames and not evaluator_class.get_is_time_frame_wildcard() else [None]
+
+
+async def stop_evaluator(evaluator) -> None:
+    return await evaluator.stop()
 
 
 def get_evaluator_classes_from_type(evaluator_type, config, activated_only=True) -> list:

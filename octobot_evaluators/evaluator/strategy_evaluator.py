@@ -26,6 +26,10 @@ from octobot_evaluators.evaluator import AbstractEvaluator
 class StrategyEvaluator(AbstractEvaluator):
     __metaclass__ = AbstractEvaluator
 
+    def __init__(self):
+        super().__init__()
+        self.consumer_instance = None
+
     @classmethod
     def get_config_tentacle_type(cls) -> str:
         return CONFIG_EVALUATOR_STRATEGIES
@@ -36,7 +40,11 @@ class StrategyEvaluator(AbstractEvaluator):
         Subscribe to Matrix notification from self.symbols and self.time_frames
         :return: None
         """
-        await get_chan(MATRIX_CHANNEL).new_consumer(self.matrix_callback)
+        self.consumer_instance = await get_chan(MATRIX_CHANNEL).new_consumer(self.matrix_callback)
+
+    async def stop(self) -> None:
+        if self.consumer_instance:
+            await get_chan(MATRIX_CHANNEL).remove_consumer(self.consumer_instance)
 
     async def matrix_callback(self,
                               matrix_id,

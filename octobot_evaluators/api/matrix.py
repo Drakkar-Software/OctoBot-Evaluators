@@ -21,6 +21,10 @@ def get_matrix(matrix_id) -> Matrix:
     return Matrices.instance().get_matrix(matrix_id)
 
 
+def del_matrix(matrix_id) -> Matrix:
+    return Matrices.instance().del_matrix(matrix_id)
+
+
 def get_node_children_by_names(matrix) -> dict:
     return matrix.get_node_children_by_names_at_path([])
 

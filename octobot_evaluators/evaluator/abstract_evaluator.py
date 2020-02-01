@@ -155,6 +155,13 @@ class AbstractEvaluator(AbstractTentacle):
     async def start(self) -> None:
         raise NotImplementedError("start is not implemented")
 
+    async def stop(self) -> None:
+        """
+        implement if necessary
+        :return: None
+        """
+        pass
+
     async def prepare(self) -> None:
         """
         Called just before start(), implement if necessary
