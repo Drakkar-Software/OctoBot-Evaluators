@@ -124,14 +124,17 @@ async def create_evaluator(evaluator_class,
 
 
 async def initialize_evaluators(config) -> str:
+    create_evaluator_classes(config)
+    _init_time_frames(config)
+
+    return create_matrix()
+
+
+def create_evaluator_classes(config):
     reload_tentacle_config(config, CONFIG_EVALUATOR, CONFIG_EVALUATOR_FILE_PATH, ConfigEvaluatorError)
 
     create_classes_list(config, AbstractEvaluator)
     create_classes_list(config, AbstractUtil)
-
-    _init_time_frames(config)
-
-    return create_matrix()
 
 
 def get_evaluator_config(config) -> dict:
