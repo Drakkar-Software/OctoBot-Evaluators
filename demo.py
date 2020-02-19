@@ -20,7 +20,9 @@ from octobot_channels.channels.channel import get_chan
 from octobot_commons.enums import TimeFrames
 
 from octobot_commons.logging.logging_util import get_logger
-from octobot_evaluators.api import create_all_type_evaluators, create_matrix_channels, initialize_evaluators
+
+from octobot_evaluators.api.evaluators import initialize_evaluators, create_all_type_evaluators
+from octobot_evaluators.api.initialization import create_matrix_channels
 from octobot_evaluators.channels import MATRIX_CHANNEL
 
 config = {

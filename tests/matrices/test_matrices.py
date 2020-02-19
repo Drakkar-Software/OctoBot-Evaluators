@@ -15,7 +15,7 @@
 #  License along with this library.
 import pytest
 
-from octobot_evaluators.api import create_matrix
+from octobot_evaluators.api.evaluators import create_matrix
 from octobot_evaluators.data.matrix import Matrix
 from octobot_evaluators.matrices.matrices import Matrices
 
