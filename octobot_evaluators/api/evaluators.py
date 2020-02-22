@@ -112,8 +112,7 @@ async def create_evaluator(evaluator_class,
             await eval_class_instance.start_evaluator()
             return eval_class_instance
     except Exception as e:
-        get_logger().error(f"Error when creating evaluator {evaluator_class}: {e}")
-        get_logger().exception(e)
+        get_logger().exception(e, True, f"Error when creating evaluator {evaluator_class}: {e}")
     return None
 
 

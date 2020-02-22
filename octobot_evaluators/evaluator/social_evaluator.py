@@ -66,8 +66,7 @@ class SocialEvaluator(AbstractEvaluator):
                 get_service_feed(self.SERVICE_FEED_CLASS).update_feed_config(self.specific_config)
                 await get_chan(self.SERVICE_FEED_CLASS.FEED_CHANNEL.get_name()).new_consumer(self._feed_callback)
             except ImportError as e:
-                self.logger.error("Can't start: requires OctoBot-Services package installed")
-                self.logger.exception(e)
+                self.logger.exception(e, True, "Can't start: requires OctoBot-Services package installed")
 
     @abstractmethod
     async def _feed_callback(self, *args):

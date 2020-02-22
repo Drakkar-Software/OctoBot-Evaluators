@@ -36,7 +36,7 @@ class MatrixChannelConsumer(Consumer):
             except CancelledError:
                 self.logger.warning("Cancelled task")
             except Exception as e:
-                self.logger.exception(f"Exception when calling callback : {e}")
+                self.logger.exception(e, True, f"Exception when calling callback : {e}")
 
 
 class MatrixChannelProducer(Producer):

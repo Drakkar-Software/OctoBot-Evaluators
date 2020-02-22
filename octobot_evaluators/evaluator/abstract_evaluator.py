@@ -144,8 +144,7 @@ class AbstractEvaluator(AbstractTentacle):
             # if ConfigManager.is_in_dev_mode(self.config): # TODO
             #     raise e
             # else:
-            self.logger.error("Exception in evaluation_completed(): " + str(e))
-            self.logger.exception(e)
+            self.logger.exception(e, True, f"Exception in evaluation_completed(): {e}")
         finally:
             if self.eval_note == "nan":
                 self.eval_note = START_PENDING_EVAL_NOTE
