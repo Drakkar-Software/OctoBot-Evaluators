@@ -21,12 +21,13 @@ from octobot_commons.time_frame_manager import sort_time_frames
 
 from octobot_evaluators.channels import MatrixChannel, MATRIX_CHANNEL
 from octobot_evaluators.evaluator import StrategyEvaluator
+from octobot_tentacles_manager.api.configurator import is_tentacle_activated_in_tentacles_setup_config
 
 
-def init_time_frames_from_strategies(config) -> None:
+def init_time_frames_from_strategies(config, tentacles_setup_config) -> None:
     time_frame_list = set()
     for strategies_eval_class in create_advanced_types_list(StrategyEvaluator, config):
-        if strategies_eval_class.is_enabled(config, False):
+        if is_tentacle_activated_in_tentacles_setup_config(tentacles_setup_config, strategies_eval_class.get_name()):
             for time_frame in strategies_eval_class.get_required_time_frames(config):
                 time_frame_list.add(time_frame)
     time_frame_list = sort_time_frames(time_frame_list)

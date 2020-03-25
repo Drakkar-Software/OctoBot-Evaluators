@@ -13,25 +13,8 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
-
-from abc import ABCMeta
-
 from octobot_commons.tentacles_management import AbstractTentacle
-from tentacles_manager import TENTACLES_EVALUATOR_PATH
-
-from octobot_evaluators.constants import TENTACLE_UTIL_FOLDER
 
 
 class AbstractUtil(AbstractTentacle):
-    __metaclass__ = AbstractTentacle
-
-    def __init__(self):
-        super().__init__()
-
-    @classmethod
-    def get_tentacle_folder(cls) -> str:
-        return TENTACLES_EVALUATOR_PATH
-
-    @classmethod
-    def get_config_tentacle_type(cls) -> str:
-        return TENTACLE_UTIL_FOLDER
+    pass

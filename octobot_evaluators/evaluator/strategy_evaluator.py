@@ -16,11 +16,11 @@
 from octobot_channels.channels.channel import get_chan
 from octobot_commons.constants import CONFIG_WILDCARD
 from octobot_commons.time_frame_manager import parse_time_frames
-
 from octobot_evaluators.channels import MATRIX_CHANNEL
-from octobot_evaluators.constants import CONFIG_EVALUATOR_STRATEGIES, CONFIG_FORCED_EVALUATOR, \
+from octobot_evaluators.constants import CONFIG_FORCED_EVALUATOR, \
     STRATEGIES_REQUIRED_TIME_FRAME, CONFIG_FORCED_TIME_FRAME, STRATEGIES_REQUIRED_EVALUATORS, TENTACLE_DEFAULT_CONFIG
 from octobot_evaluators.evaluator import AbstractEvaluator
+from octobot_tentacles_manager.api.configurator import get_tentacle_config
 
 
 class StrategyEvaluator(AbstractEvaluator):
@@ -29,10 +29,6 @@ class StrategyEvaluator(AbstractEvaluator):
     def __init__(self):
         super().__init__()
         self.consumer_instance = None
-
-    @classmethod
-    def get_config_tentacle_type(cls) -> str:
-        return CONFIG_EVALUATOR_STRATEGIES
 
     async def start(self) -> None:
         """
@@ -64,25 +60,25 @@ class StrategyEvaluator(AbstractEvaluator):
     def get_required_time_frames(cls, config: dict):
         if CONFIG_FORCED_TIME_FRAME in config:
             return parse_time_frames(config[CONFIG_FORCED_TIME_FRAME])
-        strategy_config: dict = cls.get_specific_config()
+        strategy_config: dict = get_tentacle_config(cls)
         if STRATEGIES_REQUIRED_TIME_FRAME in strategy_config:
             return parse_time_frames(strategy_config[STRATEGIES_REQUIRED_TIME_FRAME])
         else:
-            raise Exception(f"'{STRATEGIES_REQUIRED_TIME_FRAME}' is missing in {cls.get_config_file_name()}")
+            raise Exception(f"'{STRATEGIES_REQUIRED_TIME_FRAME}' is missing in configuration file")
 
     @classmethod
     def get_required_evaluators(cls, config: dict, strategy_config: dict = None):
         if CONFIG_FORCED_EVALUATOR in config:
             return config[CONFIG_FORCED_EVALUATOR]
-        strategy_config: dict = strategy_config or cls.get_specific_config()
+        strategy_config: dict = strategy_config or get_tentacle_config(cls)
         if STRATEGIES_REQUIRED_EVALUATORS in strategy_config:
             return strategy_config[STRATEGIES_REQUIRED_EVALUATORS]
         else:
-            raise Exception(f"'{STRATEGIES_REQUIRED_EVALUATORS}' is missing in {cls.get_config_file_name()}")
+            raise Exception(f"'{STRATEGIES_REQUIRED_EVALUATORS}' is missing in configuration file")
 
     @classmethod
     def get_default_evaluators(cls, config: dict):
-        strategy_config: dict = cls.get_specific_config()
+        strategy_config: dict = get_tentacle_config(cls)
         if TENTACLE_DEFAULT_CONFIG in strategy_config:
             return strategy_config[TENTACLE_DEFAULT_CONFIG]
         else:

@@ -13,15 +13,11 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
-
-import os
 from abc import abstractmethod
 
 from octobot_channels.channels.channel import get_chan
-from octobot_commons.config import load_config
-
-from octobot_evaluators.constants import CONFIG_EVALUATOR_SOCIAL
 from octobot_evaluators.evaluator import AbstractEvaluator
+from octobot_tentacles_manager.api.configurator import get_tentacle_config
 
 
 class SocialEvaluator(AbstractEvaluator):
@@ -33,24 +29,17 @@ class SocialEvaluator(AbstractEvaluator):
         self.load_config()
 
     @classmethod
-    def get_config_tentacle_type(cls) -> str:
-        return CONFIG_EVALUATOR_SOCIAL
-
-    @classmethod
     def get_is_symbol_widlcard(cls) -> bool:
         return False
 
     def load_config(self):
-        config_file = self.get_config_file_name()
         # try with this class name
-        if os.path.isfile(config_file):
-            self.specific_config = load_config(config_file)
-        else:
-            # if it's not possible, try with any super-class' config file
+        self.specific_config = get_tentacle_config(self.__class__)
+        if not self.specific_config:
+            # if nothing in config, try with any super-class' config file
             for super_class in self.get_parent_evaluator_classes(SocialEvaluator):
-                super_class_config_file = super_class.get_config_file_name()
-                if os.path.isfile(super_class_config_file):
-                    self.specific_config = load_config(super_class_config_file)
+                self.specific_config = get_tentacle_config(super_class)
+                if self.specific_config:
                     return
         # set default config if nothing found
         if not self.specific_config:

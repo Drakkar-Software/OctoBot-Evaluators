@@ -14,8 +14,6 @@
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
 from octobot_commons.channels_name import OctoBotTradingChannelsName
-
-from octobot_evaluators.constants import CONFIG_EVALUATOR_TA
 from octobot_evaluators.evaluator import AbstractEvaluator
 
 
@@ -27,14 +25,6 @@ class TAEvaluator(AbstractEvaluator):
         self.time_frame = None
         self.short_term_averages = [7, 5, 4, 3, 2, 1]  # TODO remove
         self.long_term_averages = [40, 30, 20, 15, 10]  # TODO remove
-
-    @classmethod
-    def get_name(cls) -> str:
-        return cls.__name__
-
-    @classmethod
-    def get_config_tentacle_type(cls) -> str:
-        return CONFIG_EVALUATOR_TA
 
     def get_symbol_candles(self, exchange_name: str, exchange_id: str, symbol: str, time_frame):
         try:
