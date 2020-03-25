@@ -15,17 +15,14 @@
 #  License along with this library.
 import copy
 
-from octobot_commons.constants import CONFIG_EVALUATOR_FILE_PATH, CONFIG_WILDCARD
-from octobot_commons.errors import ConfigEvaluatorError
+from octobot_commons.constants import CONFIG_WILDCARD
 from octobot_commons.logging.logging_util import get_logger
 from octobot_commons.tentacles_management import create_classes_list, create_advanced_types_list
-from octobot_commons.tentacles_management.config_manager import reload_tentacle_config
 from octobot_commons.time_frame_manager import get_config_time_frame
 
 from octobot_evaluators.api.initialization import init_time_frames_from_strategies
 from octobot_evaluators.api.inspection import is_relevant_evaluator
-from octobot_evaluators.constants import CONFIG_EVALUATOR, EVALUATOR_CLASS_TYPE_MRO_INDEX, \
-    evaluator_class_str_to_matrix_type_dict
+from octobot_evaluators.constants import EVALUATOR_CLASS_TYPE_MRO_INDEX, evaluator_class_str_to_matrix_type_dict
 from octobot_evaluators.data.matrix import Matrix
 from octobot_evaluators.enums import EvaluatorMatrixTypes
 from octobot_evaluators.evaluator import TAEvaluator, SocialEvaluator, RealTimeEvaluator, StrategyEvaluator, \
@@ -43,6 +40,7 @@ EvaluatorClassTypes = {
 
 async def create_evaluators(evaluator_parent_class,
                             config: dict,
+                            tentacles_setup_config: object,
                             matrix_id: str,
                             exchange_name: str,
                             cryptocurrencies: list = None,
@@ -50,7 +48,7 @@ async def create_evaluators(evaluator_parent_class,
                             time_frames: list = None,
                             relevant_evaluators=CONFIG_WILDCARD) -> list:
     return [
-        await create_evaluator(evaluator_class, config,
+        await create_evaluator(evaluator_class, tentacles_setup_config,
                                matrix_id=matrix_id,
                                exchange_name=exchange_name,
                                cryptocurrency=cryptocurrency,
@@ -80,15 +78,15 @@ async def stop_evaluator(evaluator) -> None:
     return await evaluator.stop()
 
 
-def get_evaluator_classes_from_type(evaluator_type, config, activated_only=True) -> list:
+def get_evaluator_classes_from_type(evaluator_type, config, tentacles_setup_config, activated_only=True) -> list:
     if activated_only:
         return [cls for cls in create_advanced_types_list(EvaluatorClassTypes[evaluator_type], config)
-                if cls.is_enabled(config, False)]
+                if cls.is_enabled(tentacles_setup_config, False)]
     return create_advanced_types_list(EvaluatorClassTypes[evaluator_type], config)
 
 
 async def create_evaluator(evaluator_class,
-                           config: dict,
+                           tentacles_setup_config: object,
                            matrix_id: str,
                            exchange_name: str,
                            cryptocurrency: str = None,
@@ -97,7 +95,7 @@ async def create_evaluator(evaluator_class,
                            relevant_evaluators=CONFIG_WILDCARD):
     try:
         eval_class_instance = evaluator_class()
-        eval_class_instance.set_config(config)
+        eval_class_instance.set_tentacles_setup_config(tentacles_setup_config)
         if is_relevant_evaluator(eval_class_instance, relevant_evaluators):
             eval_class_instance.logger = get_logger(evaluator_class.get_name())
             eval_class_instance.matrix_id = matrix_id
@@ -122,31 +120,25 @@ async def create_evaluator(evaluator_class,
 """
 
 
-async def initialize_evaluators(config) -> str:
+async def initialize_evaluators(config, tentacles_setup_config) -> str:
     create_evaluator_classes(config)
-    _init_time_frames(config)
+    _init_time_frames(config, tentacles_setup_config)
 
     return create_matrix()
 
 
 def create_evaluator_classes(config):
-    reload_tentacle_config(config, CONFIG_EVALUATOR, CONFIG_EVALUATOR_FILE_PATH, ConfigEvaluatorError)
-
     create_classes_list(config, AbstractEvaluator)
     create_classes_list(config, AbstractUtil)
-
-
-def get_evaluator_config(config) -> dict:
-    return config[CONFIG_EVALUATOR]
 
 
 def get_evaluators_time_frames(config) -> list:
     return get_config_time_frame(config)
 
 
-def _init_time_frames(config) -> list:
+def _init_time_frames(config, tentacles_setup_config) -> list:
     # Init time frames using enabled strategies
-    init_time_frames_from_strategies(config)
+    init_time_frames_from_strategies(config, tentacles_setup_config)
     time_frames = copy.copy(get_config_time_frame(config))
 
     # Init display time frame
@@ -166,13 +158,14 @@ def create_matrix() -> str:
 
 
 async def create_all_type_evaluators(config: dict,
+                                     tentacles_setup_config: object,
                                      matrix_id: str,
                                      exchange_name: str,
                                      cryptocurrencies: str = None,
                                      symbols: str = None,
                                      time_frames=None,
                                      relevant_evaluators=CONFIG_WILDCARD) -> list:
-    return [await create_evaluators(evaluator_type, config,
+    return [await create_evaluators(evaluator_type, config, tentacles_setup_config,
                                     matrix_id=matrix_id, exchange_name=exchange_name,
                                     symbols=symbols, time_frames=time_frames,
                                     cryptocurrencies=cryptocurrencies, relevant_evaluators=relevant_evaluators)

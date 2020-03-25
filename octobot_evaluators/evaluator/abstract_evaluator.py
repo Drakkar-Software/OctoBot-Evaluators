@@ -18,11 +18,12 @@ import time
 from abc import abstractmethod
 
 from octobot_channels.channels.channel import get_chan
-from octobot_commons.constants import TENTACLES_EVALUATOR_PATH, START_PENDING_EVAL_NOTE, INIT_EVAL_NOTE
+from octobot_commons.constants import START_PENDING_EVAL_NOTE, INIT_EVAL_NOTE
 from octobot_commons.tentacles_management.abstract_tentacle import AbstractTentacle
 
 from octobot_evaluators.channels import MATRIX_CHANNEL
-from octobot_evaluators.constants import START_EVAL_PERTINENCE, EVALUATOR_EVAL_DEFAULT_TYPE, CONFIG_EVALUATOR
+from octobot_evaluators.constants import START_EVAL_PERTINENCE, EVALUATOR_EVAL_DEFAULT_TYPE
+from octobot_tentacles_manager.api.configurator import is_tentacle_activated_in_tentacles_setup_config
 
 
 class AbstractEvaluator(AbstractTentacle):
@@ -33,8 +34,8 @@ class AbstractEvaluator(AbstractTentacle):
         # Evaluator matrix id
         self.matrix_id: str = None
 
-        # Global OctoBot configuration
-        self.config: dict = {}
+        # Tentacle global setup configuration
+        self.tentacles_setup_config: dict = {}
 
         # Evaluator specific config (Is loaded from tentacle specific file)
         self.specific_config: dict = {}
@@ -82,14 +83,6 @@ class AbstractEvaluator(AbstractTentacle):
         :return: type
         """
         return EVALUATOR_EVAL_DEFAULT_TYPE
-
-    @classmethod
-    def get_name(cls) -> str:
-        return cls.__name__
-
-    @classmethod
-    def get_tentacle_folder(cls) -> str:
-        return TENTACLES_EVALUATOR_PATH
 
     @classmethod
     def get_is_cryptocurrencies_wildcard(cls) -> bool:
@@ -176,14 +169,14 @@ class AbstractEvaluator(AbstractTentacle):
         await self.start()
         self.logger.debug("Evaluator started")
 
-    def set_config(self, config) -> None:
+    def set_tentacles_setup_config(self, tentacles_setup_config) -> None:
         """
-        Used to provide the global config
-        :param config: global config
+        Used to provide the tentacles setup config
+        :param tentacles_setup_config: tentacles setup config
         :return: None
         """
-        self.config = config
-        self.enabled = self.is_enabled(config, False)
+        self.tentacles_setup_config = tentacles_setup_config
+        self.enabled = self.is_enabled(tentacles_setup_config, False)
 
     def set_default_config(self):
         """
@@ -248,21 +241,26 @@ class AbstractEvaluator(AbstractTentacle):
             self.eval_note += new_eval_note
 
     @classmethod
-    def is_enabled(cls, config, default) -> dict:
+    def is_enabled(cls, tentacles_setup_config, default) -> bool:
         """
         Check if the evaluator is enabled by configuration
-        :param config: global config
+        :param tentacles_setup_config: tentacles setup config
         :param default: default value if evaluator config is not found
         :return: evaluator config
         """
-        if config[CONFIG_EVALUATOR] is not None:
-            if cls.get_name() in config[CONFIG_EVALUATOR]:
-                return config[CONFIG_EVALUATOR][cls.get_name()]
-            else:
-                for parent in cls.mro():
-                    if parent.__name__ in config[CONFIG_EVALUATOR]:
-                        return config[CONFIG_EVALUATOR][parent.__name__]
-                return default
+        try:
+            return is_tentacle_activated_in_tentacles_setup_config(tentacles_setup_config,
+                                                                   cls.get_name(),
+                                                                   raise_errors=True)
+        except KeyError:
+            for parent in cls.mro():
+                try:
+                    return is_tentacle_activated_in_tentacles_setup_config(tentacles_setup_config,
+                                                                           parent.__name__,
+                                                                           raise_errors=True)
+                except KeyError:
+                    pass
+        return default
 
     def save_evaluation_expiration_time(self, eval_note_time_to_live, eval_note_changed_time=None) -> None:
         """

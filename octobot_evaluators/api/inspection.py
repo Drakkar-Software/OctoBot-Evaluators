@@ -20,10 +20,10 @@ from octobot_commons.tentacles_management import create_advanced_types_list
 from octobot_evaluators.evaluator import StrategyEvaluator, TAEvaluator
 
 
-def get_relevant_evaluators_from_strategies(config) -> list:
+def get_relevant_evaluators_from_strategies(config, tentacles_setup_config) -> list:
     evaluator_list = set()
     for strategies_eval_class in create_advanced_types_list(StrategyEvaluator, config):
-        if strategies_eval_class.is_enabled(config, False):
+        if strategies_eval_class.is_enabled(tentacles_setup_config, False):
             required_evaluators = strategies_eval_class.get_required_evaluators(config)
             if required_evaluators == CONFIG_WILDCARD:
                 return CONFIG_WILDCARD
@@ -47,12 +47,12 @@ def is_relevant_evaluator(evaluator_instance, relevant_evaluators) -> bool:
     return False
 
 
-def get_relevant_TAs_for_strategy(strategy, config) -> list:
+def get_relevant_TAs_for_strategy(strategy, config, tentacles_setup_config) -> list:
     ta_classes_list = []
     relevant_evaluators = strategy.get_required_evaluators(config)
     for ta_eval_class in create_advanced_types_list(TAEvaluator, config):
         ta_eval_class_instance = ta_eval_class()
-        ta_eval_class_instance.set_config(config)
+        ta_eval_class_instance.set_tentacles_setup_config(tentacles_setup_config)
         if CONFIG_WILDCARD in relevant_evaluators or \
                 is_relevant_evaluator(ta_eval_class_instance, relevant_evaluators):
             ta_classes_list.append(ta_eval_class)

@@ -13,13 +13,8 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
-
-import os
-
-from octobot_commons.config import load_config
-
-from octobot_evaluators.constants import CONFIG_EVALUATOR_REALTIME
 from octobot_evaluators.evaluator.abstract_evaluator import AbstractEvaluator
+from octobot_tentacles_manager.api.configurator import get_tentacle_config
 
 
 class RealTimeEvaluator(AbstractEvaluator):
@@ -29,16 +24,6 @@ class RealTimeEvaluator(AbstractEvaluator):
         super().__init__()
         self.load_config()
 
-    @classmethod
-    def get_config_tentacle_type(cls) -> str:
-        return CONFIG_EVALUATOR_REALTIME
-
     def load_config(self):
-        config_file = self.get_config_file_name()
-        if os.path.isfile(config_file):
-            self.set_default_config()
-            self.specific_config = {**self.specific_config, **load_config(config_file)}
-        else:
-            self.set_default_config()
-
-
+        self.set_default_config()
+        self.specific_config = {**self.specific_config, **get_tentacle_config(self.__class__)}
