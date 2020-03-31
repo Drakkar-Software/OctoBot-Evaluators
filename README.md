@@ -1,6 +1,6 @@
 # OctoBot-Evaluators [1.4.2](https://github.com/Drakkar-Software/OctoBot-Evaluators/blob/master/CHANGELOG.md)
 [![PyPI](https://img.shields.io/pypi/v/OctoBot-Evaluators.svg)](https://pypi.python.org/pypi/OctoBot-Evaluators/)
-[![Build Status](https://travis-ci.com/Drakkar-Software/OctoBot-Evaluators.svg?branch=master)](https://travis-ci.org/Drakkar-Software/OctoBot-Evaluators) 
+[![Build Status](https://travis-ci.com/Drakkar-Software/OctoBot-Evaluators.svg?branch=master)](https://travis-ci.com/Drakkar-Software/OctoBot-Evaluators) 
 [![Build status](https://ci.appveyor.com/api/projects/status/p68n2y6547xhw0t6?svg=true)](https://ci.appveyor.com/project/Herklos/octobot-evaluators)
 
 # Where are evaluators and strategies ?
