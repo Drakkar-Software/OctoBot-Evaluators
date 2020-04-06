@@ -32,8 +32,8 @@ TENTACLE_DEFAULT_CONFIG = "default_config"
 
 EVALUATOR_CLASS_TYPE_MRO_INDEX = -4
 
-MATRIX_CHANNEL = "Matrix"
-MATRIX_CHANNELS = "MatrixChannels"
+MATRIX_CHANNEL: str = "Matrix"
+MATRIX_CHANNELS: str = "MatrixChannels"
 
 evaluator_class_str_to_matrix_type_dict = {
     "TAEvaluator": EvaluatorMatrixTypes.TA,
