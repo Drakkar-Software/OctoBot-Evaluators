@@ -27,3 +27,12 @@ class RealTimeEvaluator(AbstractEvaluator):
     def load_config(self):
         self.set_default_config()
         self.specific_config = {**self.specific_config, **get_tentacle_config(self.__class__)}
+
+    def get_symbol_candles(self, exchange_name: str, exchange_id: str, symbol: str, time_frame):
+        try:
+            from octobot_trading.api.symbol_data import get_symbol_candles_manager
+            return get_symbol_candles_manager(self.get_exchange_symbol_data(exchange_name, exchange_id, symbol),
+                                              time_frame)
+        except ImportError:
+            self.logger.error(f"Can't get candles manager: requires OctoBot-Trading package installed")
+
