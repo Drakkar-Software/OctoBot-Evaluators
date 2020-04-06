@@ -31,6 +31,10 @@ CONFIG_FORCED_TIME_FRAME = "forced_time_frame"
 TENTACLE_DEFAULT_CONFIG = "default_config"
 
 EVALUATOR_CLASS_TYPE_MRO_INDEX = -4
+
+MATRIX_CHANNEL = "Matrix"
+MATRIX_CHANNELS = "MatrixChannels"
+
 evaluator_class_str_to_matrix_type_dict = {
     "TAEvaluator": EvaluatorMatrixTypes.TA,
     "SocialEvaluator": EvaluatorMatrixTypes.SOCIAL,

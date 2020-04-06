@@ -21,8 +21,7 @@ from octobot_channels.channels.channel import get_chan
 from octobot_commons.constants import START_PENDING_EVAL_NOTE, INIT_EVAL_NOTE
 from octobot_commons.tentacles_management.abstract_tentacle import AbstractTentacle
 
-from octobot_evaluators.channels import MATRIX_CHANNEL
-from octobot_evaluators.constants import START_EVAL_PERTINENCE, EVALUATOR_EVAL_DEFAULT_TYPE
+from octobot_evaluators.constants import START_EVAL_PERTINENCE, EVALUATOR_EVAL_DEFAULT_TYPE, MATRIX_CHANNEL
 from octobot_tentacles_manager.api.configurator import is_tentacle_activated_in_tentacles_setup_config
 
 

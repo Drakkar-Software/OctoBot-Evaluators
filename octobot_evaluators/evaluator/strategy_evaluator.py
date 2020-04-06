@@ -16,8 +16,7 @@
 from octobot_channels.channels.channel import get_chan
 from octobot_commons.constants import CONFIG_WILDCARD
 from octobot_commons.time_frame_manager import parse_time_frames
-from octobot_evaluators.channels import MATRIX_CHANNEL
-from octobot_evaluators.constants import CONFIG_FORCED_EVALUATOR, \
+from octobot_evaluators.constants import CONFIG_FORCED_EVALUATOR, MATRIX_CHANNEL, \
     STRATEGIES_REQUIRED_TIME_FRAME, CONFIG_FORCED_TIME_FRAME, STRATEGIES_REQUIRED_EVALUATORS, TENTACLE_DEFAULT_CONFIG
 from octobot_evaluators.evaluator import AbstractEvaluator
 from octobot_tentacles_manager.api.configurator import get_tentacle_config
