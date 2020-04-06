@@ -69,9 +69,6 @@ class AbstractEvaluator(AbstractTentacle):
         # Active tells if this evaluator is currently activated (an evaluator can be paused)
         self.is_active: bool = True
 
-        # set to true if start_task has to be called to start evaluator
-        self.is_to_be_started_as_task = False
-
         self.eval_note_time_to_live = None
         self.eval_note_changed_time = None
 
