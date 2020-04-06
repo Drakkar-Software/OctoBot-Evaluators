@@ -13,7 +13,7 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
-from octobot_commons.tentacles_management import AbstractTentacle
+from octobot_commons.tentacles_management.abstract_tentacle import AbstractTentacle
 
 
 class AbstractUtil(AbstractTentacle):

@@ -17,7 +17,7 @@ import copy
 
 from octobot_commons.constants import CONFIG_WILDCARD
 from octobot_commons.logging.logging_util import get_logger
-from octobot_commons.tentacles_management import create_classes_list, create_advanced_types_list
+from octobot_commons.tentacles_management.advanced_manager import create_classes_list, create_advanced_types_list
 from octobot_commons.time_frame_manager import get_config_time_frame
 
 from octobot_evaluators.api.initialization import init_time_frames_from_strategies

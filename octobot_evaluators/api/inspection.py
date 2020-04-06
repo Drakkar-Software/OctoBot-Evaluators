@@ -15,7 +15,7 @@
 #  License along with this library.
 
 from octobot_commons.constants import CONFIG_WILDCARD
-from octobot_commons.tentacles_management import create_advanced_types_list
+from octobot_commons.tentacles_management.advanced_manager import create_advanced_types_list
 
 from octobot_evaluators.evaluator import StrategyEvaluator, TAEvaluator
 
