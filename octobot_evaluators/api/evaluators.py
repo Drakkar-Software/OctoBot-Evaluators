@@ -43,7 +43,7 @@ async def create_evaluators(evaluator_parent_class,
                             tentacles_setup_config: object,
                             matrix_id: str,
                             exchange_name: str,
-                            cryptocurrencies: list = None,
+                            symbols_by_crypto_currencies: dict = None,
                             symbols: list = None,
                             time_frames: list = None,
                             relevant_evaluators=CONFIG_WILDCARD) -> list:
@@ -56,21 +56,25 @@ async def create_evaluators(evaluator_parent_class,
                                time_frame=time_frame,
                                relevant_evaluators=relevant_evaluators)
         for evaluator_class in create_advanced_types_list(evaluator_parent_class, config)
-        for cryptocurrency in __get_cryptocurrencies_to_create(evaluator_class, cryptocurrencies)
-        for symbol in __get_symbols_to_create(evaluator_class, symbols)
-        for time_frame in __get_time_frames_to_create(evaluator_class, time_frames)
+        for cryptocurrency in _get_cryptocurrencies_to_create(evaluator_class, symbols_by_crypto_currencies.keys())
+        for symbol in _get_symbols_to_create(evaluator_class, symbols_by_crypto_currencies, cryptocurrency, symbols)
+        for time_frame in _get_time_frames_to_create(evaluator_class, time_frames)
     ]
 
 
-def __get_cryptocurrencies_to_create(evaluator_class, cryptocurrencies):  # TODO replace with python 3.8 by :=
+def _get_cryptocurrencies_to_create(evaluator_class, cryptocurrencies):  # TODO replace with python 3.8 by :=
     return cryptocurrencies if cryptocurrencies and not evaluator_class.get_is_cryptocurrencies_wildcard() else [None]
 
 
-def __get_symbols_to_create(evaluator_class, symbols):  # TODO replace with python 3.8 by :=
-    return symbols if symbols and not evaluator_class.get_is_symbol_wildcard() else [None]
+def _get_symbols_to_create(evaluator_class, symbols_by_crypto_currencies, cryptocurrency, symbols):  # TODO replace with python 3.8 by :=
+    currency_symbols = symbols
+    if cryptocurrency is not None:
+        currency_symbols = symbols_by_crypto_currencies[cryptocurrency] \
+            if cryptocurrency in symbols_by_crypto_currencies else []
+    return currency_symbols if currency_symbols and not evaluator_class.get_is_symbol_wildcard() else [None]
 
 
-def __get_time_frames_to_create(evaluator_class, time_frames):  # TODO replace with python 3.8 by :=
+def _get_time_frames_to_create(evaluator_class, time_frames):  # TODO replace with python 3.8 by :=
     return time_frames if time_frames and not evaluator_class.get_is_time_frame_wildcard() else [None]
 
 
@@ -161,12 +165,13 @@ async def create_all_type_evaluators(config: dict,
                                      tentacles_setup_config: object,
                                      matrix_id: str,
                                      exchange_name: str,
-                                     cryptocurrencies: str = None,
-                                     symbols: str = None,
-                                     time_frames=None,
+                                     symbols_by_crypto_currencies: dict = None,
+                                     symbols: list = None,
+                                     time_frames: list = None,
                                      relevant_evaluators=CONFIG_WILDCARD) -> list:
     return [await create_evaluators(evaluator_type, config, tentacles_setup_config,
                                     matrix_id=matrix_id, exchange_name=exchange_name,
                                     symbols=symbols, time_frames=time_frames,
-                                    cryptocurrencies=cryptocurrencies, relevant_evaluators=relevant_evaluators)
+                                    symbols_by_crypto_currencies=symbols_by_crypto_currencies,
+                                    relevant_evaluators=relevant_evaluators)
             for evaluator_type in EvaluatorClassTypes.values()]
