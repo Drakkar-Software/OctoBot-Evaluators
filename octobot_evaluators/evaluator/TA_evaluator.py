@@ -34,11 +34,11 @@ class TAEvaluator(AbstractEvaluator):
         except ImportError:
             self.logger.error(f"Can't get OHLCV: requires OctoBot-Trading package installed")
 
-    async def start(self) -> None:
+    async def start(self, bot_id: str) -> bool:
         """
         Default TA start: to be overwritten
         Subscribe to OHLCV notification from self.symbols and self.time_frames
-        :return: None
+        :return: success of the evaluator's start
         """
         try:
             from octobot_trading.channels.exchange_channel import get_chan as get_trading_chan
@@ -46,8 +46,10 @@ class TAEvaluator(AbstractEvaluator):
             exchange_id = get_exchange_id_from_matrix_id(self.exchange_name, self.matrix_id)
             await get_trading_chan(OctoBotTradingChannelsName.OHLCV_CHANNEL.value, exchange_id).new_consumer(
                 self.ohlcv_callback)  # TODO filter
+            return True
         except ImportError:
             self.logger.error("Can't connect to OHLCV trading channel")
+        return False
 
     async def ohlcv_callback(self, exchange: str, exchange_id: str, symbol: str,  time_frame, candle):
         # To be used to trigger an evaluation

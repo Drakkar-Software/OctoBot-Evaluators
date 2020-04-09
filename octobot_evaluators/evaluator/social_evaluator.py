@@ -46,16 +46,23 @@ class SocialEvaluator(AbstractEvaluator):
             self.set_default_config()
 
     # Override if no service feed is required for a social evaluator
-    async def start(self) -> None:
+    async def start(self, bot_id: str) -> bool:
+        """
+        :return: success of the evaluator's start
+        """
         if self.SERVICE_FEED_CLASS is None:
             self.logger.error("SERVICE_FEED_CLASS is required to use a service feed. Consumer can't start.")
         else:
             try:
                 from octobot_services.api.service_feeds import get_service_feed
-                get_service_feed(self.SERVICE_FEED_CLASS).update_feed_config(self.specific_config)
-                await get_chan(self.SERVICE_FEED_CLASS.FEED_CHANNEL.get_name()).new_consumer(self._feed_callback)
+                service_feed = get_service_feed(self.SERVICE_FEED_CLASS, bot_id)
+                if service_feed is not None:
+                    service_feed.update_feed_config(self.specific_config)
+                    await get_chan(service_feed.FEED_CHANNEL.get_name()).new_consumer(self._feed_callback)
+                    return True
             except ImportError as e:
                 self.logger.exception(e, True, "Can't start: requires OctoBot-Services package installed")
+        return False
 
     @abstractmethod
     async def _feed_callback(self, *args):

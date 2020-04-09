@@ -140,7 +140,10 @@ class AbstractEvaluator(AbstractTentacle):
                 self.logger.warning(str(self.symbol) + " evaluator returned 'nan' as eval_note, ignoring this value.")
 
     @abstractmethod
-    async def start(self) -> None:
+    async def start(self, bot_id: str) -> bool:
+        """
+        :return: success of the evaluator's start
+        """
         raise NotImplementedError("start is not implemented")
 
     async def stop(self) -> None:
@@ -157,13 +160,15 @@ class AbstractEvaluator(AbstractTentacle):
         """
         pass
 
-    async def start_evaluator(self) -> None:
+    async def start_evaluator(self, bot_id: str) -> None:
         """
         Start a task as matrix producer
         :return: None
         """
-        await self.start()
-        self.logger.debug("Evaluator started")
+        if await self.start(bot_id):
+            self.logger.debug("Evaluator started")
+        else:
+            self.logger.debug("Evaluator not started")
 
     def set_tentacles_setup_config(self, tentacles_setup_config) -> None:
         """
