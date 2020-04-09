@@ -29,13 +29,14 @@ class StrategyEvaluator(AbstractEvaluator):
         super().__init__()
         self.consumer_instance = None
 
-    async def start(self) -> None:
+    async def start(self, bot_id: str) -> bool:
         """
         Default Strategy start: to be overwritten
         Subscribe to Matrix notification from self.symbols and self.time_frames
-        :return: None
+        :return: success of the evaluator's start
         """
         self.consumer_instance = await get_chan(MATRIX_CHANNEL).new_consumer(self.matrix_callback)
+        return True
 
     async def stop(self) -> None:
         if self.consumer_instance:

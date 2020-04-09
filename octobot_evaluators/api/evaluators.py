@@ -19,7 +19,6 @@ from octobot_commons.constants import CONFIG_WILDCARD
 from octobot_commons.logging.logging_util import get_logger
 from octobot_commons.tentacles_management.advanced_manager import create_classes_list, create_advanced_types_list
 from octobot_commons.time_frame_manager import get_config_time_frame
-
 from octobot_evaluators.api.initialization import init_time_frames_from_strategies
 from octobot_evaluators.api.inspection import is_relevant_evaluator
 from octobot_evaluators.constants import EVALUATOR_CLASS_TYPE_MRO_INDEX, evaluator_class_str_to_matrix_type_dict
@@ -43,18 +42,22 @@ async def create_evaluators(evaluator_parent_class,
                             tentacles_setup_config: object,
                             matrix_id: str,
                             exchange_name: str,
+                            bot_id: str,
                             symbols_by_crypto_currencies: dict = None,
                             symbols: list = None,
                             time_frames: list = None,
                             relevant_evaluators=CONFIG_WILDCARD) -> list:
     return [
-        await create_evaluator(evaluator_class, tentacles_setup_config,
+        await create_evaluator(evaluator_class,
+                               tentacles_setup_config,
                                matrix_id=matrix_id,
                                exchange_name=exchange_name,
+                               bot_id=bot_id,
                                cryptocurrency=cryptocurrency,
                                symbol=symbol,
                                time_frame=time_frame,
-                               relevant_evaluators=relevant_evaluators)
+                               relevant_evaluators=relevant_evaluators
+                               )
         for evaluator_class in create_advanced_types_list(evaluator_parent_class, config)
         for cryptocurrency in _get_cryptocurrencies_to_create(evaluator_class, symbols_by_crypto_currencies.keys())
         for symbol in _get_symbols_to_create(evaluator_class, symbols_by_crypto_currencies, cryptocurrency, symbols)
@@ -93,6 +96,7 @@ async def create_evaluator(evaluator_class,
                            tentacles_setup_config: object,
                            matrix_id: str,
                            exchange_name: str,
+                           bot_id: str,
                            cryptocurrency: str = None,
                            symbol: str = None,
                            time_frame=None,
@@ -106,12 +110,12 @@ async def create_evaluator(evaluator_class,
             eval_class_instance.exchange_name = exchange_name if exchange_name else None
             eval_class_instance.cryptocurrency = cryptocurrency if cryptocurrency else None
             eval_class_instance.symbol = symbol if symbol else None
-            eval_class_instance.time_frame = time_frame if time_frame else None
+            eval_class_instance.time_frame = time_frame if time_frame else eval_class_instance.time_frame
             eval_class_instance.evaluator_type = evaluator_class_str_to_matrix_type_dict[
                 eval_class_instance.__class__.mro()[EVALUATOR_CLASS_TYPE_MRO_INDEX].__name__]
             await eval_class_instance.prepare()
-
-            await eval_class_instance.start_evaluator()
+            # handle backtesting
+            await eval_class_instance.start_evaluator(bot_id)
             return eval_class_instance
     except Exception as e:
         get_logger().exception(e, True, f"Error when creating evaluator {evaluator_class}: {e}")
@@ -165,12 +169,15 @@ async def create_all_type_evaluators(config: dict,
                                      tentacles_setup_config: object,
                                      matrix_id: str,
                                      exchange_name: str,
+                                     bot_id: str,
                                      symbols_by_crypto_currencies: dict = None,
                                      symbols: list = None,
                                      time_frames: list = None,
-                                     relevant_evaluators=CONFIG_WILDCARD) -> list:
+                                     relevant_evaluators=CONFIG_WILDCARD,
+                                     ) -> list:
     return [await create_evaluators(evaluator_type, config, tentacles_setup_config,
                                     matrix_id=matrix_id, exchange_name=exchange_name,
+                                    bot_id=bot_id,
                                     symbols=symbols, time_frames=time_frames,
                                     symbols_by_crypto_currencies=symbols_by_crypto_currencies,
                                     relevant_evaluators=relevant_evaluators)
