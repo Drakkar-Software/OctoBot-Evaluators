@@ -24,8 +24,8 @@ class Matrices(Singleton):
         self.matrices: dict = {}
 
     def add_matrix(self, matrix) -> None:
-        if matrix.id not in self.matrices:
-            self.matrices[matrix.id] = matrix
+        if matrix.matrix_id not in self.matrices:
+            self.matrices[matrix.matrix_id] = matrix
 
     def get_matrix(self, matrix_id) -> Matrix:
         return self.matrices[matrix_id]

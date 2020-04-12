@@ -41,7 +41,7 @@ async def test_add_matrix():
     Matrices.instance().add_matrix(created_matrix)
 
     assert matrices.matrices != {}
-    assert created_matrix.id in matrices.matrices
+    assert created_matrix.matrix_id in matrices.matrices
 
 
 @pytest.mark.asyncio
