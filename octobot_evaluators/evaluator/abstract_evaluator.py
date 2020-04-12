@@ -22,6 +22,7 @@ from octobot_commons.constants import START_PENDING_EVAL_NOTE, INIT_EVAL_NOTE
 from octobot_commons.tentacles_management.abstract_tentacle import AbstractTentacle
 
 from octobot_evaluators.constants import START_EVAL_PERTINENCE, EVALUATOR_EVAL_DEFAULT_TYPE, MATRIX_CHANNEL
+from octobot_evaluators.data_manager.matrix_manager import set_tentacle_value, get_matrix_default_value_path
 from octobot_tentacles_manager.api.configurator import is_tentacle_activated_in_tentacles_setup_config
 
 
@@ -100,6 +101,21 @@ class AbstractEvaluator(AbstractTentacle):
         :return: True if the evaluator is not time_frame dependant else False
         """
         return True
+
+    def initialize(self):
+        set_tentacle_value(
+            matrix_id=self.matrix_id,
+            tentacle_type=self.get_eval_type(),
+            tentacle_value=None,
+            tentacle_path=get_matrix_default_value_path(
+                exchange_name=self.exchange_name,
+                tentacle_type=self.evaluator_type.value,
+                tentacle_name=self.get_name(),
+                cryptocurrency=self.cryptocurrency,
+                symbol=self.symbol,
+                time_frame=self.time_frame
+            )
+        )
 
     async def evaluation_completed(self,
                                    cryptocurrency: str = None,

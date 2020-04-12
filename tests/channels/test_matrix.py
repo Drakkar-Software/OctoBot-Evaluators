@@ -19,7 +19,7 @@ from octobot_channels.channels.channel import del_chan, get_chan
 from octobot_evaluators.api.evaluators import create_matrix
 from octobot_evaluators.api.initialization import create_matrix_channels
 from octobot_evaluators.constants import MATRIX_CHANNEL
-from octobot_evaluators.data.matrix import get_tentacle_path
+from octobot_evaluators.data_manager.matrix_manager import get_tentacle_path
 from octobot_evaluators.matrices.matrices import Matrices
 
 

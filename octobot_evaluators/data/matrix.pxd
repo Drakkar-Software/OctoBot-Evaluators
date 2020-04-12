@@ -19,15 +19,10 @@ from octobot_commons.event_tree cimport EventTreeNode
 
 
 cdef class Matrix:
-    cdef public str id
+    cdef public str matrix_id
     cdef public EventTree matrix
 
-    cpdef void set_tentacle_value(self, object value, object value_type, list value_path)
+    cpdef void set_node_value(self, object value, object value_type, list value_path)
     cpdef list get_node_children_at_path(self, list node_path, EventTreeNode starting_node=*)
     cpdef dict get_node_children_by_names_at_path(self, list node_path, EventTreeNode starting_node=*)
     cpdef EventTreeNode get_node_at_path(self, list node_path, EventTreeNode starting_node=*)
-    cpdef list get_tentacle_nodes(self, str exchange_name=*, object tentacle_type=*, str tentacle_name=*)
-    cpdef list get_tentacles_value_nodes(self, list tentacle_nodes, str cryptocurrency=*, str symbol=*, str time_frame=*)
-
-cpdef list get_tentacle_path(str exchange_name=*, object tentacle_type=*, str tentacle_name=*)
-cpdef list get_tentacle_value_path(str cryptocurrency=*, str symbol=*, str time_frame=*)

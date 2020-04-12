@@ -13,6 +13,3 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
-
-PROJECT_NAME = "OctoBot-Evaluators"
-VERSION = "1.4.7"  # major.minor.revision

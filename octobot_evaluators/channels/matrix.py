@@ -21,10 +21,8 @@ from octobot_channels.constants import CHANNEL_WILDCARD
 from octobot_channels.consumer import Consumer
 from octobot_channels.producer import Producer
 from octobot_commons.logging.logging_util import get_logger
-
 from octobot_evaluators.constants import EVALUATOR_EVAL_DEFAULT_TYPE
-from octobot_evaluators.data.matrix import get_tentacle_path, get_tentacle_value_path
-from octobot_evaluators.matrices.matrices import Matrices
+from octobot_evaluators.data_manager.matrix_manager import set_tentacle_value, get_matrix_default_value_path
 
 
 class MatrixChannelConsumer(Consumer):
@@ -78,15 +76,18 @@ class MatrixChannelProducer(Producer):
                              cryptocurrency: str = None,
                              symbol: str = None,
                              time_frame=None):
-        Matrices.instance().get_matrix(matrix_id).set_tentacle_value(
-            value_type=eval_note_type,
-            value=eval_note,
-            value_path=get_tentacle_path(exchange_name=exchange_name,
-                                         tentacle_type=evaluator_type,
-                                         tentacle_name=evaluator_name) + get_tentacle_value_path(
+        set_tentacle_value(
+            matrix_id=matrix_id,
+            tentacle_type=eval_note_type,
+            tentacle_value=eval_note,
+            tentacle_path=get_matrix_default_value_path(
+                exchange_name=exchange_name,
+                tentacle_type=evaluator_type,
+                tentacle_name=evaluator_name,
                 cryptocurrency=cryptocurrency,
                 symbol=symbol,
-                time_frame=time_frame)
+                time_frame=time_frame
+            )
         )
 
         await self.send(matrix_id=matrix_id,

@@ -43,7 +43,8 @@ PACKAGES = find_packages(exclude=["tests"])
 
 packages_list: list = ["octobot_evaluators.channels.matrix",
                        "octobot_evaluators.matrices.matrices",
-                       "octobot_evaluators.data.matrix"]
+                       "octobot_evaluators.data.matrix",
+                       "octobot_evaluators.data_manager.matrix_manager"]
 
 ext_modules: list = [
     Extension(package, [f"{package.replace('.', '/')}.py"])
