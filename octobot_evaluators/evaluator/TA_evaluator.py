@@ -51,6 +51,7 @@ class TAEvaluator(AbstractEvaluator):
             self.logger.error("Can't connect to OHLCV trading channel")
         return False
 
-    async def ohlcv_callback(self, exchange: str, exchange_id: str, symbol: str,  time_frame, candle):
+    async def ohlcv_callback(self, exchange: str, exchange_id: str, cryptocurrency: str, symbol: str,
+                             time_frame: str, candle: dict):
         # To be used to trigger an evaluation
         pass
