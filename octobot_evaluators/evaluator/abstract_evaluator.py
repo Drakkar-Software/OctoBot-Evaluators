@@ -105,20 +105,40 @@ class AbstractEvaluator(AbstractTentacle):
         """
         return True
 
-    def initialize(self):
-        set_tentacle_value(
-            matrix_id=self.matrix_id,
-            tentacle_type=self.get_eval_type(),
-            tentacle_value=None,
-            tentacle_path=get_matrix_default_value_path(
-                exchange_name=self.exchange_name,
-                tentacle_type=self.evaluator_type.value,
-                tentacle_name=self.get_name(),
-                cryptocurrency=self.cryptocurrency,
-                symbol=self.symbol,
-                time_frame=self.time_frame
-            )
-        )
+    def _get_tentacle_registration_topic(self, all_symbols_by_crypto_currencies, all_time_frames):
+        currencies = [self.cryptocurrency]
+        symbols = [self.symbol]
+        time_frames = [self.time_frame]
+        if self.get_is_cryptocurrencies_wildcard():
+            currencies = all_symbols_by_crypto_currencies.keys()
+        if self.get_is_symbol_wildcard():
+            symbols = []
+            for currency_symbols in all_symbols_by_crypto_currencies.values():
+                symbols += currency_symbols
+        if self.get_is_time_frame_wildcard():
+            time_frames = all_time_frames
+        return currencies, symbols, time_frames
+
+    def initialize(self, all_symbols_by_crypto_currencies, all_time_frames):
+        currencies, symbols, time_frames = self._get_tentacle_registration_topic(all_symbols_by_crypto_currencies,
+                                                                                 all_time_frames)
+        for currency in currencies:
+            for symbol in symbols:
+                if symbol is None or symbol in all_symbols_by_crypto_currencies[currency]:
+                    for time_frame in time_frames:
+                        set_tentacle_value(
+                            matrix_id=self.matrix_id,
+                            tentacle_type=self.get_eval_type(),
+                            tentacle_value=None,
+                            tentacle_path=get_matrix_default_value_path(
+                                exchange_name=self.exchange_name,
+                                tentacle_type=self.evaluator_type.value,
+                                tentacle_name=self.get_name(),
+                                cryptocurrency=currency,
+                                symbol=symbol,
+                                time_frame=time_frame.value if time_frame else None
+                            )
+                        )
 
     async def evaluation_completed(self,
                                    cryptocurrency: str = None,

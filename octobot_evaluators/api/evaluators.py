@@ -128,7 +128,7 @@ async def create_evaluator(evaluator_class,
             eval_class_instance.time_frame = time_frame if time_frame else eval_class_instance.time_frame
             eval_class_instance.evaluator_type = evaluator_class_str_to_matrix_type_dict[
                 eval_class_instance.__class__.mro()[EVALUATOR_CLASS_TYPE_MRO_INDEX].__name__]
-            eval_class_instance.initialize()
+            eval_class_instance.initialize(all_symbols_by_crypto_currencies, all_time_frames)
             await eval_class_instance.prepare()
             # handle backtesting
             await eval_class_instance.start_evaluator(bot_id)
