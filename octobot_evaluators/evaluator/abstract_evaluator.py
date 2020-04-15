@@ -46,6 +46,9 @@ class AbstractEvaluator(AbstractTentacle):
         # Specified Cryptocurrency for this instance (Should be None if wildcard)
         self.cryptocurrency: str = None
 
+        # Specified Cryptocurrency name for this instance (Should be None if wildcard)
+        self.cryptocurrency_name: str = None
+
         # Symbol is the cryptocurrency pair (Should be None if wildcard)
         self.symbol: str = None
 
@@ -88,6 +91,13 @@ class AbstractEvaluator(AbstractTentacle):
     def get_is_cryptocurrencies_wildcard(cls) -> bool:
         """
         :return: True if the evaluator is not cryptocurrency dependant else False
+        """
+        return True
+
+    @classmethod
+    def get_is_cryptocurrency_name_wildcard(cls) -> bool:
+        """
+        :return: True if the evaluator is not cryptocurrency name dependant else False
         """
         return True
 
