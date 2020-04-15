@@ -28,10 +28,6 @@ class SocialEvaluator(AbstractEvaluator):
         super().__init__()
         self.load_config()
 
-    @classmethod
-    def get_is_symbol_widlcard(cls) -> bool:
-        return False
-
     def load_config(self):
         # try with this class name
         self.specific_config = get_tentacle_config(self.__class__)
@@ -64,6 +60,15 @@ class SocialEvaluator(AbstractEvaluator):
             except ImportError as e:
                 self.logger.exception(e, True, "Can't start: requires OctoBot-Services package installed")
         return False
+
+    def _get_tentacle_registration_topic(self, all_symbols_by_crypto_currencies, all_time_frames):
+        currencies, _, _ = super()._get_tentacle_registration_topic(all_symbols_by_crypto_currencies,
+                                                                    all_time_frames)
+        symbols = [self.symbol]
+        time_frames = [self.time_frame]
+        # by default no symbol registration for social evaluators
+        # by default no time frame registration for social evaluators
+        return currencies, symbols, time_frames
 
     @abstractmethod
     async def _feed_callback(self, *args):

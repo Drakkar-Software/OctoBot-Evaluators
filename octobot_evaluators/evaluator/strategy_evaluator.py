@@ -57,6 +57,13 @@ class StrategyEvaluator(AbstractEvaluator):
         # Do not forget to check if evaluator_name is self.name
         pass
 
+    def _get_tentacle_registration_topic(self, all_symbols_by_crypto_currencies, all_time_frames):
+        currencies, symbols, _ = super()._get_tentacle_registration_topic(all_symbols_by_crypto_currencies,
+                                                                          all_time_frames)
+        time_frames = [self.time_frame]
+        # by default no time frame registration for strategies
+        return currencies, symbols, time_frames
+
     @classmethod
     def get_required_time_frames(cls, config: dict):
         if CONFIG_FORCED_TIME_FRAME in config:

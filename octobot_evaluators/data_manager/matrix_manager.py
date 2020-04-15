@@ -106,6 +106,16 @@ def get_tentacle_nodes(matrix_id, exchange_name=None, tentacle_type=None, tentac
                                                                              tentacle_name=tentacle_name))
 
 
+def get_node_children_by_names_at_path(matrix_id, node_path, starting_node=None) -> dict:
+    """
+    :param matrix_id: the matrix id
+    :param node_path: the node's path to inspect
+    :param starting_node: the node to start the path from, default is the matrix root
+    :return: a dict of the children nodes of the given path identified by their name
+    """
+    return get_matrix(matrix_id).get_node_children_by_names_at_path(node_path, starting_node=starting_node)
+
+
 def get_tentacles_value_nodes(matrix_id, tentacle_nodes, cryptocurrency=None, symbol=None, time_frame=None):
     """
     Returns the list of nodes related to the symbol and / or time_frame from the given tentacle_nodes list

@@ -13,6 +13,7 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
+from octobot_commons.enums import TimeFrames
 from octobot_evaluators.evaluator.abstract_evaluator import AbstractEvaluator
 from octobot_tentacles_manager.api.configurator import get_tentacle_config
 
@@ -35,4 +36,11 @@ class RealTimeEvaluator(AbstractEvaluator):
                                               time_frame)
         except ImportError:
             self.logger.error(f"Can't get candles manager: requires OctoBot-Trading package installed")
+
+    def _get_tentacle_registration_topic(self, all_symbols_by_crypto_currencies, all_time_frames):
+        currencies, symbols, _ = super()._get_tentacle_registration_topic(all_symbols_by_crypto_currencies,
+                                                                          all_time_frames)
+        time_frames = [TimeFrames(self.time_frame)]
+        # by default time frame registration only for the timeframe of this real-time evaluator
+        return currencies, symbols, time_frames
 
