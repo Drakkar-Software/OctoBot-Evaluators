@@ -18,6 +18,7 @@ import copy
 from octobot_channels.channels.channel_instances import ChannelInstances
 from octobot_commons.constants import CONFIG_WILDCARD
 from octobot_commons.logging.logging_util import get_logger
+from octobot_commons.symbol_util import split_symbol
 from octobot_commons.tentacles_management.advanced_manager import create_classes_list, create_advanced_types_list
 from octobot_commons.time_frame_manager import get_config_time_frame
 from octobot_evaluators.api.initialization import init_time_frames_from_strategies
@@ -45,10 +46,17 @@ async def create_evaluators(evaluator_parent_class,
                             matrix_id: str,
                             exchange_name: str,
                             bot_id: str,
-                            symbols_by_crypto_currencies: dict = None,
+                            symbols_by_crypto_currency_names: dict = None,
                             symbols: list = None,
                             time_frames: list = None,
                             relevant_evaluators=CONFIG_WILDCARD) -> list:
+    crypto_currency_name_by_crypto_currencies = {}
+    symbols_by_crypto_currency_tickers = {}
+    for name, symbol_list in symbols_by_crypto_currency_names.items():
+        if symbol_list:
+            ticker = split_symbol(symbol_list[0])[0]
+            crypto_currency_name_by_crypto_currencies[ticker] = name
+            symbols_by_crypto_currency_tickers[ticker] = symbol_list
     return [
         await create_evaluator(evaluator_class,
                                tentacles_setup_config,
@@ -56,19 +64,32 @@ async def create_evaluators(evaluator_parent_class,
                                exchange_name=exchange_name,
                                bot_id=bot_id,
                                cryptocurrency=cryptocurrency,
+                               cryptocurrency_name=_get_cryptocurrency_name(evaluator_class,
+                                                                            crypto_currency_name_by_crypto_currencies,
+                                                                            cryptocurrency),
                                symbol=symbol,
                                time_frame=time_frame,
-                               relevant_evaluators=relevant_evaluators
+                               relevant_evaluators=relevant_evaluators,
+                               all_symbols_by_crypto_currencies=symbols_by_crypto_currency_tickers,
+                               all_time_frames=time_frames
                                )
         for evaluator_class in create_advanced_types_list(evaluator_parent_class, config)
-        for cryptocurrency in _get_cryptocurrencies_to_create(evaluator_class, symbols_by_crypto_currencies.keys())
-        for symbol in _get_symbols_to_create(evaluator_class, symbols_by_crypto_currencies, cryptocurrency, symbols)
+        for cryptocurrency in _get_cryptocurrencies_to_create(evaluator_class,
+                                                              crypto_currency_name_by_crypto_currencies)
+        for symbol in _get_symbols_to_create(evaluator_class, symbols_by_crypto_currency_tickers,
+                                             cryptocurrency, symbols)
         for time_frame in _get_time_frames_to_create(evaluator_class, time_frames)
     ]
 
 
-def _get_cryptocurrencies_to_create(evaluator_class, cryptocurrencies):  # TODO replace with python 3.8 by :=
-    return cryptocurrencies if cryptocurrencies and not evaluator_class.get_is_cryptocurrencies_wildcard() else [None]
+def _get_cryptocurrency_name(evaluator_class, crypto_currency_name_by_crypto_currencies, cryptocurrency):
+    return crypto_currency_name_by_crypto_currencies[cryptocurrency] if crypto_currency_name_by_crypto_currencies \
+        and cryptocurrency is not None and not evaluator_class.get_is_cryptocurrency_name_wildcard() else None
+
+
+def _get_cryptocurrencies_to_create(evaluator_class, crypto_currency_name_by_crypto_currencies):
+    return crypto_currency_name_by_crypto_currencies.keys() if crypto_currency_name_by_crypto_currencies \
+        and not evaluator_class.get_is_cryptocurrencies_wildcard() else [None]
 
 
 def _get_symbols_to_create(evaluator_class, symbols_by_crypto_currencies, cryptocurrency,
@@ -113,9 +134,12 @@ async def create_evaluator(evaluator_class,
                            exchange_name: str,
                            bot_id: str,
                            cryptocurrency: str = None,
+                           cryptocurrency_name: str = None,
                            symbol: str = None,
                            time_frame=None,
-                           relevant_evaluators=CONFIG_WILDCARD):
+                           relevant_evaluators=CONFIG_WILDCARD,
+                           all_symbols_by_crypto_currencies=None,
+                           all_time_frames=None):
     try:
         eval_class_instance = evaluator_class()
         eval_class_instance.set_tentacles_setup_config(tentacles_setup_config)
@@ -123,7 +147,8 @@ async def create_evaluator(evaluator_class,
             eval_class_instance.logger = get_logger(evaluator_class.get_name())
             eval_class_instance.matrix_id = matrix_id
             eval_class_instance.exchange_name = exchange_name if exchange_name else None
-            eval_class_instance.cryptocurrency = cryptocurrency if cryptocurrency else None
+            eval_class_instance.cryptocurrency = cryptocurrency
+            eval_class_instance.cryptocurrency_name = cryptocurrency_name
             eval_class_instance.symbol = symbol if symbol else None
             eval_class_instance.time_frame = time_frame if time_frame else eval_class_instance.time_frame
             eval_class_instance.evaluator_type = evaluator_class_str_to_matrix_type_dict[
@@ -195,6 +220,6 @@ async def create_all_type_evaluators(config: dict,
                                     matrix_id=matrix_id, exchange_name=exchange_name,
                                     bot_id=bot_id,
                                     symbols=symbols, time_frames=time_frames,
-                                    symbols_by_crypto_currencies=symbols_by_crypto_currencies,
+                                    symbols_by_crypto_currency_names=symbols_by_crypto_currencies,
                                     relevant_evaluators=relevant_evaluators)
             for evaluator_type in EvaluatorClassTypes.values()]
