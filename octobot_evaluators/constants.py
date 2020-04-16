@@ -32,6 +32,7 @@ TENTACLE_DEFAULT_CONFIG = "default_config"
 
 EVALUATOR_CLASS_TYPE_MRO_INDEX = -4
 
+EVALUATORS_CHANNEL: str = "Evaluators"
 MATRIX_CHANNEL: str = "Matrix"
 MATRIX_CHANNELS: str = "MatrixChannels"
 

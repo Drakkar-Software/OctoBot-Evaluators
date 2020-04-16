@@ -53,6 +53,7 @@ class SocialEvaluator(AbstractEvaluator):
         if self.SERVICE_FEED_CLASS is None:
             self.logger.error("SERVICE_FEED_CLASS is required to use a service feed. Consumer can't start.")
         else:
+            await super().start(bot_id)
             try:
                 from octobot_services.api.service_feeds import get_service_feed
                 service_feed = get_service_feed(self.SERVICE_FEED_CLASS, bot_id)

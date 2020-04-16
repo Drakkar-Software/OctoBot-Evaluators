@@ -21,7 +21,8 @@ from octobot_channels.channels.channel import get_chan
 from octobot_commons.constants import START_PENDING_EVAL_NOTE, INIT_EVAL_NOTE
 from octobot_commons.tentacles_management.abstract_tentacle import AbstractTentacle
 
-from octobot_evaluators.constants import START_EVAL_PERTINENCE, EVALUATOR_EVAL_DEFAULT_TYPE, MATRIX_CHANNEL
+from octobot_evaluators.constants import START_EVAL_PERTINENCE, EVALUATOR_EVAL_DEFAULT_TYPE, MATRIX_CHANNEL, \
+    EVALUATORS_CHANNEL
 from octobot_evaluators.data_manager.matrix_manager import set_tentacle_value, get_matrix_default_value_path
 from octobot_tentacles_manager.api.configurator import is_tentacle_activated_in_tentacles_setup_config
 
@@ -69,6 +70,9 @@ class AbstractEvaluator(AbstractTentacle):
 
         # Active tells if this evaluator is currently activated (an evaluator can be paused)
         self.is_active: bool = True
+
+        # Evaluators Channel consumer instance
+        self.evaluators_consumer_instance = None
 
         self.eval_note_time_to_live = None
         self.eval_note_changed_time = None
@@ -155,12 +159,11 @@ class AbstractEvaluator(AbstractTentacle):
                 self.eval_note = START_PENDING_EVAL_NOTE
                 self.logger.warning(str(self.symbol) + " evaluator returned 'nan' as eval_note, ignoring this value.")
 
-    @abstractmethod
     async def start(self, bot_id: str) -> bool:
         """
         :return: success of the evaluator's start
         """
-        raise NotImplementedError("start is not implemented")
+        self.evaluators_consumer_instance = await get_chan(EVALUATORS_CHANNEL).new_consumer(self.evaluators_callback)
 
     async def stop(self) -> None:
         """
@@ -320,3 +323,15 @@ class AbstractEvaluator(AbstractTentacle):
         except (ImportError, KeyError):
             self.logger.error(f"Can't get {exchange_name} from exchanges instances")
         return
+
+    async def evaluators_callback(self,
+                                  matrix_id,
+                                  data,
+                                  evaluator_name,
+                                  evaluator_type,
+                                  exchange_name,
+                                  cryptocurrency,
+                                  symbol,
+                                  time_frame):
+        # Used to communicate between evaluators
+        pass
