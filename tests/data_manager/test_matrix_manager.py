@@ -14,13 +14,18 @@
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
 import asyncio
+import time
 
 import pytest
+from octobot_commons.constants import MINUTE_TO_SECONDS
+
+from octobot_commons.enums import TimeFramesMinutes, TimeFrames
 
 from octobot_evaluators.data.matrix import Matrix
 from octobot_evaluators.data_manager.matrix_manager import get_tentacle_path, get_tentacle_value_path, \
     get_tentacle_nodes, get_tentacles_value_nodes, get_matrix_default_value_path, set_tentacle_value, \
-    get_tentacle_value, get_nodes_event, get_nodes_clear_event, get_tentacle_node
+    get_tentacle_value, get_nodes_event, get_nodes_clear_event, get_tentacle_node, \
+    is_tentacle_value_valid, is_tentacles_values_valid
 from octobot_evaluators.matrices.matrices import Matrices
 
 
@@ -484,4 +489,96 @@ async def test_get_nodes_clear_event():
     assert all([not get_tentacle_node(matrix.matrix_id, node_path).node_event.is_set()
                 for node_path in
                 [evaluator_1_path, evaluator_2_path, evaluator_3_path, evaluator_4_path, evaluator_5_path]])
+    Matrices.instance().del_matrix(matrix.matrix_id)
+
+
+@pytest.mark.asyncio
+async def test_is_tentacle_value_valid():
+    matrix = Matrix()
+    Matrices.instance().add_matrix(matrix)
+
+    evaluator_1_path = get_matrix_default_value_path(tentacle_type="TA", tentacle_name="Test-TA",
+                                                     cryptocurrency="BTC",
+                                                     symbol="BTC/USD",
+                                                     time_frame="1m")
+    evaluator_2_path = get_matrix_default_value_path(tentacle_type="TA", tentacle_name="Test-TA",
+                                                     cryptocurrency="BTC",
+                                                     symbol="BTC/USD",
+                                                     time_frame="1h")
+
+    # simulate AbstractEvaluator.initialize()
+    set_tentacle_value(matrix.matrix_id, evaluator_1_path, "TA", None)
+    set_tentacle_value(matrix.matrix_id, evaluator_2_path, "TA", None)
+
+    get_tentacle_node(matrix.matrix_id, evaluator_1_path).node_value_time = time.time()
+    assert is_tentacle_value_valid(matrix.matrix_id, evaluator_1_path)
+    assert not is_tentacle_value_valid(matrix.matrix_id, evaluator_2_path)
+
+    set_tentacle_value(matrix.matrix_id, evaluator_2_path, "TA", None, timestamp=100)
+    assert not is_tentacle_value_valid(matrix.matrix_id, evaluator_2_path)
+
+    set_tentacle_value(matrix.matrix_id, evaluator_2_path, "TA", None,
+                       timestamp=time.time() - TimeFramesMinutes[TimeFrames.ONE_HOUR] * 2 * MINUTE_TO_SECONDS)
+    assert not is_tentacle_value_valid(matrix.matrix_id, evaluator_2_path)
+
+    set_tentacle_value(matrix.matrix_id, evaluator_2_path, "TA", None,
+                       timestamp=time.time() - TimeFramesMinutes[TimeFrames.ONE_HOUR] * MINUTE_TO_SECONDS)
+    assert is_tentacle_value_valid(matrix.matrix_id, evaluator_2_path)
+
+    # test delta
+    set_tentacle_value(matrix.matrix_id, evaluator_2_path, "TA", None,
+                       timestamp=time.time() - TimeFramesMinutes[TimeFrames.ONE_HOUR] * MINUTE_TO_SECONDS - 10)
+    assert not is_tentacle_value_valid(matrix.matrix_id, evaluator_2_path)
+
+    # test delta
+    set_tentacle_value(matrix.matrix_id, evaluator_2_path, "TA", None,
+                       timestamp=time.time() - TimeFramesMinutes[TimeFrames.ONE_HOUR] * MINUTE_TO_SECONDS - 9)
+    assert is_tentacle_value_valid(matrix.matrix_id, evaluator_2_path)
+
+    # test modified delta
+    set_tentacle_value(matrix.matrix_id, evaluator_2_path, "TA", None,
+                       timestamp=time.time() - TimeFramesMinutes[TimeFrames.ONE_HOUR] * MINUTE_TO_SECONDS - 29)
+    assert is_tentacle_value_valid(matrix.matrix_id, evaluator_2_path, delta=30)
+
+    # test modified delta
+    set_tentacle_value(matrix.matrix_id, evaluator_2_path, "TA", None,
+                       timestamp=time.time() - TimeFramesMinutes[TimeFrames.ONE_HOUR] * MINUTE_TO_SECONDS - 31)
+    assert not is_tentacle_value_valid(matrix.matrix_id, evaluator_2_path, delta=30)
+
+    Matrices.instance().del_matrix(matrix.matrix_id)
+
+
+@pytest.mark.asyncio
+async def test_is_tentacles_values_valid():
+    matrix = Matrix()
+    Matrices.instance().add_matrix(matrix)
+
+    evaluator_1_path = get_matrix_default_value_path(tentacle_type="TA", tentacle_name="Test-TA",
+                                                     cryptocurrency="BTC",
+                                                     symbol="BTC/USD",
+                                                     time_frame="1m")
+    evaluator_2_path = get_matrix_default_value_path(tentacle_type="TA", tentacle_name="Test-TA",
+                                                     cryptocurrency="BTC",
+                                                     symbol="BTC/USD",
+                                                     time_frame="1h")
+
+    # simulate AbstractEvaluator.initialize()
+    set_tentacle_value(matrix.matrix_id, evaluator_1_path, "TA", None)
+    set_tentacle_value(matrix.matrix_id, evaluator_2_path, "TA", None)
+
+    assert not is_tentacles_values_valid(matrix.matrix_id, [evaluator_1_path, evaluator_2_path])
+
+    set_tentacle_value(matrix.matrix_id, evaluator_1_path, "TA", None,
+                       timestamp=time.time() - TimeFramesMinutes[TimeFrames.ONE_MINUTE] * 2 * MINUTE_TO_SECONDS)
+    set_tentacle_value(matrix.matrix_id, evaluator_2_path, "TA", None,
+                       timestamp=time.time() - TimeFramesMinutes[TimeFrames.ONE_HOUR] * 2 * MINUTE_TO_SECONDS)
+    assert not is_tentacles_values_valid(matrix.matrix_id, [evaluator_1_path, evaluator_2_path])
+
+    set_tentacle_value(matrix.matrix_id, evaluator_1_path, "TA", None,
+                       timestamp=time.time() - TimeFramesMinutes[TimeFrames.ONE_MINUTE] * MINUTE_TO_SECONDS)
+    assert not is_tentacles_values_valid(matrix.matrix_id, [evaluator_1_path, evaluator_2_path])
+
+    set_tentacle_value(matrix.matrix_id, evaluator_2_path, "TA", None,
+                       timestamp=time.time() - TimeFramesMinutes[TimeFrames.ONE_HOUR] * MINUTE_TO_SECONDS)
+    assert is_tentacles_values_valid(matrix.matrix_id, [evaluator_1_path, evaluator_2_path])
     Matrices.instance().del_matrix(matrix.matrix_id)
