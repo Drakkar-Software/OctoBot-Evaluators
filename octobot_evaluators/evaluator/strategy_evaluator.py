@@ -35,6 +35,7 @@ class StrategyEvaluator(AbstractEvaluator):
         Subscribe to Matrix notification from self.symbols and self.time_frames
         :return: success of the evaluator's start
         """
+        await super().start(bot_id)
         self.consumer_instance = await get_chan(MATRIX_CHANNEL).new_consumer(self.matrix_callback)
         return True
 

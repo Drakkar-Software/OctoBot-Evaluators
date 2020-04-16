@@ -42,6 +42,7 @@ from octobot_evaluators import VERSION, PROJECT_NAME
 PACKAGES = find_packages(exclude=["tests"])
 
 packages_list: list = ["octobot_evaluators.channels.matrix",
+                       "octobot_evaluators.channels.evaluators",
                        "octobot_evaluators.matrices.matrices",
                        "octobot_evaluators.data.matrix",
                        "octobot_evaluators.data_manager.matrix_manager"]
