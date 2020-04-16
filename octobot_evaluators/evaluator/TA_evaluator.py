@@ -40,6 +40,7 @@ class TAEvaluator(AbstractEvaluator):
         Subscribe to OHLCV notification from self.symbols and self.time_frames
         :return: success of the evaluator's start
         """
+        await super().start(bot_id)
         try:
             from octobot_trading.channels.exchange_channel import get_chan as get_trading_chan
             from octobot_trading.api.exchange import get_exchange_id_from_matrix_id
