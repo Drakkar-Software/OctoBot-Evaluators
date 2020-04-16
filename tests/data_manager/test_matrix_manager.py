@@ -20,7 +20,7 @@ import pytest
 from octobot_evaluators.data.matrix import Matrix
 from octobot_evaluators.data_manager.matrix_manager import get_tentacle_path, get_tentacle_value_path, \
     get_tentacle_nodes, get_tentacles_value_nodes, get_matrix_default_value_path, set_tentacle_value, \
-    get_tentacle_value, get_nodes_event
+    get_tentacle_value, get_nodes_event, get_nodes_clear_event, get_tentacle_node
 from octobot_evaluators.matrices.matrices import Matrices
 
 
@@ -367,6 +367,7 @@ async def test_get_nodes_event():
     set_tentacle_value(matrix.matrix_id, evaluator_4_path, "TA", None)
     set_tentacle_value(matrix.matrix_id, evaluator_5_path, "TA", None)
 
+    # Asserts that a newly created event can't be successfuly awaited
     with pytest.raises(asyncio.TimeoutError):
         await asyncio.wait_for(await get_nodes_event(matrix.matrix_id, [evaluator_1_path, evaluator_3_path]), timeout=1)
 
@@ -400,11 +401,11 @@ async def test_get_nodes_event():
         await wait_should_failed
 
     wait_should_failed = asyncio.wait_for(await get_nodes_event(matrix.matrix_id,
-                                                                 [get_matrix_default_value_path(tentacle_type="TA",
-                                                                                                tentacle_name="Test-TA",
-                                                                                                cryptocurrency="BTC",
-                                                                                                symbol="BTC/USD")]),
-                                           timeout=1)
+                                                                [get_matrix_default_value_path(tentacle_type="TA",
+                                                                                               tentacle_name="Test-TA",
+                                                                                               cryptocurrency="BTC",
+                                                                                               symbol="BTC/USD")]),
+                                          timeout=1)
     wait_should_succeed = asyncio.wait_for(await get_nodes_event(matrix.matrix_id,
                                                                  [get_matrix_default_value_path(tentacle_type="TA",
                                                                                                 tentacle_name="Test-TA",
@@ -418,4 +419,69 @@ async def test_get_nodes_event():
     with pytest.raises(asyncio.TimeoutError):
         await wait_should_failed
 
+    Matrices.instance().del_matrix(matrix.matrix_id)
+
+
+@pytest.mark.asyncio
+async def test_get_nodes_clear_event():
+    matrix = Matrix()
+    Matrices.instance().add_matrix(matrix)
+
+    evaluator_1_path = get_matrix_default_value_path(tentacle_type="TA", tentacle_name="Test-TA",
+                                                     cryptocurrency="BTC",
+                                                     symbol="BTC/USD",
+                                                     time_frame="1m")
+    evaluator_2_path = get_matrix_default_value_path(tentacle_type="TA", tentacle_name="Test-TA",
+                                                     cryptocurrency="BTC",
+                                                     symbol="BTC/USD",
+                                                     time_frame="5m")
+    evaluator_3_path = get_matrix_default_value_path(tentacle_type="TA", tentacle_name="Test-TA",
+                                                     cryptocurrency="BTC",
+                                                     symbol="BTC/USD",
+                                                     time_frame="1h")
+    evaluator_4_path = get_matrix_default_value_path(tentacle_type="TA", tentacle_name="Test-TA",
+                                                     cryptocurrency="BTC",
+                                                     symbol="BTC/USD",
+                                                     time_frame="4h")
+    evaluator_5_path = get_matrix_default_value_path(tentacle_type="TA", tentacle_name="Test-TA",
+                                                     cryptocurrency="BTC",
+                                                     symbol="BTC/USD",
+                                                     time_frame="1d")
+
+    # simulate AbstractEvaluator.initialize()
+    set_tentacle_value(matrix.matrix_id, evaluator_1_path, "TA", None)
+    set_tentacle_value(matrix.matrix_id, evaluator_2_path, "TA", None)
+    set_tentacle_value(matrix.matrix_id, evaluator_3_path, "TA", None)
+    set_tentacle_value(matrix.matrix_id, evaluator_4_path, "TA", None)
+    set_tentacle_value(matrix.matrix_id, evaluator_5_path, "TA", None)
+
+    set_tentacle_value(matrix.matrix_id, evaluator_1_path, "TA", None)
+    set_tentacle_value(matrix.matrix_id, evaluator_2_path, "TA", None)
+    set_tentacle_value(matrix.matrix_id, evaluator_3_path, "TA", None)
+    await asyncio.wait_for(await get_nodes_clear_event(matrix.matrix_id,
+                                                       [get_matrix_default_value_path(
+                                                           tentacle_type="TA",
+                                                           tentacle_name="Test-TA",
+                                                           cryptocurrency="BTC")]),
+                           timeout=1)
+    assert all([not get_tentacle_node(matrix.matrix_id, node_path).node_event.is_set()
+                for node_path in
+                [evaluator_1_path, evaluator_2_path, evaluator_3_path, evaluator_4_path, evaluator_5_path]])
+    set_tentacle_value(matrix.matrix_id, evaluator_4_path, "TA", None)
+    set_tentacle_value(matrix.matrix_id, evaluator_5_path, "TA", None)
+    assert not all([not get_tentacle_node(matrix.matrix_id, node_path).node_event.is_set()
+                    for node_path in
+                    [evaluator_1_path, evaluator_2_path, evaluator_3_path, evaluator_4_path, evaluator_5_path]])
+    assert all([get_tentacle_node(matrix.matrix_id, node_path).node_event.is_set()
+                for node_path in
+                [evaluator_4_path, evaluator_5_path]])
+    await asyncio.wait_for(await get_nodes_clear_event(matrix.matrix_id,
+                                                       [get_matrix_default_value_path(
+                                                           tentacle_type="TA",
+                                                           tentacle_name="Test-TA",
+                                                           cryptocurrency="BTC")]),
+                           timeout=1)
+    assert all([not get_tentacle_node(matrix.matrix_id, node_path).node_event.is_set()
+                for node_path in
+                [evaluator_1_path, evaluator_2_path, evaluator_3_path, evaluator_4_path, evaluator_5_path]])
     Matrices.instance().del_matrix(matrix.matrix_id)
