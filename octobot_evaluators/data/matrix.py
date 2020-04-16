@@ -31,16 +31,35 @@ class Matrix:
         self.matrix_id = str(uuid.uuid4())
         self.matrix = EventTree()
 
-    def set_node_value(self, value, value_type, value_path):
-        self.matrix.set_node_at_path(value, value_type, value_path)
+    def set_node_value(self, value, value_type, value_path, timestamp=0):
+        """
+        Set the node value at node path
+        :param value_path: the node path
+        :param value_type: the node type
+        :param value: the node value
+        :param timestamp: the value modification timestamp.
+        """
+        self.matrix.set_node_at_path(value, value_type, value_path, timestamp=timestamp)
 
     def get_node_children_at_path(self, node_path, starting_node=None):
+        """
+        Get the node children list
+        :param node_path: the node path
+        :param starting_node: the node to start the relative path
+        :return: the list of node children
+        """
         try:
             return list(self.matrix.get_node(node_path, starting_node=starting_node).children.values())
         except NodeExistsError:
             return []
 
     def get_node_children_by_names_at_path(self, node_path, starting_node=None):
+        """
+        Get the node children dict with node name as key
+        :param node_path: the node path
+        :param starting_node: the node to start the relative path
+        :return: the dict of node children
+        """
         try:
             return {key: val
                     for key, val in self.matrix.get_node(node_path, starting_node=starting_node).children.items()}
@@ -48,6 +67,12 @@ class Matrix:
             return {}
 
     def get_node_at_path(self, node_path, starting_node=None):
+        """
+        Get the EventTreeNode at path
+        :param node_path: the node path
+        :param starting_node: the node to start the relative path
+        :return: the node instance at path
+        """
         try:
             return self.matrix.get_node(node_path, starting_node=starting_node)
         except NodeExistsError:

@@ -14,6 +14,11 @@
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
 import asyncio
+import time
+
+from octobot_commons.constants import MINUTE_TO_SECONDS, MIN_EVAL_TIME_FRAME
+
+from octobot_commons.enums import TimeFrames, TimeFramesMinutes
 
 from octobot_evaluators.matrices.matrices import Matrices
 
@@ -27,15 +32,17 @@ def get_matrix(matrix_id):
     return Matrices.instance().get_matrix(matrix_id)
 
 
-def set_tentacle_value(matrix_id, tentacle_path, tentacle_type, tentacle_value):
+def set_tentacle_value(matrix_id, tentacle_path, tentacle_type, tentacle_value, timestamp=0):
     """
     Set the node value at tentacle path
     :param matrix_id: the matrix id
     :param tentacle_path: the tentacle path
     :param tentacle_type: the tentacle type
     :param tentacle_value: the tentacle value
+    :param timestamp: the value modification timestamp.
     """
-    get_matrix(matrix_id).set_node_value(value=tentacle_value, value_type=tentacle_type, value_path=tentacle_path)
+    get_matrix(matrix_id).set_node_value(value=tentacle_value, value_type=tentacle_type,
+                                         value_path=tentacle_path, timestamp=timestamp)
 
 
 def get_tentacle_node(matrix_id, tentacle_path):
@@ -189,3 +196,35 @@ async def subscribe_nodes_event(matrix_id, nodes_path, callback, timeout=None):
     """
     await get_nodes_event(matrix_id, nodes_path, timeout=timeout)
     callback()
+
+
+def is_tentacle_value_valid(matrix_id, tentacle_path, timestamp=0, delta=10) -> bool:
+    """
+    # TODO This method only works with complete default path
+    Check if the node is ready to be used
+    :param matrix_id: the matrix id
+    :param tentacle_path: the tentacle node path
+    :param timestamp: the timestamp to use
+    :param delta: the authorized delta to be valid (in seconds)
+    :return: True if the node is valid else False
+    """
+    if timestamp == 0:
+        timestamp = time.time()
+    return timestamp - (get_tentacle_node(matrix_id, tentacle_path).node_value_time +
+                        TimeFramesMinutes[TimeFrames(tentacle_path[-1])] * MINUTE_TO_SECONDS + delta) < 0
+
+
+def is_tentacles_values_valid(matrix_id, tentacle_path_list, timestamp=0, delta=10) -> bool:
+    """
+    Check if each of the tentacle path value is valid
+    :param matrix_id: the matrix id
+    :param tentacle_path_list: the tentacle node path list
+    :param timestamp: the timestamp to use
+    :param delta: the authorized delta to be valid (in seconds)
+    :return: True if all the node values are valid else False
+    """
+    return all([is_tentacle_value_valid(matrix_id=matrix_id,
+                                        tentacle_path=tentacle_path,
+                                        timestamp=timestamp,
+                                        delta=delta)
+                for tentacle_path in tentacle_path_list])
