@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2020-04-17
+### Added
+- [Channels] Evaluators channel
+- Matrix event clear management
+- Matrix node value expiration
+
+### Updated
+- [Channels] get_chan api with a new matrix_id param
+
 ## [1.4.8] - 2020-04-13
 ### Updated
 - [TA] Update ohlcv callback
