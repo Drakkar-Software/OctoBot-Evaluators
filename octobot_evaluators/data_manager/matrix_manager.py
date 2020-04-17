@@ -200,8 +200,8 @@ async def subscribe_nodes_event(matrix_id, nodes_path, callback, timeout=None):
 
 def is_tentacle_value_valid(matrix_id, tentacle_path, timestamp=0, delta=10) -> bool:
     """
-    # TODO This method only works with complete default path
     Check if the node is ready to be used
+    WARNING: This method only works with complete default tentacle path
     :param matrix_id: the matrix id
     :param tentacle_path: the tentacle node path
     :param timestamp: the timestamp to use
@@ -210,8 +210,11 @@ def is_tentacle_value_valid(matrix_id, tentacle_path, timestamp=0, delta=10) -> 
     """
     if timestamp == 0:
         timestamp = time.time()
-    return timestamp - (get_tentacle_node(matrix_id, tentacle_path).node_value_time +
-                        TimeFramesMinutes[TimeFrames(tentacle_path[-1])] * MINUTE_TO_SECONDS + delta) < 0
+    try:
+        return timestamp - (get_tentacle_node(matrix_id, tentacle_path).node_value_time +
+                            TimeFramesMinutes[TimeFrames(tentacle_path[-1])] * MINUTE_TO_SECONDS + delta) < 0
+    except (IndexError, ValueError):
+        return False
 
 
 def is_tentacles_values_valid(matrix_id, tentacle_path_list, timestamp=0, delta=10) -> bool:

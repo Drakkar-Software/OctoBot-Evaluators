@@ -15,11 +15,10 @@
 #  License along with this library.
 
 import time
-from abc import abstractmethod
 
-from octobot_channels.channels.channel import get_chan
 from octobot_commons.constants import START_PENDING_EVAL_NOTE, INIT_EVAL_NOTE
 from octobot_commons.tentacles_management.abstract_tentacle import AbstractTentacle
+from octobot_evaluators.channels.evaluator_channel import get_chan
 
 from octobot_evaluators.constants import START_EVAL_PERTINENCE, EVALUATOR_EVAL_DEFAULT_TYPE, MATRIX_CHANNEL, \
     EVALUATORS_CHANNEL
@@ -139,7 +138,7 @@ class AbstractEvaluator(AbstractTentacle):
                 eval_note = self.eval_note if self.eval_note else START_PENDING_EVAL_NOTE
 
             self.ensure_eval_note_is_not_expired()
-            await get_chan(MATRIX_CHANNEL).get_internal_producer().send_eval_note(
+            await get_chan(MATRIX_CHANNEL, self.matrix_id).get_internal_producer().send_eval_note(
                 matrix_id=self.matrix_id,
                 evaluator_name=self.get_name(),
                 evaluator_type=self.evaluator_type.value,

@@ -13,11 +13,11 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
-from octobot_channels.channels.channel import set_chan, get_chan
 from octobot_channels.util.channel_creator import create_channel_instance
 from octobot_commons.constants import CONFIG_TIME_FRAME
 from octobot_commons.tentacles_management.advanced_manager import create_advanced_types_list
 from octobot_commons.time_frame_manager import sort_time_frames
+from octobot_evaluators.channels.evaluator_channel import get_chan, set_chan
 
 from octobot_evaluators.channels.matrix import MatrixChannel
 from octobot_evaluators.constants import MATRIX_CHANNEL
@@ -35,13 +35,13 @@ def init_time_frames_from_strategies(config, tentacles_setup_config) -> None:
     config[CONFIG_TIME_FRAME] = time_frame_list
 
 
-async def create_matrix_channels() -> None:
-    await create_channel_instance(MatrixChannel, set_chan)
+async def create_matrix_channels(matrix_id: str) -> None:
+    await create_channel_instance(MatrixChannel, set_chan, matrix_id=matrix_id)
 
 
-def matrix_channel_exists() -> bool:
+def matrix_channel_exists(matrix_id: str) -> bool:
     try:
-        get_chan(MATRIX_CHANNEL)
+        get_chan(MATRIX_CHANNEL, matrix_id)
         return True
     except KeyError:
         return False

@@ -15,18 +15,17 @@
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
 
-from octobot_channels.channels.channel import Channel
 from octobot_channels.constants import CHANNEL_WILDCARD
-from octobot_channels.consumer import Consumer
-from octobot_channels.producer import Producer
 from octobot_commons.logging.logging_util import get_logger
+from octobot_evaluators.channels.evaluator_channel import EvaluatorChannelProducer, EvaluatorChannelConsumer, \
+    EvaluatorChannel
 
 
-class EvaluatorsChannelConsumer(Consumer):
+class EvaluatorsChannelConsumer(EvaluatorChannelConsumer):
     pass
 
 
-class EvaluatorsChannelProducer(Producer):
+class EvaluatorsChannelProducer(EvaluatorChannelProducer):
     # noinspection PyMethodOverriding
     async def send(self,
                    matrix_id,
@@ -57,7 +56,7 @@ class EvaluatorsChannelProducer(Producer):
             })
 
 
-class EvaluatorsChannel(Channel):
+class EvaluatorsChannel(EvaluatorChannel):
     PRODUCER_CLASS = EvaluatorsChannelProducer
     CONSUMER_CLASS = EvaluatorsChannelConsumer
 

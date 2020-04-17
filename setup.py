@@ -17,6 +17,7 @@
 import os
 
 from setuptools import dist
+
 dist.Distribution().fetch_build_eggs(['Cython>=0.29.16', 'numpy>=1.18.2'])
 
 import numpy as np
@@ -30,6 +31,7 @@ except ImportError:
         from Cython.Build import cythonize
         return cythonize(*args, **kwargs)
 
+
     def build_ext(*args, **kwargs):
         from Cython.Distutils import build_ext
         return build_ext(*args, **kwargs)
@@ -41,8 +43,9 @@ from octobot_evaluators import VERSION, PROJECT_NAME
 
 PACKAGES = find_packages(exclude=["tests"])
 
-packages_list: list = ["octobot_evaluators.channels.matrix",
-                       "octobot_evaluators.channels.evaluators",
+packages_list: list = ["octobot_evaluators.channels.evaluators",
+                       "octobot_evaluators.channels.evaluator_channel",
+                       "octobot_evaluators.channels.matrix",
                        "octobot_evaluators.matrices.matrices",
                        "octobot_evaluators.data.matrix",
                        "octobot_evaluators.data_manager.matrix_manager"]
