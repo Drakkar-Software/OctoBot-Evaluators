@@ -13,9 +13,9 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
-from octobot_channels.channels.channel import get_chan
 from octobot_commons.constants import CONFIG_WILDCARD
 from octobot_commons.time_frame_manager import parse_time_frames
+from octobot_evaluators.channels.evaluator_channel import get_chan
 from octobot_evaluators.constants import CONFIG_FORCED_EVALUATOR, MATRIX_CHANNEL, \
     STRATEGIES_REQUIRED_TIME_FRAME, CONFIG_FORCED_TIME_FRAME, STRATEGIES_REQUIRED_EVALUATORS, TENTACLE_DEFAULT_CONFIG
 from octobot_evaluators.evaluator import AbstractEvaluator
@@ -36,12 +36,12 @@ class StrategyEvaluator(AbstractEvaluator):
         :return: success of the evaluator's start
         """
         await super().start(bot_id)
-        self.consumer_instance = await get_chan(MATRIX_CHANNEL).new_consumer(self.matrix_callback)
+        self.consumer_instance = await get_chan(MATRIX_CHANNEL, self.matrix_id).new_consumer(self.matrix_callback)
         return True
 
     async def stop(self) -> None:
         if self.consumer_instance:
-            await get_chan(MATRIX_CHANNEL).remove_consumer(self.consumer_instance)
+            await get_chan(MATRIX_CHANNEL, self.matrix_id).remove_consumer(self.consumer_instance)
 
     async def matrix_callback(self,
                               matrix_id,

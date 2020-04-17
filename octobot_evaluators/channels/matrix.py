@@ -16,16 +16,15 @@
 #  License along with this library.
 from asyncio import CancelledError
 
-from octobot_channels.channels.channel import Channel
 from octobot_channels.constants import CHANNEL_WILDCARD
-from octobot_channels.consumer import Consumer
-from octobot_channels.producer import Producer
 from octobot_commons.logging.logging_util import get_logger
+from octobot_evaluators.channels.evaluator_channel import EvaluatorChannelConsumer, EvaluatorChannelProducer, \
+    EvaluatorChannel
 from octobot_evaluators.constants import EVALUATOR_EVAL_DEFAULT_TYPE
 from octobot_evaluators.data_manager.matrix_manager import set_tentacle_value, get_matrix_default_value_path
 
 
-class MatrixChannelConsumer(Consumer):
+class MatrixChannelConsumer(EvaluatorChannelConsumer):
     async def consume(self):
         while not self.should_stop:
             try:
@@ -36,7 +35,8 @@ class MatrixChannelConsumer(Consumer):
                 self.logger.exception(e, True, f"Exception when calling callback : {e}")
 
 
-class MatrixChannelProducer(Producer):
+class MatrixChannelProducer(EvaluatorChannelProducer):
+    # noinspection PyMethodOverriding
     async def send(self,
                    matrix_id,
                    evaluator_name,
@@ -101,7 +101,7 @@ class MatrixChannelProducer(Producer):
                         time_frame=time_frame)
 
 
-class MatrixChannel(Channel):
+class MatrixChannel(EvaluatorChannel):
     FILTER_SIZE = 1
     PRODUCER_CLASS = MatrixChannelProducer
     CONSUMER_CLASS = MatrixChannelConsumer
@@ -114,10 +114,11 @@ class MatrixChannel(Channel):
     EXCHANGE_NAME_KEY = "exchange_name"
     EVALUATOR_NAME_KEY = "evaluator_name"
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, matrix_id):
+        super().__init__(matrix_id)
         self.logger = get_logger(f"{self.__class__.__name__}")
 
+    # noinspection PyMethodOverriding
     async def new_consumer(self,
                            callback: object,
                            size=0,

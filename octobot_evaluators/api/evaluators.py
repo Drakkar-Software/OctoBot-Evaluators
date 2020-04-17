@@ -69,7 +69,8 @@ def _get_cryptocurrencies_to_create(evaluator_class, cryptocurrencies):  # TODO 
     return cryptocurrencies if cryptocurrencies and not evaluator_class.get_is_cryptocurrencies_wildcard() else [None]
 
 
-def _get_symbols_to_create(evaluator_class, symbols_by_crypto_currencies, cryptocurrency, symbols):  # TODO replace with python 3.8 by :=
+def _get_symbols_to_create(evaluator_class, symbols_by_crypto_currencies, cryptocurrency,
+                           symbols):  # TODO replace with python 3.8 by :=
     currency_symbols = symbols
     if cryptocurrency is not None:
         currency_symbols = symbols_by_crypto_currencies[cryptocurrency] \
@@ -83,6 +84,11 @@ def _get_time_frames_to_create(evaluator_class, time_frames):  # TODO replace wi
 
 async def stop_evaluator(evaluator) -> None:
     return await evaluator.stop()
+
+
+async def stop_evaluators_channel(matrix_id) -> None:
+    # TODO
+    pass
 
 
 def get_evaluator_classes_from_type(evaluator_type, config, tentacles_setup_config, activated_only=True) -> list:
