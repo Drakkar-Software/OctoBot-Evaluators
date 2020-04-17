@@ -16,7 +16,7 @@
 import pytest
 
 from octobot_evaluators.api.evaluators import create_matrix
-from octobot_evaluators.api.initialization import create_matrix_channels
+from octobot_evaluators.api.initialization import create_evaluator_channels, del_evaluator_channels
 from octobot_evaluators.channels.evaluator_channel import del_chan, get_chan
 from octobot_evaluators.constants import MATRIX_CHANNEL
 from octobot_evaluators.data_manager.matrix_manager import get_tentacle_path
@@ -39,17 +39,17 @@ async def matrix_callback(matrix_id,
 
 @pytest.mark.asyncio
 async def test_evaluator_channel_creation():
-    del_chan(MATRIX_CHANNEL, MATRIX_TEST_ID)
-    await create_matrix_channels(MATRIX_TEST_ID)
+    del_evaluator_channels(MATRIX_TEST_ID)
+    await create_evaluator_channels(MATRIX_TEST_ID)
     await get_chan(MATRIX_CHANNEL, MATRIX_TEST_ID).new_consumer(matrix_callback)
     await get_chan(MATRIX_CHANNEL, MATRIX_TEST_ID).stop()
 
 
 @pytest.mark.asyncio
 async def test_evaluator_channel_send():
-    del_chan(MATRIX_CHANNEL, MATRIX_TEST_ID)
+    del_evaluator_channels(MATRIX_TEST_ID)
     matrix_id = create_matrix()
-    await create_matrix_channels(MATRIX_TEST_ID)
+    await create_evaluator_channels(MATRIX_TEST_ID)
     await get_chan(MATRIX_CHANNEL, MATRIX_TEST_ID).new_consumer(matrix_callback)
     await get_chan(MATRIX_CHANNEL, MATRIX_TEST_ID).get_internal_producer().send(matrix_id=matrix_id,
                                                                                 evaluator_name="test",
@@ -65,9 +65,9 @@ async def test_evaluator_channel_send():
 
 @pytest.mark.asyncio
 async def test_evaluator_channel_send_eval_note():
-    del_chan(MATRIX_CHANNEL, MATRIX_TEST_ID)
+    del_evaluator_channels(MATRIX_TEST_ID)
     matrix_id = create_matrix()
-    await create_matrix_channels(MATRIX_TEST_ID)
+    await create_evaluator_channels(MATRIX_TEST_ID)
     await get_chan(MATRIX_CHANNEL, MATRIX_TEST_ID).new_consumer(matrix_callback)
     await get_chan(MATRIX_CHANNEL, MATRIX_TEST_ID).get_internal_producer().send_eval_note(matrix_id=matrix_id,
                                                                                           evaluator_name="test",

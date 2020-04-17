@@ -162,7 +162,8 @@ class AbstractEvaluator(AbstractTentacle):
         """
         :return: success of the evaluator's start
         """
-        self.evaluators_consumer_instance = await get_chan(EVALUATORS_CHANNEL).new_consumer(self.evaluators_callback)
+        self.evaluators_consumer_instance = await get_chan(EVALUATORS_CHANNEL, self.matrix_id)\
+            .new_consumer(self.evaluators_callback)
 
     async def stop(self) -> None:
         """
