@@ -15,12 +15,14 @@
 #  License along with this library.
 import copy
 
+from octobot_channels.channels.channel_instances import ChannelInstances
 from octobot_commons.constants import CONFIG_WILDCARD
 from octobot_commons.logging.logging_util import get_logger
 from octobot_commons.tentacles_management.advanced_manager import create_classes_list, create_advanced_types_list
 from octobot_commons.time_frame_manager import get_config_time_frame
 from octobot_evaluators.api.initialization import init_time_frames_from_strategies
 from octobot_evaluators.api.inspection import is_relevant_evaluator
+from octobot_evaluators.channels.evaluator_channel import get_chan
 from octobot_evaluators.constants import EVALUATOR_CLASS_TYPE_MRO_INDEX, evaluator_class_str_to_matrix_type_dict
 from octobot_evaluators.data.matrix import Matrix
 from octobot_evaluators.enums import EvaluatorMatrixTypes
@@ -86,9 +88,16 @@ async def stop_evaluator(evaluator) -> None:
     return await evaluator.stop()
 
 
-async def stop_evaluators_channel(matrix_id) -> None:
-    # TODO
-    pass
+async def stop_evaluator_channel(matrix_id, chan_name) -> None:
+    try:
+        await get_chan(chan_name, matrix_id).stop()
+    except Exception as e:
+        get_logger().exception(e, True, f"Error when stopping evaluator channel {chan_name}: {e}")
+
+
+async def stop_all_evaluator_channels(matrix_id) -> None:
+    for channel in ChannelInstances.instance().channels[matrix_id]:
+        await stop_evaluator_channel(matrix_id, channel.get_name())
 
 
 def get_evaluator_classes_from_type(evaluator_type, config, tentacles_setup_config, activated_only=True) -> list:

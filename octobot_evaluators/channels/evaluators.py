@@ -68,8 +68,8 @@ class EvaluatorsChannel(EvaluatorChannel):
     SYMBOL_KEY = "symbol"
     TIME_FRAME_KEY = "time_frame"
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, matrix_id):
+        super().__init__(matrix_id)
         self.logger = get_logger(f"{self.__class__.__name__}")
 
     # noinspection PyMethodOverriding

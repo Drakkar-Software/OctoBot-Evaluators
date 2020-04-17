@@ -21,7 +21,7 @@ from octobot_commons.enums import TimeFrames
 from octobot_commons.logging.logging_util import get_logger
 
 from octobot_evaluators.api.evaluators import initialize_evaluators, create_all_type_evaluators
-from octobot_evaluators.api.initialization import create_matrix_channels
+from octobot_evaluators.api.initialization import create_evaluator_channels
 from octobot_evaluators.channels.evaluator_channel import get_chan
 from octobot_evaluators.constants import MATRIX_CHANNEL
 
@@ -57,7 +57,7 @@ async def matrix_callback(matrix_id,
 
 async def create_evaluators_channel():
     matrix_id: str = await initialize_evaluators(config)
-    await create_matrix_channels(matrix_id)
+    await create_evaluator_channels(matrix_id)
     await get_chan(MATRIX_CHANNEL, matrix_id).new_consumer(matrix_callback)
     await create_all_type_evaluators(config,
                                      matrix_id=matrix_id,
