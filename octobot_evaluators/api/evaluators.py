@@ -97,7 +97,7 @@ async def stop_evaluator_channel(matrix_id, chan_name) -> None:
 
 async def stop_all_evaluator_channels(matrix_id) -> None:
     for channel in ChannelInstances.instance().channels[matrix_id]:
-        await stop_evaluator_channel(matrix_id, channel.get_name())
+        await stop_evaluator_channel(matrix_id, channel)
 
 
 def get_evaluator_classes_from_type(evaluator_type, config, tentacles_setup_config, activated_only=True) -> list:
