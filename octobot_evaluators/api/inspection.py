@@ -24,7 +24,7 @@ def get_relevant_evaluators_from_strategies(config, tentacles_setup_config) -> l
     evaluator_list = set()
     for strategies_eval_class in create_advanced_types_list(StrategyEvaluator, config):
         if strategies_eval_class.is_enabled(tentacles_setup_config, False):
-            required_evaluators = strategies_eval_class.get_required_evaluators(config)
+            required_evaluators = strategies_eval_class.get_required_evaluators()
             if required_evaluators == CONFIG_WILDCARD:
                 return CONFIG_WILDCARD
             else:
@@ -33,8 +33,8 @@ def get_relevant_evaluators_from_strategies(config, tentacles_setup_config) -> l
     return evaluator_list
 
 
-def is_relevant_evaluator(evaluator_instance, relevant_evaluators) -> bool:
-    if evaluator_instance.enabled:
+def is_relevant_evaluator(evaluator_instance, relevant_evaluators, use_relevant_evaluators_only=False) -> bool:
+    if evaluator_instance.enabled or use_relevant_evaluators_only:
         if relevant_evaluators == CONFIG_WILDCARD or \
                 evaluator_instance.get_name() in relevant_evaluators:
             return True
@@ -49,11 +49,12 @@ def is_relevant_evaluator(evaluator_instance, relevant_evaluators) -> bool:
 
 def get_relevant_TAs_for_strategy(strategy, config, tentacles_setup_config) -> list:
     ta_classes_list = []
-    relevant_evaluators = strategy.get_required_evaluators(config)
+    relevant_evaluators = strategy.get_required_evaluators()
     for ta_eval_class in create_advanced_types_list(TAEvaluator, config):
         ta_eval_class_instance = ta_eval_class()
         ta_eval_class_instance.set_tentacles_setup_config(tentacles_setup_config)
+        # use ony relevant_evaluators given by the strategy
         if CONFIG_WILDCARD in relevant_evaluators or \
-                is_relevant_evaluator(ta_eval_class_instance, relevant_evaluators):
+                is_relevant_evaluator(ta_eval_class_instance, relevant_evaluators, use_relevant_evaluators_only=True):
             ta_classes_list.append(ta_eval_class)
     return ta_classes_list

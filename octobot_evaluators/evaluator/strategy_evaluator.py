@@ -16,7 +16,7 @@
 from octobot_commons.constants import CONFIG_WILDCARD
 from octobot_commons.time_frame_manager import parse_time_frames
 from octobot_evaluators.channels.evaluator_channel import get_chan
-from octobot_evaluators.constants import CONFIG_FORCED_EVALUATOR, MATRIX_CHANNEL, \
+from octobot_evaluators.constants import MATRIX_CHANNEL, \
     STRATEGIES_REQUIRED_TIME_FRAME, CONFIG_FORCED_TIME_FRAME, STRATEGIES_REQUIRED_EVALUATORS, TENTACLE_DEFAULT_CONFIG
 from octobot_evaluators.evaluator import AbstractEvaluator
 from octobot_tentacles_manager.api.configurator import get_tentacle_config
@@ -68,9 +68,7 @@ class StrategyEvaluator(AbstractEvaluator):
             raise Exception(f"'{STRATEGIES_REQUIRED_TIME_FRAME}' is missing in configuration file")
 
     @classmethod
-    def get_required_evaluators(cls, config: dict, strategy_config: dict = None):
-        if CONFIG_FORCED_EVALUATOR in config:
-            return config[CONFIG_FORCED_EVALUATOR]
+    def get_required_evaluators(cls, strategy_config: dict = None):
         strategy_config: dict = strategy_config or get_tentacle_config(cls)
         if STRATEGIES_REQUIRED_EVALUATORS in strategy_config:
             return strategy_config[STRATEGIES_REQUIRED_EVALUATORS]
@@ -78,12 +76,12 @@ class StrategyEvaluator(AbstractEvaluator):
             raise Exception(f"'{STRATEGIES_REQUIRED_EVALUATORS}' is missing in configuration file")
 
     @classmethod
-    def get_default_evaluators(cls, config: dict):
+    def get_default_evaluators(cls):
         strategy_config: dict = get_tentacle_config(cls)
         if TENTACLE_DEFAULT_CONFIG in strategy_config:
             return strategy_config[TENTACLE_DEFAULT_CONFIG]
         else:
-            required_evaluators = cls.get_required_evaluators(config, strategy_config)
+            required_evaluators = cls.get_required_evaluators(strategy_config)
             if required_evaluators == CONFIG_WILDCARD:
                 return []
             else:
