@@ -19,7 +19,6 @@ from octobot_evaluators.enums import EvaluatorMatrixTypes
 
 MatrixValueType = NewType('MatrixValueType', Union[str, int, float])
 
-CONFIG_FORCED_EVALUATOR = "forced_evaluator"
 START_EVAL_PERTINENCE = 1
 MAX_TA_EVAL_TIME_SECONDS = 0.1
 EVALUATOR_EVAL_DEFAULT_TYPE = float
