@@ -15,5 +15,11 @@
 #  License along with this library.
 
 
-class UnsetTentacleEvaluation(Exception):
-    pass
+class Evaluation:
+    def __init__(self, evaluator_name, evaluation_value, evaluation_type):
+        self.evaluator_name = evaluator_name
+        self.evaluation_value = evaluation_value
+        self.evaluation_type = evaluation_type
+
+    def __str__(self):
+        return f"[{self.evaluator_name}] evaluation: {self.evaluation_value} ({self.evaluation_type})"
