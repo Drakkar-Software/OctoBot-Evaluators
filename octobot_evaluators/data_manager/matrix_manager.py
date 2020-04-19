@@ -171,28 +171,28 @@ def get_tentacle_value_path(cryptocurrency=None, symbol=None, time_frame=None) -
     return node_path
 
 
-async def get_nodes_event(matrix_id, nodes_path, timeout=None):
+async def get_nodes_event(matrix_id, nodes_paths, timeout=None):
     """
     Return the asyncio.wait of nodes event
     :param matrix_id: the matrix id
-    :param nodes_path: the tentacle node path
+    :param nodes_paths: the tentacle node paths
     :param timeout: the event waiting timeout (when None no timeout)
     :return: the
     """
     return asyncio.gather(*[asyncio.wait_for(get_tentacle_node(matrix_id, node_path).node_event.wait(), timeout=timeout)
-                            for node_path in nodes_path])
+                            for node_path in nodes_paths])
 
 
-async def get_nodes_clear_event(matrix_id, nodes_path, timeout=None):
+async def get_nodes_clear_event(matrix_id, nodes_paths, timeout=None):
     """
     Return the asyncio.wait of nodes clear event
     :param matrix_id: the matrix id
-    :param nodes_path: the tentacle node path
+    :param nodes_paths: the tentacle node path
     :param timeout: the event waiting timeout (when None no timeout)
     :return: the
     """
     return asyncio.gather(*[asyncio.wait_for(get_tentacle_node(matrix_id, node_path).node_clear_event.wait(),
-                                             timeout=timeout) for node_path in nodes_path])
+                                             timeout=timeout) for node_path in nodes_paths])
 
 
 async def subscribe_nodes_event(matrix_id, nodes_path, callback, timeout=None):
