@@ -48,7 +48,8 @@ packages_list: list = ["octobot_evaluators.channels.evaluators",
                        "octobot_evaluators.channels.matrix",
                        "octobot_evaluators.matrices.matrices",
                        "octobot_evaluators.data.matrix",
-                       "octobot_evaluators.data_manager.matrix_manager"]
+                       "octobot_evaluators.data_manager.matrix_manager",
+                       "octobot_evaluators.util.evaluation_util"]
 
 ext_modules: list = [
     Extension(package, [f"{package.replace('.', '/')}.py"])

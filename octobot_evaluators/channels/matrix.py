@@ -30,7 +30,7 @@ class MatrixChannelConsumer(EvaluatorChannelConsumer):
             try:
                 await self.callback(**(await self.queue.get()))
             except CancelledError:
-                self.logger.warning("Cancelled task")
+                self.logger.debug("Cancelled task")
             except Exception as e:
                 self.logger.exception(e, True, f"Exception when calling callback : {e}")
 
@@ -43,6 +43,7 @@ class MatrixChannelProducer(EvaluatorChannelProducer):
                    evaluator_type,
                    eval_note,
                    eval_note_type=EVALUATOR_EVAL_DEFAULT_TYPE,
+                   eval_time=0,
                    exchange_name=None,
                    cryptocurrency=CHANNEL_WILDCARD,
                    symbol=CHANNEL_WILDCARD,
@@ -62,6 +63,7 @@ class MatrixChannelProducer(EvaluatorChannelProducer):
                 "evaluator_type": evaluator_type,
                 "eval_note": eval_note,
                 "eval_note_type": eval_note_type,
+                "eval_time": eval_time,
                 "exchange_name": exchange_name,
                 "cryptocurrency": cryptocurrency,
                 "symbol": symbol,
@@ -74,6 +76,7 @@ class MatrixChannelProducer(EvaluatorChannelProducer):
                              evaluator_type,
                              eval_note,
                              eval_note_type,
+                             eval_time: float = 0,
                              exchange_name: str = None,
                              cryptocurrency: str = None,
                              symbol: str = None,
@@ -83,6 +86,7 @@ class MatrixChannelProducer(EvaluatorChannelProducer):
             matrix_id=matrix_id,
             tentacle_type=eval_note_type,
             tentacle_value=eval_note,
+            timestamp=eval_time,
             tentacle_path=get_matrix_default_value_path(
                 exchange_name=exchange_name,
                 tentacle_type=evaluator_type,
@@ -98,6 +102,7 @@ class MatrixChannelProducer(EvaluatorChannelProducer):
                         evaluator_type=evaluator_type,
                         eval_note=eval_note,
                         eval_note_type=eval_note_type,
+                        eval_time=eval_time,
                         exchange_name=exchange_name,
                         cryptocurrency=cryptocurrency,
                         symbol=symbol,
