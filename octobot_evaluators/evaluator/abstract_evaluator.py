@@ -155,13 +155,15 @@ class AbstractEvaluator(AbstractTentacle):
                                    cryptocurrency: str = None,
                                    symbol: str = None,
                                    time_frame=None,
-                                   eval_note=None) -> None:
+                                   eval_note=None,
+                                   eval_time=0) -> None:
         """
         Main async method to notify matrix to update
         :param cryptocurrency: evaluated cryptocurrency
         :param symbol: evaluated symbol
-        :param time_frame: evaluated time frame
+        :param time_frame: evaluated time fram
         :param eval_note: if None = self.eval_note
+        :param eval_time: the time of the evaluation if relevant, default is 0
         :return: None
         """
         try:
