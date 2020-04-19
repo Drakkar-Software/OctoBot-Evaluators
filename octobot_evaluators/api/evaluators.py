@@ -49,6 +49,7 @@ async def create_evaluators(evaluator_parent_class,
                             symbols_by_crypto_currency_names: dict = None,
                             symbols: list = None,
                             time_frames: list = None,
+                            real_time_time_frames: list = None,
                             relevant_evaluators=CONFIG_WILDCARD) -> list:
     crypto_currency_name_by_crypto_currencies = {}
     symbols_by_crypto_currency_tickers = {}
@@ -71,7 +72,8 @@ async def create_evaluators(evaluator_parent_class,
                                time_frame=time_frame,
                                relevant_evaluators=relevant_evaluators,
                                all_symbols_by_crypto_currencies=symbols_by_crypto_currency_tickers,
-                               all_time_frames=time_frames
+                               time_frames=time_frames,
+                               real_time_time_frames=real_time_time_frames
                                )
         for evaluator_class in create_advanced_types_list(evaluator_parent_class, config)
         for cryptocurrency in _get_cryptocurrencies_to_create(evaluator_class,
@@ -139,7 +141,8 @@ async def create_evaluator(evaluator_class,
                            time_frame=None,
                            relevant_evaluators=CONFIG_WILDCARD,
                            all_symbols_by_crypto_currencies=None,
-                           all_time_frames=None):
+                           time_frames=None,
+                           real_time_time_frames=None):
     try:
         eval_class_instance = evaluator_class()
         eval_class_instance.set_tentacles_setup_config(tentacles_setup_config)
@@ -153,7 +156,7 @@ async def create_evaluator(evaluator_class,
             eval_class_instance.time_frame = time_frame if time_frame else eval_class_instance.time_frame
             eval_class_instance.evaluator_type = evaluator_class_str_to_matrix_type_dict[
                 eval_class_instance.__class__.mro()[EVALUATOR_CLASS_TYPE_MRO_INDEX].__name__]
-            eval_class_instance.initialize(all_symbols_by_crypto_currencies, all_time_frames)
+            eval_class_instance.initialize(all_symbols_by_crypto_currencies, time_frames, real_time_time_frames)
             await eval_class_instance.prepare()
             # handle backtesting
             await eval_class_instance.start_evaluator(bot_id)
@@ -214,12 +217,14 @@ async def create_all_type_evaluators(config: dict,
                                      symbols_by_crypto_currencies: dict = None,
                                      symbols: list = None,
                                      time_frames: list = None,
+                                     real_time_time_frames: list = None,
                                      relevant_evaluators=CONFIG_WILDCARD,
                                      ) -> list:
     return [await create_evaluators(evaluator_type, config, tentacles_setup_config,
                                     matrix_id=matrix_id, exchange_name=exchange_name,
                                     bot_id=bot_id,
                                     symbols=symbols, time_frames=time_frames,
+                                    real_time_time_frames=real_time_time_frames,
                                     symbols_by_crypto_currency_names=symbols_by_crypto_currencies,
                                     relevant_evaluators=relevant_evaluators)
             for evaluator_type in EvaluatorClassTypes.values()]

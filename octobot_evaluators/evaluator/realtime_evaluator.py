@@ -27,7 +27,7 @@ class RealTimeEvaluator(AbstractEvaluator):
 
     def load_config(self):
         self.set_default_config()
-        self.specific_config = {**self.specific_config, **get_tentacle_config(self.__class__)}
+        self.specific_config.update(get_tentacle_config(self.__class__))
 
     def get_symbol_candles(self, exchange_name: str, exchange_id: str, symbol: str, time_frame):
         try:
@@ -37,10 +37,26 @@ class RealTimeEvaluator(AbstractEvaluator):
         except ImportError:
             self.logger.error(f"Can't get candles manager: requires OctoBot-Trading package installed")
 
-    def _get_tentacle_registration_topic(self, all_symbols_by_crypto_currencies, all_time_frames):
+    def _get_tentacle_registration_topic(self, all_symbols_by_crypto_currencies, time_frames, real_time_time_frames):
         currencies, symbols, _ = super()._get_tentacle_registration_topic(all_symbols_by_crypto_currencies,
-                                                                          all_time_frames)
-        time_frames = [TimeFrames(self.time_frame)]
+                                                                          time_frames,
+                                                                          real_time_time_frames)
+        to_handle_time_frames = []
+        if self.time_frame is None:
+            self.logger.error("Missing self.time_frame value, impossible to initialize this evaluator.")
+        else:
+            ideal_time_frame = TimeFrames(self.time_frame)
+            to_handle_time_frame = ideal_time_frame
+            if to_handle_time_frame in real_time_time_frames:
+                to_handle_time_frame = TimeFrames(self.time_frame)
+            elif real_time_time_frames:
+                to_handle_time_frame = real_time_time_frames[0]
+            else:
+                to_handle_time_frame = time_frames[0]
+            if ideal_time_frame != to_handle_time_frame:
+                self.logger.warning(f"Missing {ideal_time_frame.name} time frame in available time frames, "
+                                    f"using {to_handle_time_frame.name} instead.")
+            to_handle_time_frames = [to_handle_time_frame]
         # by default time frame registration only for the timeframe of this real-time evaluator
-        return currencies, symbols, time_frames
+        return currencies, symbols, to_handle_time_frames
 
