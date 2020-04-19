@@ -115,10 +115,10 @@ class AbstractEvaluator(AbstractTentacle):
         """
         return True
 
-    def _get_tentacle_registration_topic(self, all_symbols_by_crypto_currencies, all_time_frames):
+    def _get_tentacle_registration_topic(self, all_symbols_by_crypto_currencies, time_frames, real_time_time_frames):
         currencies = [self.cryptocurrency]
         symbols = [self.symbol]
-        time_frames = [self.time_frame]
+        available_time_frames = [self.time_frame]
         if self.get_is_cryptocurrencies_wildcard():
             currencies = all_symbols_by_crypto_currencies.keys()
         if self.get_is_symbol_wildcard():
@@ -126,12 +126,13 @@ class AbstractEvaluator(AbstractTentacle):
             for currency_symbols in all_symbols_by_crypto_currencies.values():
                 symbols += currency_symbols
         if self.get_is_time_frame_wildcard():
-            time_frames = all_time_frames
-        return currencies, symbols, time_frames
+            available_time_frames = time_frames
+        return currencies, symbols, available_time_frames
 
-    def initialize(self, all_symbols_by_crypto_currencies, all_time_frames):
+    def initialize(self, all_symbols_by_crypto_currencies, time_frames, real_time_time_frames):
         currencies, symbols, time_frames = self._get_tentacle_registration_topic(all_symbols_by_crypto_currencies,
-                                                                                 all_time_frames)
+                                                                                 time_frames,
+                                                                                 real_time_time_frames)
         for currency in currencies:
             for symbol in symbols:
                 if symbol is None or symbol in all_symbols_by_crypto_currencies[currency]:
@@ -174,6 +175,7 @@ class AbstractEvaluator(AbstractTentacle):
                 evaluator_type=self.evaluator_type.value,
                 eval_note=eval_note,
                 eval_note_type=self.get_eval_type(),
+                eval_time=eval_time,
                 exchange_name=self.exchange_name,
                 cryptocurrency=cryptocurrency,
                 symbol=symbol,

@@ -61,14 +61,15 @@ class SocialEvaluator(AbstractEvaluator):
                 self.logger.exception(e, True, "Can't start: requires OctoBot-Services package installed")
         return False
 
-    def _get_tentacle_registration_topic(self, all_symbols_by_crypto_currencies, all_time_frames):
+    def _get_tentacle_registration_topic(self, all_symbols_by_crypto_currencies, time_frames, real_time_time_frames):
         currencies, _, _ = super()._get_tentacle_registration_topic(all_symbols_by_crypto_currencies,
-                                                                    all_time_frames)
+                                                                    time_frames,
+                                                                    real_time_time_frames)
         symbols = [self.symbol]
-        time_frames = [self.time_frame]
+        to_handle_time_frames = [self.time_frame]
         # by default no symbol registration for social evaluators
         # by default no time frame registration for social evaluators
-        return currencies, symbols, time_frames
+        return currencies, symbols, to_handle_time_frames
 
     @abstractmethod
     async def _feed_callback(self, *args):

@@ -28,6 +28,9 @@ class StrategyEvaluator(AbstractEvaluator):
     def __init__(self):
         super().__init__()
         self.consumer_instance = None
+        self.strategy_time_frames = []
+        self.strategy_currencies = []
+        self.all_symbols_by_crypto_currencies = {}
 
     async def start(self, bot_id: str) -> bool:
         """
@@ -61,8 +64,15 @@ class StrategyEvaluator(AbstractEvaluator):
         currencies, symbols, _ = super()._get_tentacle_registration_topic(all_symbols_by_crypto_currencies,
                                                                           all_time_frames)
         time_frames = [self.time_frame]
+    def _get_tentacle_registration_topic(self, all_symbols_by_crypto_currencies, time_frames, real_time_time_frames):
+        self.strategy_currencies, symbols, self.strategy_time_frames = super()._get_tentacle_registration_topic(
+            all_symbols_by_crypto_currencies,
+            time_frames,
+            real_time_time_frames)
+        self.all_symbols_by_crypto_currencies = all_symbols_by_crypto_currencies
+        to_handle_time_frames = [self.time_frame]
         # by default no time frame registration for strategies
-        return currencies, symbols, time_frames
+        return self.strategy_currencies, symbols, to_handle_time_frames
 
     @classmethod
     def get_required_time_frames(cls, config: dict):
