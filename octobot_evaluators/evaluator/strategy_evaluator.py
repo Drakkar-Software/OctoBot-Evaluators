@@ -23,12 +23,12 @@ from octobot_evaluators.channels.evaluator_channel import get_chan
 from octobot_evaluators.constants import MATRIX_CHANNEL, \
     STRATEGIES_REQUIRED_TIME_FRAME, CONFIG_FORCED_TIME_FRAME, STRATEGIES_REQUIRED_EVALUATORS, TENTACLE_DEFAULT_CONFIG, \
     TA_LOOP_CALLBACK
-from octobot_evaluators.data import UnsetTentacleEvaluation
 from octobot_evaluators.data_manager.evaluation import Evaluation
 from octobot_evaluators.data_manager.matrix_manager import get_tentacles_value_nodes, \
     get_tentacle_path, get_node_children_by_names_at_path, get_tentacle_value_path, get_nodes_event, \
     get_matrix_default_value_path, is_tentacle_value_valid, get_nodes_clear_event
 from octobot_evaluators.enums import EvaluatorMatrixTypes
+from octobot_evaluators.errors import UnsetTentacleEvaluation
 from octobot_evaluators.evaluator import AbstractEvaluator
 from octobot_commons.evaluators_util import check_valid_eval_note
 from octobot_tentacles_manager.api.configurator import get_tentacle_config
