@@ -21,7 +21,8 @@ from octobot_commons.enums import TimeFrames, TimeFramesMinutes
 from octobot_commons.time_frame_manager import parse_time_frames
 from octobot_evaluators.channels.evaluator_channel import get_chan
 from octobot_evaluators.constants import MATRIX_CHANNEL, \
-    STRATEGIES_REQUIRED_TIME_FRAME, CONFIG_FORCED_TIME_FRAME, STRATEGIES_REQUIRED_EVALUATORS, TENTACLE_DEFAULT_CONFIG
+    STRATEGIES_REQUIRED_TIME_FRAME, CONFIG_FORCED_TIME_FRAME, STRATEGIES_REQUIRED_EVALUATORS, TENTACLE_DEFAULT_CONFIG, \
+    TA_LOOP_CALLBACK
 from octobot_evaluators.data import UnsetTentacleEvaluation
 from octobot_evaluators.data_manager.evaluation import Evaluation
 from octobot_evaluators.data_manager.matrix_manager import get_tentacles_value_nodes, \
@@ -82,7 +83,9 @@ class StrategyEvaluator(AbstractEvaluator):
 
     async def technical_evaluators_update_loop_callback(self,
                                                         matrix_id,
+                                                        update_source,
                                                         evaluator_type,
+                                                        current_time,
                                                         exchange_name,
                                                         cryptocurrency,
                                                         symbol,
@@ -141,18 +144,19 @@ class StrategyEvaluator(AbstractEvaluator):
     async def _strategy_TA_update_loop(self, exchange_name, exchange_manager, available_evaluators, cryptocurrency,
                                        symbol, time_frame, to_validate_node_paths):
         TA_update_timeout = TimeFramesMinutes[TimeFrames(time_frame)] * MINUTE_TO_SECONDS * 1.5
-        while not self.should_stop:
-            try:
-                await self._wait_for_evaluation_and_update(exchange_name, exchange_manager, available_evaluators,
-                                                           cryptocurrency, symbol, time_frame, to_validate_node_paths,
-                                                           TA_update_timeout)
-            except TimeoutError:
-                self.logger.error(f"Technical evaluation of pair {symbol} took too long.")
-            except asyncio.CancelledError:
-                pass
-            except Exception as e:
-                self.logger.exception(e, True, f"Error when handling strategy technical evaluators update loop: "
-                                               f"{e.__class__.__name__} {e}")
+        try:
+            while not self.should_stop:
+                try:
+                    await self._wait_for_evaluation_and_update(exchange_name, exchange_manager, available_evaluators,
+                                                               cryptocurrency, symbol, time_frame, to_validate_node_paths,
+                                                               TA_update_timeout)
+                except TimeoutError:
+                    self.logger.error(f"Technical evaluation of pair {symbol} took too long.")
+        except asyncio.CancelledError:
+            pass
+        except Exception as e:
+            self.logger.exception(e, True, f"Error when handling strategy technical evaluators update loop: "
+                                           f"{e.__class__.__name__} {e}")
 
     async def _wait_for_evaluation_and_update(self, exchange_name, exchange_manager, available_evaluators,
                                               cryptocurrency, symbol, time_frame, to_validate_node_paths,
@@ -181,7 +185,9 @@ class StrategyEvaluator(AbstractEvaluator):
             try:
                 self.logger.debug(f"Entering technical_evaluators_update_loop_callback for {symbol}")
                 await self.technical_evaluators_update_loop_callback(self.matrix_id,
+                                                                     TA_LOOP_CALLBACK,
                                                                      EvaluatorMatrixTypes.TA,
+                                                                     current_time,
                                                                      exchange_name,
                                                                      cryptocurrency,
                                                                      symbol,
@@ -244,12 +250,13 @@ class StrategyEvaluator(AbstractEvaluator):
                                     "this means there is an issue in this methods given arguments")
             else:
                 if evaluation:
-                    eval_value = check_valid_eval_note(evaluation[0].node_value)
+                    eval_value = evaluation[0].node_value
                     if (allowed_values is not None and eval_value in allowed_values) or \
                             check_valid_eval_note(eval_value):
                         evaluations_by_evaluator[evaluator_name] = Evaluation(evaluator_name,
                                                                               eval_value,
-                                                                              evaluation[0].node_type)
+                                                                              evaluation[0].node_type,
+                                                                              evaluation[0].node_value_time)
                     elif not allow_missing:
                         raise UnsetTentacleEvaluation(f"Missing {time_frame if time_frame else 'evaluation'} "
                                                       f"for {evaluator_name} on {symbol}, evaluation is "
@@ -275,6 +282,22 @@ class StrategyEvaluator(AbstractEvaluator):
                                                   get_tentacle_value_path(cryptocurrency=cryptocurrency,
                                                                           symbol=symbol),
                                                   starting_node=first_node).keys()
+
+    def get_available_symbols(self, matrix_id, exchange_name,
+                              cryptocurrency, tentacle_type=EvaluatorMatrixTypes.TA.value):
+        evaluator_nodes = get_node_children_by_names_at_path(matrix_id,
+                                                             get_tentacle_path(exchange_name=exchange_name,
+                                                                               tentacle_type=tentacle_type))
+        first_node = next(iter(evaluator_nodes.values()))
+        possible_symbols = get_node_children_by_names_at_path(matrix_id,
+                                                              get_tentacle_value_path(cryptocurrency=cryptocurrency),
+                                                              starting_node=first_node).keys()
+        if possible_symbols:
+            return possible_symbols
+        else:
+            # try with real time evaluators
+            return self.get_available_symbols(matrix_id, exchange_name,
+                                              cryptocurrency, EvaluatorMatrixTypes.REAL_TIME.value)
 
     def _get_tentacle_registration_topic(self, all_symbols_by_crypto_currencies, time_frames, real_time_time_frames):
         self.strategy_currencies, symbols, self.strategy_time_frames = super()._get_tentacle_registration_topic(

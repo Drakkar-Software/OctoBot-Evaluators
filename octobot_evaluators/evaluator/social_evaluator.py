@@ -27,6 +27,7 @@ class SocialEvaluator(AbstractEvaluator):
     def __init__(self):
         super().__init__()
         self.load_config()
+        self.exchange_id = None
 
     def load_config(self):
         # try with this class name
@@ -56,10 +57,29 @@ class SocialEvaluator(AbstractEvaluator):
                 if service_feed is not None:
                     service_feed.update_feed_config(self.specific_config)
                     await get_chan(service_feed.FEED_CHANNEL.get_name()).new_consumer(self._feed_callback)
+                    # store exchange_id to use it later for evaluation timestamps
+                    from octobot_trading.api.exchange import get_exchange_id_from_matrix_id
+                    self.exchange_id = get_exchange_id_from_matrix_id(self.exchange_name, self.matrix_id)
                     return True
             except ImportError as e:
-                self.logger.exception(e, True, "Can't start: requires OctoBot-Services package installed")
+                self.logger.exception(e, True, "Can't start: requires OctoBot-Services and OctoBot-Trading "
+                                               "package installed")
         return False
+
+    def get_current_exchange_time(self):
+        try:
+            from octobot_trading.api.exchange import get_exchange_current_time, \
+                get_exchange_manager_from_exchange_name_and_id
+            if self.exchange_id is not None:
+                return get_exchange_current_time(
+                    get_exchange_manager_from_exchange_name_and_id(
+                        self.exchange_name,
+                        self.exchange_id
+                    )
+                )
+        except ImportError:
+            self.logger.error(f"Can't get current exchange time: requires OctoBot-Trading package installed")
+        return None
 
     def _get_tentacle_registration_topic(self, all_symbols_by_crypto_currencies, time_frames, real_time_time_frames):
         currencies, _, _ = super()._get_tentacle_registration_topic(all_symbols_by_crypto_currencies,
