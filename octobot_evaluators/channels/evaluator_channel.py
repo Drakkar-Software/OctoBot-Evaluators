@@ -17,9 +17,12 @@
 
 from octobot_channels.channels.channel import Channel
 from octobot_channels.channels.channel_instances import ChannelInstances
+from octobot_channels.constants import CHANNEL_WILDCARD
 from octobot_channels.consumer import Consumer
 from octobot_channels.producer import Producer
 from octobot_commons.logging.logging_util import get_logger
+from octobot_evaluators.constants import EVALUATORS_CHANNEL, TA_RE_EVALUATION_TRIGGER_UPDATED_DATA, RESET_EVALUATION, \
+    EVALUATOR_CHANNEL_DATA_ACTION, EVALUATOR_CHANNEL_DATA_EXCHANGE_ID, EVALUATOR_CHANNEL_DATA_TIME_FRAMES
 
 
 class EvaluatorChannelConsumer(Consumer):
@@ -91,3 +94,42 @@ def del_chan(chan_name, matrix_id) -> None:
         ChannelInstances.instance().channels[matrix_id].pop(chan_name, None)
     except KeyError:
         get_logger(EvaluatorChannel.__name__).warning(f"Can't del chan {chan_name} with matrix_id: {matrix_id}")
+
+
+async def trigger_technical_evaluators_re_evaluation_with_updated_data(matrix_id,
+                                                                       evaluator_name,
+                                                                       evaluator_type,
+                                                                       exchange_name,
+                                                                       cryptocurrency,
+                                                                       symbol,
+                                                                       exchange_id,
+                                                                       time_frames
+                                                                       ):
+    # first reset evaluations to avoid partially updated TA cycle validation
+    await get_chan(EVALUATORS_CHANNEL, matrix_id).get_internal_producer().send(
+        matrix_id,
+        data={
+            EVALUATOR_CHANNEL_DATA_ACTION: RESET_EVALUATION,
+            EVALUATOR_CHANNEL_DATA_TIME_FRAMES: time_frames
+        },
+        evaluator_name=evaluator_name,
+        evaluator_type=evaluator_type,
+        exchange_name=exchange_name,
+        cryptocurrency=cryptocurrency,
+        symbol=symbol,
+        time_frame=CHANNEL_WILDCARD
+    )
+    await get_chan(EVALUATORS_CHANNEL, matrix_id).get_internal_producer().send(
+        matrix_id,
+        data={
+            EVALUATOR_CHANNEL_DATA_ACTION: TA_RE_EVALUATION_TRIGGER_UPDATED_DATA,
+            EVALUATOR_CHANNEL_DATA_EXCHANGE_ID: exchange_id,
+            EVALUATOR_CHANNEL_DATA_TIME_FRAMES: time_frames
+        },
+        evaluator_name=evaluator_name,
+        evaluator_type=evaluator_type,
+        exchange_name=exchange_name,
+        cryptocurrency=cryptocurrency,
+        symbol=symbol,
+        time_frame=CHANNEL_WILDCARD
+    )

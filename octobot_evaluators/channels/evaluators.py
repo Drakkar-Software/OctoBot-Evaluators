@@ -63,6 +63,7 @@ class EvaluatorsChannel(EvaluatorChannel):
     CONSUMER_CLASS = EvaluatorsChannelConsumer
 
     MATRIX_ID_KEY = "matrix_id"
+    DATA_KEY = "data"
     EVALUATOR_NAME_KEY = "evaluator_name"
     EVALUATOR_TYPE_KEY = "evaluator_type"
     EXCHANGE_NAME_KEY = "exchange_name"
@@ -98,6 +99,7 @@ class EvaluatorsChannel(EvaluatorChannel):
 
     def get_filtered_consumers(self,
                                matrix_id=CHANNEL_WILDCARD,
+                               data=CHANNEL_WILDCARD,
                                evaluator_name=CHANNEL_WILDCARD,
                                evaluator_type=CHANNEL_WILDCARD,
                                exchange_name=CHANNEL_WILDCARD,
@@ -107,6 +109,7 @@ class EvaluatorsChannel(EvaluatorChannel):
                                origin_consumer=None):
         return self.get_consumer_from_filters({
             self.MATRIX_ID_KEY: matrix_id,
+            self.DATA_KEY: data,
             self.EVALUATOR_NAME_KEY: evaluator_name,
             self.EVALUATOR_TYPE_KEY: evaluator_type,
             self.EXCHANGE_NAME_KEY: exchange_name,
@@ -118,6 +121,7 @@ class EvaluatorsChannel(EvaluatorChannel):
 
     async def _add_new_consumer_and_run(self, consumer,
                                         matrix_id=CHANNEL_WILDCARD,
+                                        data=CHANNEL_WILDCARD,
                                         evaluator_name=CHANNEL_WILDCARD,
                                         evaluator_type=CHANNEL_WILDCARD,
                                         exchange_name=CHANNEL_WILDCARD,
@@ -126,6 +130,7 @@ class EvaluatorsChannel(EvaluatorChannel):
                                         time_frame=CHANNEL_WILDCARD):
         consumer_filters: dict = {
             self.MATRIX_ID_KEY: matrix_id,
+            self.DATA_KEY: data,
             self.EVALUATOR_NAME_KEY: evaluator_name,
             self.EVALUATOR_TYPE_KEY: evaluator_type,
             self.EXCHANGE_NAME_KEY: exchange_name,
