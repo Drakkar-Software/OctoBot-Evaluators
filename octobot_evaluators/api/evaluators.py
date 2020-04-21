@@ -18,7 +18,6 @@ import copy
 from octobot_channels.channels.channel_instances import ChannelInstances
 from octobot_commons.constants import CONFIG_WILDCARD
 from octobot_commons.logging.logging_util import get_logger
-from octobot_commons.symbol_util import split_symbol
 from octobot_commons.tentacles_management.advanced_manager import create_classes_list, create_advanced_types_list
 from octobot_commons.time_frame_manager import get_config_time_frame
 from octobot_evaluators.api.initialization import init_time_frames_from_strategies
@@ -53,35 +52,43 @@ async def create_evaluators(evaluator_parent_class,
                             relevant_evaluators=CONFIG_WILDCARD) -> list:
     crypto_currency_name_by_crypto_currencies = {}
     symbols_by_crypto_currency_tickers = {}
-    for name, symbol_list in symbols_by_crypto_currency_names.items():
-        if symbol_list:
-            ticker = split_symbol(symbol_list[0])[0]
-            crypto_currency_name_by_crypto_currencies[ticker] = name
-            symbols_by_crypto_currency_tickers[ticker] = symbol_list
-    return [
-        await create_evaluator(evaluator_class,
-                               tentacles_setup_config,
-                               matrix_id=matrix_id,
-                               exchange_name=exchange_name,
-                               bot_id=bot_id,
-                               cryptocurrency=cryptocurrency,
-                               cryptocurrency_name=_get_cryptocurrency_name(evaluator_class,
-                                                                            crypto_currency_name_by_crypto_currencies,
-                                                                            cryptocurrency),
-                               symbol=symbol,
-                               time_frame=time_frame,
-                               relevant_evaluators=relevant_evaluators,
-                               all_symbols_by_crypto_currencies=symbols_by_crypto_currency_tickers,
-                               time_frames=time_frames,
-                               real_time_time_frames=real_time_time_frames
-                               )
-        for evaluator_class in create_advanced_types_list(evaluator_parent_class, config)
-        for cryptocurrency in _get_cryptocurrencies_to_create(evaluator_class,
-                                                              crypto_currency_name_by_crypto_currencies)
-        for symbol in _get_symbols_to_create(evaluator_class, symbols_by_crypto_currency_tickers,
-                                             cryptocurrency, symbols)
-        for time_frame in _get_time_frames_to_create(evaluator_class, time_frames)
-    ]
+    try:
+        from octobot_trading.api.exchange import get_exchange_manager_from_exchange_name_and_id, \
+            get_exchange_id_from_matrix_id, get_base_currency
+        exchange_id = get_exchange_id_from_matrix_id(exchange_name, matrix_id)
+        exchange_manager = get_exchange_manager_from_exchange_name_and_id(exchange_name, exchange_id)
+        for name, symbol_list in symbols_by_crypto_currency_names.items():
+            if symbol_list:
+                ticker = get_base_currency(exchange_manager, symbol_list[0])
+                crypto_currency_name_by_crypto_currencies[ticker] = name
+                symbols_by_crypto_currency_tickers[ticker] = symbol_list
+        return [
+            await create_evaluator(evaluator_class,
+                                   tentacles_setup_config,
+                                   matrix_id=matrix_id,
+                                   exchange_name=exchange_name,
+                                   bot_id=bot_id,
+                                   cryptocurrency=cryptocurrency,
+                                   cryptocurrency_name=_get_cryptocurrency_name(
+                                       evaluator_class,
+                                       crypto_currency_name_by_crypto_currencies,
+                                       cryptocurrency),
+                                   symbol=symbol,
+                                   time_frame=time_frame,
+                                   relevant_evaluators=relevant_evaluators,
+                                   all_symbols_by_crypto_currencies=symbols_by_crypto_currency_tickers,
+                                   time_frames=time_frames,
+                                   real_time_time_frames=real_time_time_frames
+                                   )
+            for evaluator_class in create_advanced_types_list(evaluator_parent_class, config)
+            for cryptocurrency in _get_cryptocurrencies_to_create(evaluator_class,
+                                                                  crypto_currency_name_by_crypto_currencies)
+            for symbol in _get_symbols_to_create(evaluator_class, symbols_by_crypto_currency_tickers,
+                                                 cryptocurrency, symbols)
+            for time_frame in _get_time_frames_to_create(evaluator_class, time_frames)
+        ]
+    except ImportError:
+        get_logger("EvaluatorsAPI").error("create_evaluators requires Octobot-Trading package installed")
 
 
 def _get_cryptocurrency_name(evaluator_class, crypto_currency_name_by_crypto_currencies, cryptocurrency):
@@ -115,7 +122,7 @@ async def stop_evaluator_channel(matrix_id, chan_name) -> None:
     try:
         await get_chan(chan_name, matrix_id).stop()
     except Exception as e:
-        get_logger().exception(e, True, f"Error when stopping evaluator channel {chan_name}: {e}")
+        get_logger("EvaluatorsAPI").exception(e, True, f"Error when stopping evaluator channel {chan_name}: {e}")
 
 
 async def stop_all_evaluator_channels(matrix_id) -> None:
@@ -162,7 +169,7 @@ async def create_evaluator(evaluator_class,
             await eval_class_instance.start_evaluator(bot_id)
             return eval_class_instance
     except Exception as e:
-        get_logger().exception(e, True, f"Error when creating evaluator {evaluator_class}: {e}")
+        get_logger("EvaluatorsAPI").exception(e, True, f"Error when creating evaluator {evaluator_class}: {e}")
     return None
 
 
