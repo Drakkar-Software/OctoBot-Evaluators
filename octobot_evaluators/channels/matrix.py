@@ -43,7 +43,6 @@ class MatrixChannelProducer(EvaluatorChannelProducer):
                    evaluator_type,
                    eval_note,
                    eval_note_type=EVALUATOR_EVAL_DEFAULT_TYPE,
-                   eval_time=0,
                    exchange_name=None,
                    cryptocurrency=CHANNEL_WILDCARD,
                    symbol=CHANNEL_WILDCARD,
@@ -63,7 +62,6 @@ class MatrixChannelProducer(EvaluatorChannelProducer):
                 "evaluator_type": evaluator_type,
                 "eval_note": eval_note,
                 "eval_note_type": eval_note_type,
-                "eval_time": eval_time,
                 "exchange_name": exchange_name,
                 "cryptocurrency": cryptocurrency,
                 "symbol": symbol,
@@ -81,7 +79,8 @@ class MatrixChannelProducer(EvaluatorChannelProducer):
                              cryptocurrency: str = None,
                              symbol: str = None,
                              time_frame=None,
-                             origin_consumer=None):
+                             origin_consumer=None,
+                             notify: bool = True):
         set_tentacle_value(
             matrix_id=matrix_id,
             tentacle_type=eval_note_type,
@@ -96,18 +95,17 @@ class MatrixChannelProducer(EvaluatorChannelProducer):
                 time_frame=time_frame
             )
         )
-
-        await self.send(matrix_id=matrix_id,
-                        evaluator_name=evaluator_name,
-                        evaluator_type=evaluator_type,
-                        eval_note=eval_note,
-                        eval_note_type=eval_note_type,
-                        eval_time=eval_time,
-                        exchange_name=exchange_name,
-                        cryptocurrency=cryptocurrency,
-                        symbol=symbol,
-                        time_frame=time_frame,
-                        origin_consumer=origin_consumer)
+        if notify:
+            await self.send(matrix_id=matrix_id,
+                            evaluator_name=evaluator_name,
+                            evaluator_type=evaluator_type,
+                            eval_note=eval_note,
+                            eval_note_type=eval_note_type,
+                            exchange_name=exchange_name,
+                            cryptocurrency=cryptocurrency,
+                            symbol=symbol,
+                            time_frame=time_frame,
+                            origin_consumer=origin_consumer)
 
 
 class MatrixChannel(EvaluatorChannel):
