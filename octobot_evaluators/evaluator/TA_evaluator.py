@@ -41,7 +41,7 @@ class TAEvaluator(AbstractEvaluator):
             from octobot_trading.api.exchange import get_exchange_id_from_matrix_id
             exchange_id = get_exchange_id_from_matrix_id(self.exchange_name, self.matrix_id)
             await get_trading_chan(OctoBotTradingChannelsName.OHLCV_CHANNEL.value, exchange_id).new_consumer(
-                self.ohlcv_callback)  # TODO filter
+                self.evaluator_ohlcv_callback)  # TODO filter
             return True
         except ImportError:
             self.logger.error("Can't connect to OHLCV trading channel")
@@ -49,16 +49,16 @@ class TAEvaluator(AbstractEvaluator):
 
     async def reset_evaluation(self, cryptocurrency, symbol, time_frame):
         self.eval_note = START_PENDING_EVAL_NOTE
-        await self.evaluation_completed(cryptocurrency, symbol, time_frame, eval_time=0)
+        await self.evaluation_completed(cryptocurrency, symbol, time_frame, eval_time=0, notify=False)
 
-    async def inner_ohlcv_callback(self, exchange: str, exchange_id: str,
+    async def ohlcv_callback(self, exchange: str, exchange_id: str,
                                    cryptocurrency: str, symbol: str, time_frame, candle, inc_in_construction_data):
         # To be used to trigger an evaluation when a new candle in closed or a re-evaluation is required
         pass
 
-    async def ohlcv_callback(self, exchange: str, exchange_id: str, cryptocurrency: str, symbol: str,
+    async def evaluator_ohlcv_callback(self, exchange: str, exchange_id: str, cryptocurrency: str, symbol: str,
                              time_frame: str, candle: dict):
-        await self.inner_ohlcv_callback(exchange, exchange_id, cryptocurrency, symbol, time_frame, candle, False)
+        await self.ohlcv_callback(exchange, exchange_id, cryptocurrency, symbol, time_frame, candle, False)
 
     async def evaluators_callback(self,
                                   matrix_id,
@@ -77,8 +77,8 @@ class TAEvaluator(AbstractEvaluator):
                 symbol_data = self.get_exchange_symbol_data(exchange_name, exchange_id, symbol)
                 for time_frame in data[EVALUATOR_CHANNEL_DATA_TIME_FRAMES]:
                     last_full_candle = get_symbol_historical_candles(symbol_data, time_frame, limit=1)
-                    await self.inner_ohlcv_callback(exchange_name, exchange_id, cryptocurrency,
-                                                    symbol, time_frame.value, last_full_candle, True)
+                    await self.ohlcv_callback(exchange_name, exchange_id, cryptocurrency,
+                                              symbol, time_frame.value, last_full_candle, True)
             except ImportError:
                 self.logger.error(f"Can't get OHLCV: requires OctoBot-Trading package installed")
         elif data[EVALUATOR_CHANNEL_DATA_ACTION] == RESET_EVALUATION:

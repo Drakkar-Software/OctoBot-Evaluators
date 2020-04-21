@@ -156,7 +156,8 @@ class AbstractEvaluator(AbstractTentacle):
                                    symbol: str = None,
                                    time_frame=None,
                                    eval_note=None,
-                                   eval_time=0) -> None:
+                                   eval_time=0,
+                                   notify=True) -> None:
         """
         Main async method to notify matrix to update
         :param cryptocurrency: evaluated cryptocurrency
@@ -181,7 +182,8 @@ class AbstractEvaluator(AbstractTentacle):
                 exchange_name=self.exchange_name,
                 cryptocurrency=cryptocurrency,
                 symbol=symbol,
-                time_frame=time_frame)
+                time_frame=time_frame,
+                notify=notify)
         except Exception as e:
             # if ConfigManager.is_in_dev_mode(self.config): # TODO
             #     raise e
