@@ -39,3 +39,11 @@ def has_children(matrix_node) -> bool:
 
 def get_value(matrix_node) -> object:
     return matrix_node.node_value
+
+
+def get_type(matrix_node) -> object:
+    return matrix_node.node_type
+
+
+def get_time(matrix_node) -> object:
+    return matrix_node.node_value_time
