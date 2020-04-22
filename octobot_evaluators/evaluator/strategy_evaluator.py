@@ -21,13 +21,11 @@ from octobot_evaluators.channels.evaluator_channel import get_chan
 from octobot_evaluators.constants import MATRIX_CHANNEL, \
     STRATEGIES_REQUIRED_TIME_FRAME, CONFIG_FORCED_TIME_FRAME, STRATEGIES_REQUIRED_EVALUATORS, TENTACLE_DEFAULT_CONFIG, \
     EVALUATOR_CHANNEL_DATA_ACTION, RESET_EVALUATION, EVALUATOR_CHANNEL_DATA_TIME_FRAMES
-from octobot_evaluators.data_manager.matrix_manager import get_tentacles_value_nodes, \
-    get_tentacle_path, get_node_children_by_names_at_path, get_tentacle_value_path, get_tentacle_eval_time, \
+from octobot_evaluators.data_manager.matrix_manager import get_tentacle_path, get_node_children_by_names_at_path, \
+    get_tentacle_value_path, get_tentacle_eval_time, \
     get_matrix_default_value_path, is_tentacle_value_valid
 from octobot_evaluators.enums import EvaluatorMatrixTypes
-from octobot_evaluators.errors import UnsetTentacleEvaluation
 from octobot_evaluators.evaluator import AbstractEvaluator
-from octobot_commons.evaluators_util import check_valid_eval_note
 from octobot_tentacles_manager.api.configurator import get_tentacle_config
 
 
@@ -40,6 +38,11 @@ class StrategyEvaluator(AbstractEvaluator):
         self.strategy_time_frames = []
         self.evaluations_last_updates = {}
 
+        # caches
+        self.available_evaluators_cache = {}
+        self.available_time_frames_cache = {}
+        self.available_node_paths_cache = {}
+
     async def start(self, bot_id: str) -> bool:
         """
         Default Strategy start: to be overwritten
@@ -51,13 +54,29 @@ class StrategyEvaluator(AbstractEvaluator):
             self.strategy_matrix_callback)
         return True
 
-    @classmethod
-    def get_is_requiring_complete_TA_updates(cls) -> bool:
+    def is_technical_evaluator_cycle_complete(self, matrix_id, evaluator_name, evaluator_type, exchange_name,
+                                              cryptocurrency, symbol, time_frame) -> bool:
         """
-        :return: True if the strategy is to be waken up by technical evaluators only when every time frame update
-        has been completed. This avoids partial time frame updates wakeup.
+        :return: True if the strategy is to be waken up by technical evaluators at the moment of this call.
+        This avoids partial time frame updates wakeup.
+        Override if necessary
         """
-        return True
+        # 1. Ensure this evaluation has not already been sent
+        # 2. Ensure every technical evaluator form this time frame are valid
+        return not self._already_sent_this_technical_evaluation(matrix_id,
+                                                                evaluator_name,
+                                                                evaluator_type,
+                                                                exchange_name,
+                                                                cryptocurrency,
+                                                                symbol,
+                                                                time_frame) and \
+            self._are_every_evaluation_valid(matrix_id,
+                                             evaluator_name,
+                                             evaluator_type,
+                                             exchange_name,
+                                             cryptocurrency,
+                                             symbol,
+                                             time_frame)
 
     async def stop(self) -> None:
         if self.consumer_instance:
@@ -81,25 +100,13 @@ class StrategyEvaluator(AbstractEvaluator):
         if evaluator_type == EvaluatorMatrixTypes.TA.value:
             # ensure this time frame is within the strategy's time frames
             if TimeFrames(time_frame) not in self.strategy_time_frames or \
-                self.get_is_requiring_complete_TA_updates() and \
-                    (
-                        # ensure this evaluation has not already been sent
-                        self._already_sent_this_technical_evaluation(matrix_id,
-                                                                     evaluator_name,
-                                                                     evaluator_type,
-                                                                     exchange_name,
-                                                                     cryptocurrency,
-                                                                     symbol,
-                                                                     time_frame)
-                        # ensure every technical evaluator form this time frame are valid
-                        or not self._are_every_evaluation_valid(matrix_id,
-                                                                evaluator_name,
-                                                                evaluator_type,
-                                                                exchange_name,
-                                                                cryptocurrency,
-                                                                symbol,
-                                                                time_frame)
-                    ):
+                not self.is_technical_evaluator_cycle_complete(matrix_id,
+                                                               evaluator_name,
+                                                               evaluator_type,
+                                                               exchange_name,
+                                                               cryptocurrency,
+                                                               symbol,
+                                                               time_frame):
                 # do not call the strategy
                 return
         await self.matrix_callback(
@@ -137,22 +144,12 @@ class StrategyEvaluator(AbstractEvaluator):
                                     symbol,
                                     time_frame
                                     ):
-        available_time_frames = self.get_available_time_frames(matrix_id, exchange_name, evaluator_type,
-                                                               cryptocurrency, symbol)
-        to_check_time_frames = [tf
-                                for tf in available_time_frames
-                                if TimeFrames(tf) in self.strategy_time_frames]
-        available_evaluators = self._get_available_evaluators(matrix_id, exchange_name, evaluator_type)
-        to_validate_node_paths = [
-            get_matrix_default_value_path(tentacle_name=evaluator,
-                                          tentacle_type=evaluator_type,
-                                          exchange_name=exchange_name,
-                                          cryptocurrency=cryptocurrency,
-                                          symbol=symbol,
-                                          time_frame=time_frame)
-            for time_frame in to_check_time_frames
-            for evaluator in available_evaluators
-        ]
+        to_validate_node_paths = self._get_available_node_paths(matrix_id,
+                                                                evaluator_type,
+                                                                exchange_name,
+                                                                cryptocurrency,
+                                                                symbol,
+                                                                use_cache=True)
         current_time = self._get_exchange_current_time(exchange_name, matrix_id)
         # negative time delta to invalidate evaluations 10 secs before next timestamp
         nodes_paths_to_authorized_delta = 10
@@ -165,6 +162,50 @@ class StrategyEvaluator(AbstractEvaluator):
                                        cryptocurrency, symbol, time_frame)
             return True
         return False
+
+    def _get_available_node_paths(self,
+                                  matrix_id,
+                                  evaluator_type,
+                                  exchange_name,
+                                  cryptocurrency,
+                                  symbol,
+                                  use_cache=True):
+        if use_cache:
+            try:
+                return self.available_node_paths_cache[matrix_id][exchange_name][evaluator_type]
+            except KeyError:
+                # No cache usage here to be use to refresh data
+                node_paths = self._inner_get_available_node_paths(matrix_id, evaluator_type, exchange_name,
+                                                                  cryptocurrency, symbol, use_cache=False)
+                if matrix_id not in self.available_node_paths_cache:
+                    self.available_node_paths_cache[matrix_id] = {}
+                if exchange_name not in self.available_node_paths_cache[matrix_id]:
+                    self.available_node_paths_cache[matrix_id][exchange_name] = {
+                        evaluator_type: node_paths
+                    }
+                return node_paths
+        return self._inner_get_available_node_paths(matrix_id, evaluator_type, exchange_name,
+                                                    cryptocurrency, symbol, use_cache=use_cache)
+
+    def _inner_get_available_node_paths(self, matrix_id, evaluator_type, exchange_name, cryptocurrency, symbol,
+                                        use_cache=True):
+        available_time_frames = self.get_available_time_frames(matrix_id, exchange_name, evaluator_type,
+                                                               cryptocurrency, symbol, use_cache=use_cache)
+        to_check_time_frames = [tf
+                                for tf in available_time_frames
+                                if TimeFrames(tf) in self.strategy_time_frames]
+        available_evaluators = self._get_available_evaluators(matrix_id, exchange_name, evaluator_type,
+                                                              use_cache=use_cache)
+        return [
+            get_matrix_default_value_path(tentacle_name=evaluator,
+                                          tentacle_type=evaluator_type,
+                                          exchange_name=exchange_name,
+                                          cryptocurrency=cryptocurrency,
+                                          symbol=symbol,
+                                          time_frame=time_frame)
+            for time_frame in to_check_time_frames
+            for evaluator in available_evaluators
+        ]
 
     def _save_last_evaluation(self, matrix_id, exchange_name, evaluator_type, tentacle_name,
                               cryptocurrency, symbol, time_frame):
@@ -238,49 +279,58 @@ class StrategyEvaluator(AbstractEvaluator):
                 self._set_last_evaluation_time(exchange_name, EvaluatorMatrixTypes.TA.value, cryptocurrency, symbol,
                                                time_frame.value, None)
 
-    def get_evaluations_by_evaluator(self,
-                                     matrix_id,
-                                     exchange_name=None,
-                                     tentacle_type=None,
-                                     cryptocurrency=None,
-                                     symbol=None,
-                                     time_frame=None,
-                                     allow_missing=True,
-                                     allowed_values=None) -> dict:
-        evaluator_nodes = get_node_children_by_names_at_path(matrix_id,
-                                                             get_tentacle_path(exchange_name=exchange_name,
-                                                                               tentacle_type=tentacle_type))
-        evaluations_by_evaluator = {}
-        for evaluator_name, node in evaluator_nodes.items():
-            evaluation = get_tentacles_value_nodes(matrix_id, [node], cryptocurrency=cryptocurrency,
-                                                   symbol=symbol, time_frame=time_frame)
-            if len(evaluation) > 1:
-                self.logger.warning("More than one evaluation corresponding to the given tentacle filter, "
-                                    "this means there is an issue in this methods given arguments")
-            else:
-                if evaluation:
-                    eval_value = evaluation[0].node_value
-                    if (allowed_values is not None and eval_value in allowed_values) or \
-                            check_valid_eval_note(eval_value):
-                        evaluations_by_evaluator[evaluator_name] = evaluation[0]
-                    elif not allow_missing:
-                        raise UnsetTentacleEvaluation(f"Missing {time_frame if time_frame else 'evaluation'} "
-                                                      f"for {evaluator_name} on {symbol}, evaluation is "
-                                                      f"{repr(eval_value)}).")
-        return evaluations_by_evaluator
+    def _get_available_evaluators(self, matrix_id, exchange_name, tentacle_type, use_cache=True):
+        if use_cache:
+            try:
+                return self.available_evaluators_cache[matrix_id][exchange_name][tentacle_type]
+            except KeyError:
+                available_evaluators = get_node_children_by_names_at_path(
+                    matrix_id, get_tentacle_path(exchange_name=exchange_name, tentacle_type=tentacle_type)
+                ).keys()
+                if matrix_id not in self.available_evaluators:
+                    self.available_evaluators_cache[matrix_id] = {}
+                if exchange_name not in self.available_evaluators[matrix_id]:
+                    self.available_evaluators_cache[matrix_id][exchange_name] = {
+                        tentacle_type: available_evaluators
+                    }
+                return available_evaluators
+        return get_node_children_by_names_at_path(
+            matrix_id, get_tentacle_path(exchange_name=exchange_name, tentacle_type=tentacle_type)
+        ).keys()
 
-    @staticmethod
-    def _get_available_evaluators(matrix_id, exchange_name, tentacle_type):
-        return get_node_children_by_names_at_path(matrix_id,
-                                                  get_tentacle_path(exchange_name=exchange_name,
-                                                                    tentacle_type=tentacle_type)).keys()
-
-    @staticmethod
-    def get_available_time_frames(matrix_id,
+    def get_available_time_frames(self,
+                                  matrix_id,
                                   exchange_name=None,
                                   tentacle_type=None,
                                   cryptocurrency=None,
-                                  symbol=None):
+                                  symbol=None,
+                                  use_cache=True):
+        if use_cache:
+            try:
+                return self.available_time_frames_cache[matrix_id][exchange_name][tentacle_type][cryptocurrency][symbol]
+            except KeyError:
+                available_time_frames = StrategyEvaluator._get_available_time_frames(
+                    matrix_id, exchange_name,tentacle_type, cryptocurrency, symbol)
+                if matrix_id not in self.available_time_frames_cache:
+                    self.available_time_frames_cache[matrix_id] = {}
+                if exchange_name not in self.available_time_frames_cache[matrix_id]:
+                    self.available_time_frames_cache[matrix_id][exchange_name] = {}
+                if tentacle_type not in self.available_time_frames_cache[matrix_id][exchange_name]:
+                    self.available_time_frames_cache[matrix_id][exchange_name][tentacle_type] = {}
+                if cryptocurrency not in self.available_time_frames_cache[matrix_id][exchange_name][tentacle_type]:
+                    self.available_time_frames_cache[matrix_id][exchange_name][tentacle_type][cryptocurrency] = {
+                        symbol: available_time_frames
+                    }
+                return available_time_frames
+        return StrategyEvaluator._get_available_time_frames(matrix_id, exchange_name,
+                                                            tentacle_type, cryptocurrency, symbol)
+
+    @staticmethod
+    def _get_available_time_frames(matrix_id,
+                                   exchange_name,
+                                   tentacle_type,
+                                   cryptocurrency,
+                                   symbol):
         try:
             evaluator_nodes = get_node_children_by_names_at_path(matrix_id,
                                                                  get_tentacle_path(exchange_name=exchange_name,
