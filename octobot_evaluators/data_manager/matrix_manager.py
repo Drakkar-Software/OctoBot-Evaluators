@@ -16,10 +16,11 @@
 import asyncio
 import time
 
-from octobot_commons.constants import MINUTE_TO_SECONDS, MIN_EVAL_TIME_FRAME
-
+from octobot_commons.constants import MINUTE_TO_SECONDS
 from octobot_commons.enums import TimeFrames, TimeFramesMinutes
-
+from octobot_commons.evaluators_util import check_valid_eval_note
+from octobot_commons.logging.logging_util import get_logger
+from octobot_evaluators.errors import UnsetTentacleEvaluation
 from octobot_evaluators.matrices.matrices import Matrices
 
 
@@ -207,6 +208,47 @@ async def get_nodes_clear_event(matrix_id, nodes_paths, timeout=None):
     return asyncio.gather(*[asyncio.wait_for(get_tentacle_node(matrix_id, node_path).node_clear_event.wait(),
                                              timeout=timeout) for node_path in nodes_paths])
 
+
+def get_evaluations_by_evaluator(matrix_id,
+                                 exchange_name=None,
+                                 tentacle_type=None,
+                                 cryptocurrency=None,
+                                 symbol=None,
+                                 time_frame=None,
+                                 allow_missing=True,
+                                 allowed_values=None) -> dict:
+    """
+    Return a dict of evaluation nodes by evaluator name
+    :param matrix_id: the matrix id
+    :param exchange_name: the exchange name
+    :param tentacle_type: the tentacle type
+    :param cryptocurrency: the currency ticker
+    :param symbol: the traded pair
+    :param time_frame: the evaluation time frame
+    :param allow_missing: if False will raise UnsetTentacleEvaluation on missing or invalid evaluation
+    :param allowed_values: a white list of allowed values not to be taken as invalid
+    :return: the dict of evaluation nodes by evaluator name
+    """
+    evaluator_nodes = get_node_children_by_names_at_path(matrix_id,
+                                                         get_tentacle_path(exchange_name=exchange_name,
+                                                                           tentacle_type=tentacle_type))
+    evaluations_by_evaluator = {}
+    for evaluator_name, node in evaluator_nodes.items():
+        evaluation = get_tentacles_value_nodes(matrix_id, [node], cryptocurrency=cryptocurrency,
+                                               symbol=symbol, time_frame=time_frame)
+        if len(evaluation) > 1:
+            get_logger("matrix_manager").warning("More than one evaluation corresponding to the given tentacle filter, "
+                                                 "this means there is an issue in this methods given arguments")
+        elif evaluation:
+            eval_value = evaluation[0].node_value
+            if (allowed_values is not None and eval_value in allowed_values) or \
+                    check_valid_eval_note(eval_value):
+                evaluations_by_evaluator[evaluator_name] = evaluation[0]
+            elif not allow_missing:
+                raise UnsetTentacleEvaluation(f"Missing {time_frame if time_frame else 'evaluation'} "
+                                              f"for {evaluator_name} on {symbol}, evaluation is "
+                                              f"{repr(eval_value)}).")
+    return evaluations_by_evaluator
 
 async def subscribe_nodes_event(matrix_id, nodes_path, callback, timeout=None):
     """
