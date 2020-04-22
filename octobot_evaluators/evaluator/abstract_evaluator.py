@@ -122,7 +122,9 @@ class AbstractEvaluator(AbstractTentacle):
         if self.get_is_cryptocurrencies_wildcard():
             currencies = all_symbols_by_crypto_currencies.keys()
         if self.get_is_symbol_wildcard():
-            symbols = [currency_symbols for currency_symbols in all_symbols_by_crypto_currencies.values()]
+            symbols = [currency_symbol
+                       for currency_symbols in all_symbols_by_crypto_currencies.values()
+                       for currency_symbol in currency_symbols]
         if self.get_is_time_frame_wildcard():
             available_time_frames = time_frames
         return currencies, symbols, available_time_frames
