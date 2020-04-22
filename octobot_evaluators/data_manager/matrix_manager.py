@@ -57,7 +57,7 @@ def get_tentacle_node(matrix_id, tentacle_path):
 
 def get_tentacle_value(matrix_id, tentacle_path):
     """
-    Set the node value at tentacle path
+    Get the value of the node at tentacle path
     :param matrix_id: the matrix id
     :param tentacle_path: the tentacle path
     :return: the tentacle value
@@ -65,6 +65,19 @@ def get_tentacle_value(matrix_id, tentacle_path):
     tentacle_node = get_tentacle_node(matrix_id, tentacle_path)
     if tentacle_node:
         return tentacle_node.node_value
+    return None
+
+
+def get_tentacle_eval_time(matrix_id, tentacle_path):
+    """
+    Get the evaluation time of the node at tentacle path
+    :param matrix_id: the matrix id
+    :param tentacle_path: the tentacle path
+    :return: the tentacle evaluation time
+    """
+    tentacle_node = get_tentacle_node(matrix_id, tentacle_path)
+    if tentacle_node:
+        return tentacle_node.node_value_time
     return None
 
 

@@ -35,8 +35,6 @@ EVALUATORS_CHANNEL: str = "Evaluators"
 MATRIX_CHANNEL: str = "Matrix"
 MATRIX_CHANNELS: str = "MatrixChannels"
 
-TA_LOOP_CALLBACK = "TA_loop_callback"
-
 TA_RE_EVALUATION_TRIGGER_UPDATED_DATA = "TA_re_evaluation_trigger_updated_data"
 RESET_EVALUATION = "reset_evaluation"
 EVALUATOR_CHANNEL_DATA_ACTION = "action"
