@@ -22,7 +22,7 @@ from octobot_evaluators.matrices.matrices import Matrices
 
 def cleanup_matrices():
     matrices = Matrices.instance()
-    for m_id in matrices.matrices.keys():
+    for m_id in list(matrices.matrices):
         Matrices.instance().del_matrix(m_id)
 
 
