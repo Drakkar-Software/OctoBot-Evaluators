@@ -20,7 +20,8 @@ from octobot_commons.time_frame_manager import parse_time_frames
 from octobot_evaluators.channels.evaluator_channel import get_chan
 from octobot_evaluators.constants import MATRIX_CHANNEL, \
     STRATEGIES_REQUIRED_TIME_FRAME, CONFIG_FORCED_TIME_FRAME, STRATEGIES_REQUIRED_EVALUATORS, TENTACLE_DEFAULT_CONFIG, \
-    EVALUATOR_CHANNEL_DATA_ACTION, RESET_EVALUATION, EVALUATOR_CHANNEL_DATA_TIME_FRAMES
+    EVALUATOR_CHANNEL_DATA_ACTION, RESET_EVALUATION, EVALUATOR_CHANNEL_DATA_TIME_FRAMES, \
+    STRATEGIES_COMPATIBLE_EVALUATOR_TYPES
 from octobot_evaluators.data_manager.matrix_manager import get_tentacle_path, get_node_children_by_names_at_path, \
     get_tentacle_value_path, get_tentacle_eval_time, \
     get_matrix_default_value_path, is_tentacle_value_valid, get_available_time_frames
@@ -370,7 +371,11 @@ class StrategyEvaluator(AbstractEvaluator):
             raise Exception(f"'{STRATEGIES_REQUIRED_TIME_FRAME}' is missing in configuration file")
 
     @classmethod
-    def get_required_evaluators(cls, strategy_config: dict = None):
+    def get_required_evaluators(cls, strategy_config: dict = None) -> list:
+        """
+        :param strategy_config: the strategy configuration dict
+        :return: the list of required evaluators, [CONFIG_WILDCARD] means any evaluator
+        """
         strategy_config: dict = strategy_config or get_tentacle_config(cls)
         if STRATEGIES_REQUIRED_EVALUATORS in strategy_config:
             return strategy_config[STRATEGIES_REQUIRED_EVALUATORS]
@@ -378,8 +383,20 @@ class StrategyEvaluator(AbstractEvaluator):
             raise Exception(f"'{STRATEGIES_REQUIRED_EVALUATORS}' is missing in configuration file")
 
     @classmethod
-    def get_default_evaluators(cls):
-        strategy_config: dict = get_tentacle_config(cls)
+    def get_compatible_evaluators_types(cls, strategy_config: dict = None) -> list:
+        """
+        :param strategy_config: the strategy configuration dict
+        :return: the list of compatible evaluator type, [CONFIG_WILDCARD] means any type
+        """
+        strategy_config: dict = strategy_config or get_tentacle_config(cls)
+        if STRATEGIES_COMPATIBLE_EVALUATOR_TYPES in strategy_config:
+            return strategy_config[STRATEGIES_COMPATIBLE_EVALUATOR_TYPES]
+        else:
+            return [CONFIG_WILDCARD]
+
+    @classmethod
+    def get_default_evaluators(cls, strategy_config: dict = None):
+        strategy_config: dict = strategy_config or get_tentacle_config(cls)
         if TENTACLE_DEFAULT_CONFIG in strategy_config:
             return strategy_config[TENTACLE_DEFAULT_CONFIG]
         else:
