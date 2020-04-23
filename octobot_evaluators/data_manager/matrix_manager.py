@@ -250,6 +250,30 @@ def get_evaluations_by_evaluator(matrix_id,
                                               f"{repr(eval_value)}).")
     return evaluations_by_evaluator
 
+
+def get_available_time_frames(matrix_id, exchange_name, tentacle_type, cryptocurrency, symbol) -> list:
+    """
+    Return the key set of available time frames for the given tentacle
+    :param matrix_id: the matrix id
+    :param exchange_name: the exchange name
+    :param tentacle_type: the tentacle type
+    :param cryptocurrency: the currency ticker
+    :param symbol: the traded pair
+    :return: the key set of available time frames for the given tentacle
+    """
+    try:
+        evaluator_nodes = get_node_children_by_names_at_path(matrix_id,
+                                                             get_tentacle_path(exchange_name=exchange_name,
+                                                                               tentacle_type=tentacle_type))
+        first_node = next(iter(evaluator_nodes.values()))
+        return list(get_node_children_by_names_at_path(matrix_id,
+                                                       get_tentacle_value_path(cryptocurrency=cryptocurrency,
+                                                                               symbol=symbol),
+                                                       starting_node=first_node))
+    except StopIteration:
+        return []
+
+
 async def subscribe_nodes_event(matrix_id, nodes_path, callback, timeout=None):
     """
 

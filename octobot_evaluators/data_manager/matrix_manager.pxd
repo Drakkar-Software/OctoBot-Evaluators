@@ -23,14 +23,34 @@ cpdef void set_tentacle_value(str matrix_id, list tentacle_path, object tentacle
 cpdef EventTreeNode get_tentacle_node(str matrix_id, list tentacle_path)
 cpdef object get_tentacle_value(str matrix_id, list tentacle_path)
 cpdef list get_matrix_default_value_path(str tentacle_name,
-                                  object tentacle_type,
-                                  str exchange_name=*,
-                                  str cryptocurrency=*,
-                                  str symbol=*,
-                                  str time_frame=*)
+                                         object tentacle_type,
+                                         str exchange_name=*,
+                                         str cryptocurrency=*,
+                                         str symbol=*,
+                                         str time_frame=*)
+cpdef object get_tentacle_eval_time(str matrix_id, list tentacle_path)
 cpdef list get_tentacle_nodes(str matrix_id, str exchange_name=*, object tentacle_type=*, str tentacle_name=*)
-cpdef list get_tentacles_value_nodes(str matrix_id, list tentacle_nodes, str cryptocurrency=*, str symbol=*, str time_frame=*)
+cpdef dict get_node_children_by_names_at_path(str matrix_id, list tentacle_path, object starting_node=*)
+
+cpdef list get_tentacles_value_nodes(str matrix_id,
+                                     list tentacle_nodes,
+                                     str cryptocurrency=*,
+                                     str symbol=*,
+                                     str time_frame=*)
 cpdef list get_tentacle_path(str exchange_name=*, object tentacle_type=*, str tentacle_name=*)
 cpdef list get_tentacle_value_path(str cryptocurrency=*, str symbol=*, str time_frame=*)
+cpdef dict get_evaluations_by_evaluator(str matrix_id,
+                                        str exchange_name=*,
+                                        str tentacle_type=*,
+                                        str cryptocurrency=*,
+                                        str symbol=*,
+                                        str time_frame=*,
+                                        bint allow_missing=*,
+                                        list allowed_values=*)
+cpdef list get_available_time_frames(str matrix_id,
+                                     str exchange_name,
+                                     str tentacle_type,
+                                     str cryptocurrency,
+                                     str symbol)
 cpdef bint is_tentacle_value_valid(str matrix_id, list tentacle_path, double timestamp=*, int delta=*)
 cpdef bint is_tentacles_values_valid(str matrix_id, list tentacle_path_list, double timestamp=*, int delta=*)
