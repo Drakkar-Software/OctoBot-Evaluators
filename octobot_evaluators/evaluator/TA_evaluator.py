@@ -26,8 +26,6 @@ class TAEvaluator(AbstractEvaluator):
     def __init__(self):
         super().__init__()
         self.time_frame = None
-        self.short_term_averages = [7, 5, 4, 3, 2, 1]  # TODO remove
-        self.long_term_averages = [40, 30, 20, 15, 10]  # TODO remove
 
     async def start(self, bot_id: str) -> bool:
         """

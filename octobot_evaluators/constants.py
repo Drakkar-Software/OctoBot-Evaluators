@@ -26,6 +26,7 @@ STRATEGIES_REQUIRED_TIME_FRAME = "required_time_frames"
 TRADING_MODE_REQUIRED_STRATEGIES = "required_strategies"
 TRADING_MODE_REQUIRED_STRATEGIES_MIN_COUNT = "required_strategies_min_count"
 STRATEGIES_REQUIRED_EVALUATORS = "required_evaluators"
+STRATEGIES_COMPATIBLE_EVALUATOR_TYPES = "compatible_evaluator_types"
 CONFIG_FORCED_TIME_FRAME = "forced_time_frame"
 TENTACLE_DEFAULT_CONFIG = "default_config"
 
