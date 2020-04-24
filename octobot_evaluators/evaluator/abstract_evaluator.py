@@ -168,8 +168,8 @@ class AbstractEvaluator(AbstractTentacle):
         :return: None
         """
         try:
-            if not eval_note:
-                eval_note = self.eval_note if self.eval_note else START_PENDING_EVAL_NOTE
+            if eval_note is None:
+                eval_note = self.eval_note if self.eval_note is not None else START_PENDING_EVAL_NOTE
 
             self.ensure_eval_note_is_not_expired()
             await get_chan(MATRIX_CHANNEL, self.matrix_id).get_internal_producer().send_eval_note(
