@@ -58,5 +58,5 @@ class RealTimeEvaluator(AbstractEvaluator):
                                     f"using {to_handle_time_frame.name} instead.")
             to_handle_time_frames = [to_handle_time_frame]
         # by default time frame registration only for the timeframe of this real-time evaluator
-        return currencies, symbols, to_handle_time_frames
+        return currencies, symbols, [to_handle_time_frame]
 

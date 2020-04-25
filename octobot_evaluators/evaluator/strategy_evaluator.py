@@ -32,6 +32,8 @@ from octobot_tentacles_manager.api.configurator import get_tentacle_config
 
 class StrategyEvaluator(AbstractEvaluator):
     __metaclass__ = AbstractEvaluator
+    # invalidate evaluations 10 secs before next timestamp
+    AUTHORIZED_EVALUATION_TIME_DELTA = 10
 
     def __init__(self):
         super().__init__()
@@ -157,12 +159,10 @@ class StrategyEvaluator(AbstractEvaluator):
                                                                 symbol,
                                                                 use_cache=True)
         current_time = self._get_exchange_current_time(exchange_name, matrix_id)
-        # negative time delta to invalidate evaluations 10 secs before next timestamp
-        nodes_paths_to_authorized_delta = 10
         # ensure all evaluations are valid (do not trigger on an expired evaluation)
         if all(is_tentacle_value_valid(self.matrix_id, evaluation_node_path,
                                        timestamp=current_time,
-                                       delta=nodes_paths_to_authorized_delta)
+                                       delta=self.AUTHORIZED_EVALUATION_TIME_DELTA)
                for evaluation_node_path in to_validate_node_paths):
             self._save_last_evaluation(matrix_id, exchange_name, evaluator_type, evaluator_name,
                                        cryptocurrency, symbol, time_frame)
@@ -195,13 +195,6 @@ class StrategyEvaluator(AbstractEvaluator):
 
     def _inner_get_available_node_paths(self, matrix_id, evaluator_type, exchange_name, cryptocurrency, symbol,
                                         use_cache=True):
-        available_time_frames = self.get_available_time_frames(matrix_id, exchange_name, evaluator_type,
-                                                               cryptocurrency, symbol, use_cache=use_cache)
-        to_check_time_frames = [tf
-                                for tf in available_time_frames
-                                if TimeFrames(tf) in self.strategy_time_frames]
-        available_evaluators = self._get_available_evaluators(matrix_id, exchange_name, evaluator_type,
-                                                              use_cache=use_cache)
         return [
             get_matrix_default_value_path(tentacle_name=evaluator,
                                           tentacle_type=evaluator_type,
@@ -209,22 +202,30 @@ class StrategyEvaluator(AbstractEvaluator):
                                           cryptocurrency=cryptocurrency,
                                           symbol=symbol,
                                           time_frame=time_frame)
-            for time_frame in to_check_time_frames
-            for evaluator in available_evaluators
+            for time_frame in self.get_available_time_frames(matrix_id, exchange_name, evaluator_type,
+                                                             cryptocurrency, symbol, use_cache=use_cache)
+            if TimeFrames(time_frame) in self.strategy_time_frames
+            for evaluator in self._get_available_evaluators(matrix_id, exchange_name, evaluator_type,
+                                                            use_cache=use_cache)
         ]
 
     def _save_last_evaluation(self, matrix_id, exchange_name, evaluator_type, tentacle_name,
                               cryptocurrency, symbol, time_frame):
-        update_time = get_tentacle_eval_time(matrix_id,
-                                             get_matrix_default_value_path(
-                                                  tentacle_name=tentacle_name,
-                                                  tentacle_type=evaluator_type,
-                                                  exchange_name=exchange_name,
-                                                  cryptocurrency=cryptocurrency,
-                                                  symbol=symbol,
-                                                  time_frame=time_frame)
-                                             )
-        self._set_last_evaluation_time(exchange_name, evaluator_type, cryptocurrency, symbol, time_frame, update_time)
+        self._set_last_evaluation_time(exchange_name,
+                                       evaluator_type,
+                                       cryptocurrency,
+                                       symbol,
+                                       time_frame,
+                                       get_tentacle_eval_time(matrix_id,
+                                                              get_matrix_default_value_path(
+                                                                  tentacle_name=tentacle_name,
+                                                                  tentacle_type=evaluator_type,
+                                                                  exchange_name=exchange_name,
+                                                                  cryptocurrency=cryptocurrency,
+                                                                  symbol=symbol,
+                                                                  time_frame=time_frame)
+                                                              )
+                                       )
 
     def _already_sent_this_technical_evaluation(self, matrix_id, evaluator, evaluator_type, exchange_name,
                                                 cryptocurrency, symbol, time_frame):
@@ -356,9 +357,8 @@ class StrategyEvaluator(AbstractEvaluator):
             time_frames,
             real_time_time_frames)
         self.all_symbols_by_crypto_currencies = all_symbols_by_crypto_currencies
-        to_handle_time_frames = [self.time_frame]
         # by default no time frame registration for strategies
-        return strategy_currencies, symbols, to_handle_time_frames
+        return strategy_currencies, symbols, [self.time_frame]
 
     @classmethod
     def get_required_time_frames(cls, config: dict):
@@ -391,8 +391,7 @@ class StrategyEvaluator(AbstractEvaluator):
         strategy_config: dict = strategy_config or get_tentacle_config(cls)
         if STRATEGIES_COMPATIBLE_EVALUATOR_TYPES in strategy_config:
             return strategy_config[STRATEGIES_COMPATIBLE_EVALUATOR_TYPES]
-        else:
-            return [CONFIG_WILDCARD]
+        return [CONFIG_WILDCARD]
 
     @classmethod
     def get_default_evaluators(cls, strategy_config: dict = None):
@@ -403,5 +402,4 @@ class StrategyEvaluator(AbstractEvaluator):
             required_evaluators = cls.get_required_evaluators(strategy_config)
             if required_evaluators == CONFIG_WILDCARD:
                 return []
-            else:
-                return required_evaluators
+            return required_evaluators
