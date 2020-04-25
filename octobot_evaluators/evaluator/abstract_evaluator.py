@@ -162,9 +162,10 @@ class AbstractEvaluator(AbstractTentacle):
         Main async method to notify matrix to update
         :param cryptocurrency: evaluated cryptocurrency
         :param symbol: evaluated symbol
-        :param time_frame: evaluated time fram
+        :param time_frame: evaluated time frame
         :param eval_note: if None = self.eval_note
         :param eval_time: the time of the evaluation if relevant, default is 0
+        :param notify: if true, will trigger matrix consumers
         :return: None
         """
         try:
