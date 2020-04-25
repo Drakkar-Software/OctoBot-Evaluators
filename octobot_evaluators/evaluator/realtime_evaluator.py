@@ -15,6 +15,7 @@
 #  License along with this library.
 from octobot_commons.enums import TimeFrames
 from octobot_evaluators.evaluator.abstract_evaluator import AbstractEvaluator
+from octobot_evaluators.util.evaluation_util import get_shortest_time_frame
 from octobot_tentacles_manager.api.configurator import get_tentacle_config
 
 
@@ -46,17 +47,11 @@ class RealTimeEvaluator(AbstractEvaluator):
             self.logger.error("Missing self.time_frame value, impossible to initialize this evaluator.")
         else:
             ideal_time_frame = TimeFrames(self.time_frame)
-            to_handle_time_frame = ideal_time_frame
-            if to_handle_time_frame in real_time_time_frames:
-                to_handle_time_frame = TimeFrames(self.time_frame)
-            elif real_time_time_frames:
-                to_handle_time_frame = real_time_time_frames[0]
-            else:
-                to_handle_time_frame = time_frames[0]
+            to_handle_time_frame = get_shortest_time_frame(ideal_time_frame, real_time_time_frames, time_frames)
             if ideal_time_frame != to_handle_time_frame:
                 self.logger.warning(f"Missing {ideal_time_frame.name} time frame in available time frames, "
                                     f"using {to_handle_time_frame.name} instead.")
             to_handle_time_frames = [to_handle_time_frame]
         # by default time frame registration only for the timeframe of this real-time evaluator
-        return currencies, symbols, [to_handle_time_frame]
+        return currencies, symbols, to_handle_time_frames
 
