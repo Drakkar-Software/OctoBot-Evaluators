@@ -27,3 +27,12 @@ def get_eval_time(full_candle=None, time_frame=None, partial_candle=None, kline=
     if kline is not None:
         return kline[PriceIndexes.IND_PRICE_TIME.value]
     raise ValueError("Invalid arguments")
+
+
+def get_shortest_time_frame(ideal_time_frame, preferred_available_time_frames, others):
+    if ideal_time_frame in preferred_available_time_frames:
+        return ideal_time_frame
+    if preferred_available_time_frames:
+        return preferred_available_time_frames[0]
+    else:
+        return others[0]
