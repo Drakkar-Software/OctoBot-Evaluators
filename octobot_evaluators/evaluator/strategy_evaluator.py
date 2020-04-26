@@ -294,9 +294,9 @@ class StrategyEvaluator(AbstractEvaluator):
                 available_evaluators = get_node_children_by_names_at_path(
                     matrix_id, get_tentacle_path(exchange_name=exchange_name, tentacle_type=tentacle_type)
                 ).keys()
-                if matrix_id not in self.available_evaluators:
+                if matrix_id not in self.available_evaluators_cache:
                     self.available_evaluators_cache[matrix_id] = {}
-                if exchange_name not in self.available_evaluators[matrix_id]:
+                if exchange_name not in self.available_evaluators_cache[matrix_id]:
                     self.available_evaluators_cache[matrix_id][exchange_name] = {
                         tentacle_type: available_evaluators
                     }
@@ -330,26 +330,6 @@ class StrategyEvaluator(AbstractEvaluator):
                     }
                 return available_time_frames
         return get_available_time_frames(matrix_id, exchange_name, tentacle_type, cryptocurrency, symbol)
-
-    def get_available_symbols(self, matrix_id, exchange_name,
-                              cryptocurrency, tentacle_type=EvaluatorMatrixTypes.TA.value):
-        try:
-            evaluator_nodes = get_node_children_by_names_at_path(matrix_id,
-                                                                 get_tentacle_path(exchange_name=exchange_name,
-                                                                                   tentacle_type=tentacle_type))
-            first_node = next(iter(evaluator_nodes.values()))
-            possible_symbols = get_node_children_by_names_at_path(
-                matrix_id,
-                get_tentacle_value_path(cryptocurrency=cryptocurrency),
-                starting_node=first_node).keys()
-            if possible_symbols:
-                return possible_symbols
-            else:
-                # try with real time evaluators
-                return self.get_available_symbols(matrix_id, exchange_name,
-                                                  cryptocurrency, EvaluatorMatrixTypes.REAL_TIME.value)
-        except StopIteration:
-            return []
 
     def _get_tentacle_registration_topic(self, all_symbols_by_crypto_currencies, time_frames, real_time_time_frames):
         strategy_currencies, symbols, self.strategy_time_frames = super()._get_tentacle_registration_topic(

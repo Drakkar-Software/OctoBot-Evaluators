@@ -52,5 +52,10 @@ cpdef list get_available_time_frames(str matrix_id,
                                      str tentacle_type,
                                      str cryptocurrency,
                                      str symbol)
+cpdef list get_available_symbols(str matrix_id,
+                                 str exchange_name,
+                                 str cryptocurrency,
+                                 str tentacle_type=*,
+                                 str second_tentacle_type=*)
 cpdef bint is_tentacle_value_valid(str matrix_id, list tentacle_path, double timestamp=*, int delta=*)
 cpdef bint is_tentacles_values_valid(str matrix_id, list tentacle_path_list, double timestamp=*, int delta=*)
