@@ -20,6 +20,7 @@ from octobot_commons.constants import MINUTE_TO_SECONDS
 from octobot_commons.enums import TimeFrames, TimeFramesMinutes
 from octobot_commons.evaluators_util import check_valid_eval_note
 from octobot_commons.logging.logging_util import get_logger
+from octobot_evaluators.enums import EvaluatorMatrixTypes
 from octobot_evaluators.errors import UnsetTentacleEvaluation
 from octobot_evaluators.matrices.matrices import Matrices
 
@@ -253,13 +254,13 @@ def get_evaluations_by_evaluator(matrix_id,
 
 def get_available_time_frames(matrix_id, exchange_name, tentacle_type, cryptocurrency, symbol) -> list:
     """
-    Return the key set of available time frames for the given tentacle
+    Return the list of available time frames for the given tentacle
     :param matrix_id: the matrix id
     :param exchange_name: the exchange name
     :param tentacle_type: the tentacle type
     :param cryptocurrency: the currency ticker
     :param symbol: the traded pair
-    :return: the key set of available time frames for the given tentacle
+    :return: the list of available time frames for the given tentacle
     """
     try:
         evaluator_nodes = get_node_children_by_names_at_path(matrix_id,
@@ -270,6 +271,39 @@ def get_available_time_frames(matrix_id, exchange_name, tentacle_type, cryptocur
                                                        get_tentacle_value_path(cryptocurrency=cryptocurrency,
                                                                                symbol=symbol),
                                                        starting_node=first_node))
+    except StopIteration:
+        return []
+
+
+def get_available_symbols(matrix_id,
+                          exchange_name,
+                          cryptocurrency,
+                          tentacle_type=EvaluatorMatrixTypes.TA.value,
+                          second_tentacle_type=EvaluatorMatrixTypes.REAL_TIME.value) -> list:
+    """
+    Return the list of available symbols for the given currency
+    :param matrix_id: the matrix id
+    :param exchange_name: the exchange name
+    :param cryptocurrency: the cryptocurrency ticker
+    :param tentacle_type: the tentacle type to look into first
+    :param second_tentacle_type: the tentacle type to look into if no symbol is found in the first tentacle type
+    :return: the list of available symbols for the given currency
+    """
+    try:
+        evaluator_nodes = get_node_children_by_names_at_path(matrix_id,
+                                                             get_tentacle_path(exchange_name=exchange_name,
+                                                                               tentacle_type=tentacle_type))
+        first_node = next(iter(evaluator_nodes.values()))
+        possible_symbols = list(get_node_children_by_names_at_path(
+            matrix_id,
+            get_tentacle_value_path(cryptocurrency=cryptocurrency),
+            starting_node=first_node))
+        if possible_symbols:
+            return possible_symbols
+        elif tentacle_type != second_tentacle_type:
+            # try with second tentacle type
+            return get_available_symbols(matrix_id, exchange_name,
+                                         cryptocurrency, second_tentacle_type, second_tentacle_type)
     except StopIteration:
         return []
 

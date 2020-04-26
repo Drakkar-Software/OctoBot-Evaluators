@@ -25,7 +25,8 @@ from octobot_evaluators.data.matrix import Matrix
 from octobot_evaluators.data_manager.matrix_manager import get_tentacle_path, get_tentacle_value_path, \
     get_tentacle_nodes, get_tentacles_value_nodes, get_matrix_default_value_path, set_tentacle_value, \
     get_tentacle_value, get_nodes_event, get_nodes_clear_event, get_tentacle_node, \
-    is_tentacle_value_valid, is_tentacles_values_valid, get_evaluations_by_evaluator, get_available_time_frames
+    is_tentacle_value_valid, is_tentacles_values_valid, get_evaluations_by_evaluator, get_available_time_frames, \
+    get_available_symbols
 from octobot_evaluators.errors import UnsetTentacleEvaluation
 from octobot_evaluators.matrices.matrices import Matrices
 
@@ -714,3 +715,60 @@ async def test_get_available_time_frames():
                                      tentacle_type="TA_invalid",
                                      cryptocurrency="BTC",
                                      symbol="BTC/USD") == []
+
+
+@pytest.mark.asyncio
+async def test_get_available_symbols():
+
+    matrix = Matrix()
+    Matrices.instance().add_matrix(matrix)
+
+    evaluator_1_path = get_matrix_default_value_path(tentacle_type="TA",
+                                                     exchange_name="kraken",
+                                                     tentacle_name="RSI",
+                                                     cryptocurrency="BTC",
+                                                     symbol="BTC/USD",
+                                                     time_frame="1m")
+    evaluator_2_path = get_matrix_default_value_path(tentacle_type="TA",
+                                                     exchange_name="kraken",
+                                                     tentacle_name="RSI",
+                                                     cryptocurrency="BTC",
+                                                     symbol="BTCX/USDC",
+                                                     time_frame="1m")
+    evaluator_3_path = get_matrix_default_value_path(tentacle_type="TA",
+                                                     exchange_name="kraken",
+                                                     tentacle_name="RSI",
+                                                     cryptocurrency="BTC",
+                                                     symbol="BTCX/USDC",
+                                                     time_frame="1h")
+    evaluator_4_path = get_matrix_default_value_path(tentacle_type="TA",
+                                                     exchange_name="kraken",
+                                                     tentacle_name="RSI",
+                                                     cryptocurrency="BTC",
+                                                     symbol="BTC/USD",
+                                                     time_frame="1h")
+
+    # simulate AbstractEvaluator.initialize()
+    set_tentacle_value(matrix.matrix_id, evaluator_1_path, "TA", 1)
+    set_tentacle_value(matrix.matrix_id, evaluator_2_path, "TA", -0.5)
+    set_tentacle_value(matrix.matrix_id, evaluator_3_path, "TA", 0)
+    set_tentacle_value(matrix.matrix_id, evaluator_4_path, "TA", -1)
+
+    assert get_available_symbols(matrix.matrix_id,
+                                 exchange_name="kraken",
+                                 cryptocurrency="BTC") == ["BTC/USD", "BTCX/USDC"]
+
+    # invalid path
+    assert get_available_symbols(matrix.matrix_id, exchange_name="invalid_exchange", cryptocurrency="BTC") == []
+    assert get_available_symbols(matrix.matrix_id, exchange_name="kraken", cryptocurrency="BTCX") == []
+    assert get_available_symbols(matrix.matrix_id, exchange_name="invalid_exchange", cryptocurrency="BTCX") == []
+
+    # now valid using real-time evaluation
+    evaluator_5_path = get_matrix_default_value_path(tentacle_type="REAL_TIME",
+                                                     exchange_name="kraken",
+                                                     tentacle_name="RSI",
+                                                     cryptocurrency="BTCX",
+                                                     symbol="BTCX/USD",
+                                                     time_frame="1h")
+    set_tentacle_value(matrix.matrix_id, evaluator_5_path, "REAL_TIME", -1)
+    assert get_available_symbols(matrix.matrix_id, exchange_name="kraken", cryptocurrency="BTCX") == ["BTCX/USD"]
