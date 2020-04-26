@@ -45,50 +45,37 @@ async def create_evaluators(evaluator_parent_class,
                             matrix_id: str,
                             exchange_name: str,
                             bot_id: str,
-                            symbols_by_crypto_currency_names: dict = None,
+                            crypto_currency_name_by_crypto_currencies: dict,
+                            symbols_by_crypto_currency_tickers: dict,
                             symbols: list = None,
                             time_frames: list = None,
                             real_time_time_frames: list = None,
-                            relevant_evaluators=CONFIG_WILDCARD) -> list:
-    crypto_currency_name_by_crypto_currencies = {}
-    symbols_by_crypto_currency_tickers = {}
-    try:
-        from octobot_trading.api.exchange import get_exchange_manager_from_exchange_name_and_id, \
-            get_exchange_id_from_matrix_id, get_base_currency
-        exchange_id = get_exchange_id_from_matrix_id(exchange_name, matrix_id)
-        exchange_manager = get_exchange_manager_from_exchange_name_and_id(exchange_name, exchange_id)
-        for name, symbol_list in symbols_by_crypto_currency_names.items():
-            if symbol_list:
-                ticker = get_base_currency(exchange_manager, symbol_list[0])
-                crypto_currency_name_by_crypto_currencies[ticker] = name
-                symbols_by_crypto_currency_tickers[ticker] = symbol_list
-        return [
-            await create_evaluator(evaluator_class,
-                                   tentacles_setup_config,
-                                   matrix_id=matrix_id,
-                                   exchange_name=exchange_name,
-                                   bot_id=bot_id,
-                                   cryptocurrency=cryptocurrency,
-                                   cryptocurrency_name=_get_cryptocurrency_name(
-                                       evaluator_class,
-                                       crypto_currency_name_by_crypto_currencies,
-                                       cryptocurrency),
-                                   symbol=symbol,
-                                   time_frame=time_frame,
-                                   relevant_evaluators=relevant_evaluators,
-                                   all_symbols_by_crypto_currencies=symbols_by_crypto_currency_tickers,
-                                   time_frames=time_frames,
-                                   real_time_time_frames=real_time_time_frames
-                                   )
-            for evaluator_class in create_advanced_types_list(evaluator_parent_class, config)
-            for cryptocurrency in _get_cryptocurrencies_to_create(evaluator_class,
-                                                                  crypto_currency_name_by_crypto_currencies)
-            for symbol in _get_symbols_to_create(evaluator_class, symbols_by_crypto_currency_tickers,
-                                                 cryptocurrency, symbols)
-            for time_frame in _get_time_frames_to_create(evaluator_class, time_frames)
-        ]
-    except ImportError:
-        get_logger("EvaluatorsAPI").error("create_evaluators requires Octobot-Trading package installed")
+                            relevant_evaluators=CONFIG_WILDCARD,) -> list:
+    return [
+        await create_evaluator(evaluator_class,
+                               tentacles_setup_config,
+                               matrix_id=matrix_id,
+                               exchange_name=exchange_name,
+                               bot_id=bot_id,
+                               cryptocurrency=cryptocurrency,
+                               cryptocurrency_name=_get_cryptocurrency_name(
+                                   evaluator_class,
+                                   crypto_currency_name_by_crypto_currencies,
+                                   cryptocurrency),
+                               symbol=symbol,
+                               time_frame=time_frame,
+                               relevant_evaluators=relevant_evaluators,
+                               all_symbols_by_crypto_currencies=symbols_by_crypto_currency_tickers,
+                               time_frames=time_frames,
+                               real_time_time_frames=real_time_time_frames
+                               )
+        for evaluator_class in create_advanced_types_list(evaluator_parent_class, config)
+        for cryptocurrency in _get_cryptocurrencies_to_create(evaluator_class,
+                                                              crypto_currency_name_by_crypto_currencies)
+        for symbol in _get_symbols_to_create(evaluator_class, symbols_by_crypto_currency_tickers,
+                                             cryptocurrency, symbols)
+        for time_frame in _get_time_frames_to_create(evaluator_class, time_frames)
+    ]
 
 
 def _get_cryptocurrency_name(evaluator_class, crypto_currency_name_by_crypto_currencies, cryptocurrency):
@@ -227,11 +214,28 @@ async def create_all_type_evaluators(config: dict,
                                      real_time_time_frames: list = None,
                                      relevant_evaluators=CONFIG_WILDCARD,
                                      ) -> list:
-    return [await create_evaluators(evaluator_type, config, tentacles_setup_config,
-                                    matrix_id=matrix_id, exchange_name=exchange_name,
-                                    bot_id=bot_id,
-                                    symbols=symbols, time_frames=time_frames,
-                                    real_time_time_frames=real_time_time_frames,
-                                    symbols_by_crypto_currency_names=symbols_by_crypto_currencies,
-                                    relevant_evaluators=relevant_evaluators)
+    crypto_currency_name_by_crypto_currencies = {}
+    symbols_by_crypto_currency_tickers = {}
+    try:
+        from octobot_trading.api.exchange import get_exchange_manager_from_exchange_name_and_id, \
+            get_exchange_id_from_matrix_id, get_base_currency
+        exchange_id = get_exchange_id_from_matrix_id(exchange_name, matrix_id)
+        exchange_manager = get_exchange_manager_from_exchange_name_and_id(exchange_name, exchange_id)
+        for name, symbol_list in symbols_by_crypto_currencies.items():
+            if symbol_list:
+                ticker = get_base_currency(exchange_manager, symbol_list[0])
+                crypto_currency_name_by_crypto_currencies[ticker] = name
+                symbols_by_crypto_currency_tickers[ticker] = symbol_list
+        return [
+            await create_evaluators(
+                evaluator_type, config, tentacles_setup_config,
+                matrix_id=matrix_id, exchange_name=exchange_name,
+                bot_id=bot_id,
+                crypto_currency_name_by_crypto_currencies=crypto_currency_name_by_crypto_currencies,
+                symbols_by_crypto_currency_tickers=symbols_by_crypto_currency_tickers,
+                symbols=symbols, time_frames=time_frames,
+                real_time_time_frames=real_time_time_frames,
+                relevant_evaluators=relevant_evaluators)
             for evaluator_type in EvaluatorClassTypes.values()]
+    except ImportError:
+        get_logger("EvaluatorsAPI").error("create_evaluators requires Octobot-Trading package installed")
