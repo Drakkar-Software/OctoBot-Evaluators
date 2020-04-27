@@ -13,7 +13,6 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
-from octobot_channels.channels.channel import get_chan
 from octobot_commons.constants import CONFIG_WILDCARD
 from octobot_commons.enums import TimeFrames
 from octobot_commons.time_frame_manager import parse_time_frames
@@ -23,8 +22,7 @@ from octobot_evaluators.constants import MATRIX_CHANNEL, \
     EVALUATOR_CHANNEL_DATA_ACTION, RESET_EVALUATION, EVALUATOR_CHANNEL_DATA_TIME_FRAMES, \
     STRATEGIES_COMPATIBLE_EVALUATOR_TYPES
 from octobot_evaluators.data_manager.matrix_manager import get_tentacle_path, get_node_children_by_names_at_path, \
-    get_tentacle_value_path, get_tentacle_eval_time, \
-    get_matrix_default_value_path, is_tentacle_value_valid, get_available_time_frames
+    get_tentacle_eval_time, get_matrix_default_value_path, is_tentacle_value_valid, get_available_time_frames
 from octobot_evaluators.enums import EvaluatorMatrixTypes
 from octobot_evaluators.evaluator import AbstractEvaluator
 from octobot_tentacles_manager.api.configurator import get_tentacle_config
