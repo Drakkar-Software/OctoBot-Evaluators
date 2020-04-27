@@ -160,13 +160,12 @@ async def create_evaluator(evaluator_class,
     return None
 
 
-"""
-:param config: evaluator config
-:return: initialized matrix id
-"""
-
-
 async def initialize_evaluators(config, tentacles_setup_config) -> str:
+    """
+    :param config: bot config
+    :param tentacles_setup_config: tentacles configuration
+    :return: initialized matrix id
+    """
     create_evaluator_classes(config)
     _init_time_frames(config, tentacles_setup_config)
 
