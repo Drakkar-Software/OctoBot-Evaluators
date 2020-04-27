@@ -35,7 +35,8 @@ class EvaluatorsChannelProducer(EvaluatorChannelProducer):
                    exchange_name=CHANNEL_WILDCARD,
                    cryptocurrency=CHANNEL_WILDCARD,
                    symbol=CHANNEL_WILDCARD,
-                   time_frame=CHANNEL_WILDCARD):
+                   time_frame=CHANNEL_WILDCARD,
+                   origin_consumer=None):
         for consumer in self.channel.get_filtered_consumers(matrix_id=matrix_id,
                                                             data=data,
                                                             evaluator_name=evaluator_name,
@@ -43,7 +44,8 @@ class EvaluatorsChannelProducer(EvaluatorChannelProducer):
                                                             exchange_name=exchange_name,
                                                             cryptocurrency=cryptocurrency,
                                                             symbol=symbol,
-                                                            time_frame=time_frame):
+                                                            time_frame=time_frame,
+                                                            origin_consumer=origin_consumer):
             await consumer.queue.put({
                 "matrix_id": matrix_id,
                 "evaluator_name": evaluator_name,
@@ -101,7 +103,8 @@ class EvaluatorsChannel(EvaluatorChannel):
                                exchange_name=CHANNEL_WILDCARD,
                                cryptocurrency=CHANNEL_WILDCARD,
                                symbol=CHANNEL_WILDCARD,
-                               time_frame=CHANNEL_WILDCARD):
+                               time_frame=CHANNEL_WILDCARD,
+                               origin_consumer=None):
         return self.get_consumer_from_filters({
             self.MATRIX_ID_KEY: matrix_id,
             self.EVALUATOR_NAME_KEY: evaluator_name,
@@ -110,7 +113,8 @@ class EvaluatorsChannel(EvaluatorChannel):
             self.CRYPTOCURRENCY_KEY: cryptocurrency,
             self.SYMBOL_KEY: symbol,
             self.TIME_FRAME_KEY: time_frame,
-        })
+        },
+            origin_consumer=origin_consumer)
 
     async def _add_new_consumer_and_run(self, consumer,
                                         matrix_id=CHANNEL_WILDCARD,

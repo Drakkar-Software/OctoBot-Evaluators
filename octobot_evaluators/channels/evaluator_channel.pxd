@@ -21,6 +21,8 @@ from octobot_channels.producer cimport Producer
 cdef class EvaluatorChannel(Channel):
     cdef public str matrix_id
 
+    cpdef list get_consumer_from_filters(self, dict consumer_filters, EvaluatorChannelConsumer origin_consumer=*)
+
 cdef class EvaluatorChannelConsumer(Consumer):
     pass
 
