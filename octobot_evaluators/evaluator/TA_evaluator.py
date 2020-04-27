@@ -13,6 +13,7 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
+from octobot_channels.constants import CHANNEL_WILDCARD
 from octobot_commons.channels_name import OctoBotTradingChannelsName
 from octobot_commons.constants import START_PENDING_EVAL_NOTE
 from octobot_evaluators.constants import TA_RE_EVALUATION_TRIGGER_UPDATED_DATA, RESET_EVALUATION, \
@@ -36,10 +37,19 @@ class TAEvaluator(AbstractEvaluator):
         await super().start(bot_id)
         try:
             from octobot_trading.channels.exchange_channel import get_chan as get_trading_chan
-            from octobot_trading.api.exchange import get_exchange_id_from_matrix_id
+            from octobot_trading.api.exchange import get_exchange_id_from_matrix_id, \
+                get_exchange_time_frames_without_real_time
             exchange_id = get_exchange_id_from_matrix_id(self.exchange_name, self.matrix_id)
+            time_frame_filter = [tf.value
+                                 for tf in get_exchange_time_frames_without_real_time(self.exchange_name, exchange_id)]
+            if len(time_frame_filter) == 1:
+                time_frame_filter = time_frame_filter[0]
             await get_trading_chan(OctoBotTradingChannelsName.OHLCV_CHANNEL.value, exchange_id).new_consumer(
-                self.evaluator_ohlcv_callback)  # TODO filter
+                self.evaluator_ohlcv_callback,
+                cryptocurrency=self.cryptocurrency if self.cryptocurrency else CHANNEL_WILDCARD,
+                symbol=self.symbol if self.symbol else CHANNEL_WILDCARD,
+                time_frame=self.time_frame if self.time_frame else time_frame_filter
+            )
             return True
         except ImportError:
             self.logger.error("Can't connect to OHLCV trading channel")
@@ -50,12 +60,12 @@ class TAEvaluator(AbstractEvaluator):
         await self.evaluation_completed(cryptocurrency, symbol, time_frame, eval_time=0, notify=False)
 
     async def ohlcv_callback(self, exchange: str, exchange_id: str,
-                                   cryptocurrency: str, symbol: str, time_frame, candle, inc_in_construction_data):
+                             cryptocurrency: str, symbol: str, time_frame, candle, inc_in_construction_data):
         # To be used to trigger an evaluation when a new candle in closed or a re-evaluation is required
         pass
 
     async def evaluator_ohlcv_callback(self, exchange: str, exchange_id: str, cryptocurrency: str, symbol: str,
-                             time_frame: str, candle: dict):
+                                       time_frame: str, candle: dict):
         await self.ohlcv_callback(exchange, exchange_id, cryptocurrency, symbol, time_frame, candle, False)
 
     async def evaluators_callback(self,
