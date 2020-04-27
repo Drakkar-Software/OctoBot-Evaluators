@@ -363,12 +363,12 @@ class AbstractEvaluator(AbstractTentacle):
 
     async def evaluators_callback(self,
                                   matrix_id,
-                                  data,
                                   evaluator_name,
                                   evaluator_type,
                                   exchange_name,
                                   cryptocurrency,
                                   symbol,
-                                  time_frame):
+                                  time_frame,
+                                  data):
         # Used to communicate between evaluators
         pass
