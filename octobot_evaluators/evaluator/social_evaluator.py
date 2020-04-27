@@ -93,4 +93,4 @@ class SocialEvaluator(AbstractEvaluator):
 
     @abstractmethod
     async def _feed_callback(self, *args):
-        raise NotImplemented("_feed_callback is not implemented")
+        raise NotImplementedError("_feed_callback is not implemented")
