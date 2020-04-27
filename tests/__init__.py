@@ -13,3 +13,14 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
+import pytest
+
+from octobot_evaluators.api.evaluators import create_matrix
+from octobot_evaluators.matrices.matrices import Matrices
+
+
+@pytest.yield_fixture()
+async def matrix_id():
+    created_matrix_id = create_matrix()
+    yield created_matrix_id
+    Matrices.instance().del_matrix(created_matrix_id)

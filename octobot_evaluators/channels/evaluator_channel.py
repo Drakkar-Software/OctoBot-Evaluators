@@ -38,6 +38,17 @@ class EvaluatorChannel(Channel):
         super().__init__()
         self.matrix_id = matrix_id
 
+    def get_consumer_from_filters(self, consumer_filters, origin_consumer=None) -> list:
+        """
+        Returns the instance filtered consumers list except origin_consumer if provided
+        :param consumer_filters: the consumer filters dict
+        :param origin_consumer: the consumer behind the call if any else None
+        :return: the filtered consumer list
+        """
+        return [consumer
+                for consumer in super(EvaluatorChannel, self).get_consumer_from_filters(consumer_filters)
+                if origin_consumer is None or consumer is not origin_consumer]
+
 
 def set_chan(chan, name) -> None:
     chan_name = chan.get_name() if name else name
