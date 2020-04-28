@@ -55,6 +55,29 @@ class StrategyEvaluator(AbstractEvaluator):
             self.strategy_matrix_callback)
         return True
 
+    async def strategy_completed(self,
+                                 cryptocurrency: str = None,
+                                 symbol: str = None,
+                                 eval_note=None,
+                                 eval_time=0,
+                                 notify=True) -> None:
+        """
+        Main async method to notify that a strategy has updated its evaluation
+        :param cryptocurrency: evaluated cryptocurrency
+        :param symbol: evaluated symbol
+        :param eval_note: if None = self.eval_note
+        :param eval_time: the time of the evaluation if relevant, default is 0
+        :param notify: if true, will trigger matrix consumers
+        :return: None
+        """
+        return await self.evaluation_completed(cryptocurrency=cryptocurrency,
+                                               symbol=symbol,
+                                               time_frame=None,
+                                               eval_note=eval_note,
+                                               eval_time=eval_time,
+                                               notify=notify,
+                                               origin_consumer=self.consumer_instance)
+
     def is_technical_evaluator_cycle_complete(self, matrix_id, evaluator_name, evaluator_type, exchange_name,
                                               cryptocurrency, symbol, time_frame) -> bool:
         """
@@ -98,10 +121,6 @@ class StrategyEvaluator(AbstractEvaluator):
                                        cryptocurrency,
                                        symbol,
                                        time_frame):
-        # TODO: find better way than this if
-        # avoid self-calls
-        if evaluator_name == self.get_name():
-            return
         # if this callback is from a technical evaluator: ensure strategy should be notified at this moment
         if evaluator_type == EvaluatorMatrixTypes.TA.value:
             # ensure this time frame is within the strategy's time frames
