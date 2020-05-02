@@ -22,10 +22,16 @@ from octobot_evaluators.channels.evaluator_channel import EvaluatorChannelProduc
 
 
 class EvaluatorsChannelConsumer(EvaluatorChannelConsumer):
-    pass
+    """
+    EvaluatorChannelConsumer adapted for EvaluatorsChannel
+    """
 
 
 class EvaluatorsChannelProducer(EvaluatorChannelProducer):
+    """
+    EvaluatorChannelProducer adapted for EvaluatorsChannel
+    """
+
     # noinspection PyMethodOverriding
     async def send(self,
                    matrix_id,
@@ -76,15 +82,16 @@ class EvaluatorsChannel(EvaluatorChannel):
     # noinspection PyMethodOverriding
     async def new_consumer(self,
                            callback: object,
-                           size=0,
-                           matrix_id=CHANNEL_WILDCARD,
-                           evaluator_name=CHANNEL_WILDCARD,
-                           evaluator_type=CHANNEL_WILDCARD,
-                           exchange_name=CHANNEL_WILDCARD,
-                           cryptocurrency=CHANNEL_WILDCARD,
-                           symbol=CHANNEL_WILDCARD,
-                           time_frame=CHANNEL_WILDCARD):
-        consumer = EvaluatorsChannelConsumer(callback, size=size)
+                           size: int = 0,
+                           priority_level: int = EvaluatorChannel.DEFAULT_PRIORITY_LEVEL,
+                           matrix_id: str = CHANNEL_WILDCARD,
+                           evaluator_name: str = CHANNEL_WILDCARD,
+                           evaluator_type: object = CHANNEL_WILDCARD,
+                           exchange_name: str = CHANNEL_WILDCARD,
+                           cryptocurrency: str = CHANNEL_WILDCARD,
+                           symbol: str = CHANNEL_WILDCARD,
+                           time_frame=CHANNEL_WILDCARD) -> EvaluatorsChannelConsumer:
+        consumer = EvaluatorsChannelConsumer(callback, size=size, priority_level=priority_level)
         await self._add_new_consumer_and_run(consumer,
                                              matrix_id=matrix_id,
                                              evaluator_name=evaluator_name,

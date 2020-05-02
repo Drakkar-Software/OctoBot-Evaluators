@@ -26,16 +26,21 @@ from octobot_evaluators.constants import EVALUATORS_CHANNEL, TA_RE_EVALUATION_TR
 
 
 class EvaluatorChannelConsumer(Consumer):
-    pass
+    """
+    Consumer adapted for EvaluatorChannel
+    """
 
 
 class EvaluatorChannelProducer(Producer):
-    pass
+    """
+    Producer adapted for EvaluatorChannel
+    """
 
 
 class EvaluatorChannel(Channel):
     PRODUCER_CLASS = EvaluatorChannelProducer
     CONSUMER_CLASS = EvaluatorChannelConsumer
+    DEFAULT_PRIORITY_LEVEL = 2
 
     def __init__(self, matrix_id):
         super().__init__()
