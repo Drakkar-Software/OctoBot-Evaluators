@@ -79,6 +79,9 @@ class AbstractEvaluator(AbstractTentacle):
         self.eval_note_time_to_live = None
         self.eval_note_changed_time = None
 
+        # Define evaluators default consumer priority level
+        self.priority_level: int = 2
+
     @staticmethod
     def get_eval_type():
         """
@@ -203,7 +206,7 @@ class AbstractEvaluator(AbstractTentacle):
         :return: success of the evaluator's start
         """
         self.evaluators_consumer_instance = await get_chan(EVALUATORS_CHANNEL, self.matrix_id)\
-            .new_consumer(self.evaluators_callback)
+            .new_consumer(self.evaluators_callback, priority_level=self.priority_level)
 
     async def stop(self) -> None:
         """

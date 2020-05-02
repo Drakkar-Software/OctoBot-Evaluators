@@ -52,7 +52,7 @@ class StrategyEvaluator(AbstractEvaluator):
         """
         await super().start(bot_id)
         self.consumer_instance = await get_chan(MATRIX_CHANNEL, self.matrix_id).new_consumer(
-            self.strategy_matrix_callback)
+            self.strategy_matrix_callback, priority_level=self.priority_level)
         return True
 
     async def strategy_completed(self,
@@ -133,6 +133,7 @@ class StrategyEvaluator(AbstractEvaluator):
                                                                symbol,
                                                                time_frame):
                 # do not call the strategy
+                self.logger.debug(f"False and {TimeFrames(time_frame) not in self.strategy_time_frames}")
                 return
         await self.matrix_callback(
             matrix_id,

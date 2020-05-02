@@ -33,8 +33,8 @@ def init_time_frames_from_strategies(config, tentacles_setup_config) -> None:
     config[CONFIG_TIME_FRAME] = time_frame_list
 
 
-async def create_evaluator_channels(matrix_id: str) -> None:
-    await create_all_subclasses_channel(EvaluatorChannel, set_chan, matrix_id=matrix_id)
+async def create_evaluator_channels(matrix_id: str, is_backtesting: bool = False) -> None:
+    await create_all_subclasses_channel(EvaluatorChannel, set_chan, is_synchronized=is_backtesting, matrix_id=matrix_id)
 
 
 def del_evaluator_channels(matrix_id: str) -> None:
