@@ -29,7 +29,7 @@ def init_time_frames_from_strategies(config, tentacles_setup_config) -> None:
         if is_tentacle_activated_in_tentacles_setup_config(tentacles_setup_config, strategies_eval_class.get_name()):
             for time_frame in strategies_eval_class.get_required_time_frames(config):
                 time_frame_list.add(time_frame)
-    time_frame_list = sort_time_frames(time_frame_list)
+    time_frame_list = sort_time_frames(list(time_frame_list))
     config[CONFIG_TIME_FRAME] = time_frame_list
 
 
