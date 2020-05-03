@@ -186,30 +186,6 @@ def get_tentacle_value_path(cryptocurrency=None, symbol=None, time_frame=None) -
     return node_path
 
 
-async def get_nodes_event(matrix_id, nodes_paths, timeout=None):
-    """
-    Return the asyncio.wait of nodes event
-    :param matrix_id: the matrix id
-    :param nodes_paths: the tentacle node paths
-    :param timeout: the event waiting timeout (when None no timeout)
-    :return: the
-    """
-    return asyncio.gather(*[asyncio.wait_for(get_tentacle_node(matrix_id, node_path).node_event.wait(), timeout=timeout)
-                            for node_path in nodes_paths])
-
-
-async def get_nodes_clear_event(matrix_id, nodes_paths, timeout=None):
-    """
-    Return the asyncio.wait of nodes clear event
-    :param matrix_id: the matrix id
-    :param nodes_paths: the tentacle node path
-    :param timeout: the event waiting timeout (when None no timeout)
-    :return: the
-    """
-    return asyncio.gather(*[asyncio.wait_for(get_tentacle_node(matrix_id, node_path).node_clear_event.wait(),
-                                             timeout=timeout) for node_path in nodes_paths])
-
-
 def get_evaluations_by_evaluator(matrix_id,
                                  exchange_name=None,
                                  tentacle_type=None,
@@ -306,19 +282,6 @@ def get_available_symbols(matrix_id,
                                          cryptocurrency, second_tentacle_type, second_tentacle_type)
     except StopIteration:
         return []
-
-
-async def subscribe_nodes_event(matrix_id, nodes_path, callback, timeout=None):
-    """
-
-    :param matrix_id: the matrix id
-    :param nodes_path: the tentacle node path
-    :param callback:
-    :param timeout: the event waiting timeout (when None no timeout)
-    :return:
-    """
-    await get_nodes_event(matrix_id, nodes_path, timeout=timeout)
-    callback()
 
 
 def is_tentacle_value_valid(matrix_id, tentacle_path, timestamp=0, delta=10) -> bool:
