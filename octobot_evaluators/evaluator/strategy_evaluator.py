@@ -30,14 +30,13 @@ from octobot_tentacles_manager.api.configurator import get_tentacle_config
 
 class StrategyEvaluator(AbstractEvaluator):
     __metaclass__ = AbstractEvaluator
-    # invalidate evaluations 10 secs before next timestamp
-    AUTHORIZED_EVALUATION_TIME_DELTA = 10
 
     def __init__(self):
         super().__init__()
         self.consumer_instance = None
         self.strategy_time_frames = []
         self.evaluations_last_updates = {}
+        self.allowed_time_delta = None
 
         # caches
         self.available_evaluators_cache = {}
@@ -53,6 +52,7 @@ class StrategyEvaluator(AbstractEvaluator):
         await super().start(bot_id)
         self.consumer_instance = await get_chan(MATRIX_CHANNEL, self.matrix_id).new_consumer(
             self.strategy_matrix_callback, priority_level=self.priority_level)
+        self._init_exchange_allowed_time_delta(self.exchange_name, self.matrix_id)
         return True
 
     async def strategy_completed(self,
@@ -179,7 +179,7 @@ class StrategyEvaluator(AbstractEvaluator):
         # ensure all evaluations are valid (do not trigger on an expired evaluation)
         if all(is_tentacle_value_valid(self.matrix_id, evaluation_node_path,
                                        timestamp=current_time,
-                                       delta=self.AUTHORIZED_EVALUATION_TIME_DELTA)
+                                       delta=self.allowed_time_delta)
                for evaluation_node_path in to_validate_node_paths):
             self._save_last_evaluation(matrix_id, exchange_name, evaluator_type, evaluator_name,
                                        cryptocurrency, symbol, time_frame)
@@ -285,6 +285,18 @@ class StrategyEvaluator(AbstractEvaluator):
                 get_exchange_id_from_matrix_id(exchange_name, matrix_id)
             )
             return get_exchange_current_time(exchange_manager)
+        except ImportError:
+            self.logger.error("Strategy requires OctoBot-Trading package installed")
+
+    def _init_exchange_allowed_time_delta(self, exchange_name, matrix_id):
+        try:
+            from octobot_trading.api.exchange import get_exchange_allowed_time_lag, \
+                get_exchange_manager_from_exchange_name_and_id, get_exchange_id_from_matrix_id
+            exchange_manager = get_exchange_manager_from_exchange_name_and_id(
+                exchange_name,
+                get_exchange_id_from_matrix_id(exchange_name, matrix_id)
+            )
+            self.allowed_time_delta = get_exchange_allowed_time_lag(exchange_manager)
         except ImportError:
             self.logger.error("Strategy requires OctoBot-Trading package installed")
 
