@@ -195,7 +195,7 @@ class StrategyEvaluator(AbstractEvaluator):
                                   use_cache=True):
         if use_cache:
             try:
-                return self.available_node_paths_cache[matrix_id][exchange_name][evaluator_type]
+                return self.available_node_paths_cache[matrix_id][exchange_name][evaluator_type][cryptocurrency][symbol]
             except KeyError:
                 # No cache usage here to be use to refresh data
                 node_paths = self._inner_get_available_node_paths(matrix_id, evaluator_type, exchange_name,
@@ -203,9 +203,13 @@ class StrategyEvaluator(AbstractEvaluator):
                 if matrix_id not in self.available_node_paths_cache:
                     self.available_node_paths_cache[matrix_id] = {}
                 if exchange_name not in self.available_node_paths_cache[matrix_id]:
-                    self.available_node_paths_cache[matrix_id][exchange_name] = {
-                        evaluator_type: node_paths
-                    }
+                    self.available_node_paths_cache[matrix_id][exchange_name] = {}
+                if evaluator_type not in self.available_node_paths_cache[matrix_id][exchange_name]:
+                    self.available_node_paths_cache[matrix_id][exchange_name][evaluator_type] = {}
+                if cryptocurrency not in self.available_node_paths_cache[matrix_id][exchange_name][evaluator_type]:
+                    self.available_node_paths_cache[matrix_id][exchange_name][evaluator_type][cryptocurrency] = {}
+                self.available_node_paths_cache[matrix_id][exchange_name][evaluator_type][cryptocurrency][symbol] = \
+                    node_paths
                 return node_paths
         return self._inner_get_available_node_paths(matrix_id, evaluator_type, exchange_name,
                                                     cryptocurrency, symbol, use_cache=use_cache)
@@ -272,9 +276,10 @@ class StrategyEvaluator(AbstractEvaluator):
             if cryptocurrency not in self.evaluations_last_updates[exchange_name][evaluator_type]:
                 self.evaluations_last_updates[exchange_name][evaluator_type][cryptocurrency] = {}
             if symbol not in self.evaluations_last_updates[exchange_name][evaluator_type][cryptocurrency]:
-                self.evaluations_last_updates[exchange_name][evaluator_type][cryptocurrency][symbol] = {
-                    time_frame: value
-                }
+                self.evaluations_last_updates[exchange_name][evaluator_type][cryptocurrency][symbol] = {}
+            self.evaluations_last_updates[exchange_name][evaluator_type][cryptocurrency][symbol] = {
+                time_frame: value
+            }
 
     def _get_exchange_current_time(self, exchange_name, matrix_id):
         try:
@@ -326,9 +331,8 @@ class StrategyEvaluator(AbstractEvaluator):
                 if matrix_id not in self.available_evaluators_cache:
                     self.available_evaluators_cache[matrix_id] = {}
                 if exchange_name not in self.available_evaluators_cache[matrix_id]:
-                    self.available_evaluators_cache[matrix_id][exchange_name] = {
-                        tentacle_type: available_evaluators
-                    }
+                    self.available_evaluators_cache[matrix_id][exchange_name] = {}
+                self.available_evaluators_cache[matrix_id][exchange_name][tentacle_type] = available_evaluators
                 return available_evaluators
         return get_node_children_by_names_at_path(
             matrix_id, get_tentacle_path(exchange_name=exchange_name, tentacle_type=tentacle_type)
@@ -354,9 +358,9 @@ class StrategyEvaluator(AbstractEvaluator):
                 if tentacle_type not in self.available_time_frames_cache[matrix_id][exchange_name]:
                     self.available_time_frames_cache[matrix_id][exchange_name][tentacle_type] = {}
                 if cryptocurrency not in self.available_time_frames_cache[matrix_id][exchange_name][tentacle_type]:
-                    self.available_time_frames_cache[matrix_id][exchange_name][tentacle_type][cryptocurrency] = {
-                        symbol: available_time_frames
-                    }
+                    self.available_time_frames_cache[matrix_id][exchange_name][tentacle_type][cryptocurrency] = {}
+                self.available_time_frames_cache[matrix_id][exchange_name][tentacle_type][cryptocurrency][symbol] = \
+                    available_time_frames
                 return available_time_frames
         return get_available_time_frames(matrix_id, exchange_name, tentacle_type, cryptocurrency, symbol)
 
