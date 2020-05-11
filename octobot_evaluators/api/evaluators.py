@@ -222,9 +222,11 @@ async def create_all_type_evaluators(config: dict,
         exchange_manager = get_exchange_manager_from_exchange_name_and_id(exchange_name, exchange_id)
         for name, symbol_list in symbols_by_crypto_currencies.items():
             if symbol_list:
-                ticker = get_base_currency(exchange_manager, symbol_list[0])
-                crypto_currency_name_by_crypto_currencies[ticker] = name
-                symbols_by_crypto_currency_tickers[ticker] = symbol_list
+                base = get_base_currency(exchange_manager, symbol_list[0])
+                crypto_currency_name_by_crypto_currencies[base] = \
+                    crypto_currency_name_by_crypto_currencies.get(base, "") + name
+                symbols_by_crypto_currency_tickers[base] = \
+                    symbols_by_crypto_currency_tickers.get(base, []) + symbol_list
         return [
             await create_evaluators(
                 evaluator_type, config, tentacles_setup_config,
