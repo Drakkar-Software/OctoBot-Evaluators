@@ -3,7 +3,7 @@
 [![PyPI](https://img.shields.io/pypi/v/OctoBot-Evaluators.svg)](https://pypi.python.org/pypi/OctoBot-Evaluators/)
 [![Coverage Status](https://coveralls.io/repos/github/Drakkar-Software/OctoBot-Evaluators/badge.svg)](https://coveralls.io/github/Drakkar-Software/OctoBot-Evaluators)
 [![Build Status](https://travis-ci.com/Drakkar-Software/OctoBot-Evaluators.svg?branch=master)](https://travis-ci.com/Drakkar-Software/OctoBot-Evaluators) 
-[![Build status](https://ci.appveyor.com/api/projects/status/p68n2y6547xhw0t6?svg=true)](https://ci.appveyor.com/project/Herklos/octobot-evaluators)
+[![Build Status](https://dev.azure.com/drakkarsoftware/OctoBot-Evaluators/_apis/build/status/Drakkar-Software.OctoBot-Evaluators?branchName=master)](https://dev.azure.com/drakkarsoftware/OctoBot-Evaluators/_build/latest?definitionId=5&branchName=master)
 
 # Where are evaluators and strategies ?
 
