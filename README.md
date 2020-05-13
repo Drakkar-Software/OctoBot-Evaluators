@@ -4,6 +4,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/Drakkar-Software/OctoBot-Evaluators/badge.svg)](https://coveralls.io/github/Drakkar-Software/OctoBot-Evaluators)
 [![Build Status](https://travis-ci.com/Drakkar-Software/OctoBot-Evaluators.svg?branch=master)](https://travis-ci.com/Drakkar-Software/OctoBot-Evaluators) 
 [![Build Status](https://dev.azure.com/drakkarsoftware/OctoBot-Evaluators/_apis/build/status/Drakkar-Software.OctoBot-Evaluators?branchName=master)](https://dev.azure.com/drakkarsoftware/OctoBot-Evaluators/_build/latest?definitionId=5&branchName=master)
+[![Build Status](https://cloud.drone.io/api/badges/Drakkar-Software/OctoBot-Evaluators/status.svg)](https://cloud.drone.io/Drakkar-Software/OctoBot-Evaluators)
 
 # Where are evaluators and strategies ?
 
