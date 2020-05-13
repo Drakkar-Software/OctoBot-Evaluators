@@ -13,6 +13,7 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
+from octobot_channels.constants import CHANNEL_WILDCARD
 from octobot_commons.constants import CONFIG_WILDCARD
 from octobot_commons.enums import TimeFrames
 from octobot_commons.time_frame_manager import parse_time_frames
@@ -51,7 +52,9 @@ class StrategyEvaluator(AbstractEvaluator):
         """
         await super().start(bot_id)
         self.consumer_instance = await get_chan(MATRIX_CHANNEL, self.matrix_id).new_consumer(
-            self.strategy_matrix_callback, priority_level=self.priority_level)
+            self.strategy_matrix_callback,
+            priority_level=self.priority_level,
+            exchange_name=self.exchange_name if self.exchange_name else CHANNEL_WILDCARD)
         self._init_exchange_allowed_time_delta(self.exchange_name, self.matrix_id)
         return True
 
