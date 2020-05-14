@@ -16,6 +16,7 @@
 
 import time
 
+from octobot_commons.enums import ChannelConsumerPriorityLevels
 from octobot_commons.constants import START_PENDING_EVAL_NOTE, INIT_EVAL_NOTE
 from octobot_commons.tentacles_management.abstract_tentacle import AbstractTentacle
 from octobot_evaluators.channels.evaluator_channel import get_chan
@@ -80,7 +81,7 @@ class AbstractEvaluator(AbstractTentacle):
         self.eval_note_changed_time = None
 
         # Define evaluators default consumer priority level
-        self.priority_level: int = 2
+        self.priority_level: int = ChannelConsumerPriorityLevels.MEDIUM.value
 
     @staticmethod
     def get_eval_type():
