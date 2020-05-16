@@ -46,6 +46,7 @@ PACKAGES = find_packages(exclude=["tests"])
 packages_list: list = ["octobot_evaluators.channels.evaluators",
                        "octobot_evaluators.channels.evaluator_channel",
                        "octobot_evaluators.channels.matrix",
+                       "octobot_evaluators.consumers.octobot_channel_consumer",
                        "octobot_evaluators.matrices.matrices",
                        "octobot_evaluators.data.matrix",
                        "octobot_evaluators.data_manager.matrix_manager",
