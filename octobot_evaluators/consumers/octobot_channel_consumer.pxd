@@ -1,3 +1,4 @@
+# cython: language_level=3
 #  Drakkar-Software OctoBot-Evaluators
 #  Copyright (c) Drakkar-Software, All rights reserved.
 #
@@ -13,6 +14,3 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
-
-PROJECT_NAME = "OctoBot-Evaluators"
-VERSION = "1.5.12"  # major.minor.revision
