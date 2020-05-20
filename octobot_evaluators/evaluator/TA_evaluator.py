@@ -81,11 +81,12 @@ class TAEvaluator(AbstractEvaluator):
         # Used to communicate between evaluators
         if data[EVALUATOR_CHANNEL_DATA_ACTION] == TA_RE_EVALUATION_TRIGGER_UPDATED_DATA:
             try:
-                from octobot_trading.api.symbol_data import get_symbol_historical_candles
+                from octobot_trading.api.symbol_data import get_symbol_historical_candles, get_candle_as_list
                 exchange_id = data[EVALUATOR_CHANNEL_DATA_EXCHANGE_ID]
                 symbol_data = self.get_exchange_symbol_data(exchange_name, exchange_id, symbol)
                 for time_frame in data[EVALUATOR_CHANNEL_DATA_TIME_FRAMES]:
-                    last_full_candle = get_symbol_historical_candles(symbol_data, time_frame, limit=1)
+                    last_full_candle = get_candle_as_list(get_symbol_historical_candles(symbol_data, time_frame,
+                                                                                        limit=1))
                     await self.ohlcv_callback(exchange_name, exchange_id, cryptocurrency,
                                               symbol, time_frame.value, last_full_candle, True)
             except ImportError:
