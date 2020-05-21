@@ -15,7 +15,7 @@
 #  License along with this library.
 from octobot_channels.util.channel_creator import create_all_subclasses_channel
 from octobot_commons.constants import CONFIG_TIME_FRAME
-from octobot_commons.tentacles_management.advanced_manager import create_advanced_types_list
+from octobot_commons.tentacles_management.class_inspector import get_all_classes_from_parent
 from octobot_commons.time_frame_manager import sort_time_frames
 from octobot_evaluators.channels.evaluator_channel import get_chan, set_chan, EvaluatorChannel, del_chan
 from octobot_evaluators.constants import MATRIX_CHANNEL
@@ -25,7 +25,7 @@ from octobot_tentacles_manager.api.configurator import is_tentacle_activated_in_
 
 def init_time_frames_from_strategies(config, tentacles_setup_config) -> None:
     time_frame_list = set()
-    for strategies_eval_class in create_advanced_types_list(StrategyEvaluator, config):
+    for strategies_eval_class in get_all_classes_from_parent(StrategyEvaluator):
         if is_tentacle_activated_in_tentacles_setup_config(tentacles_setup_config, strategies_eval_class.get_name()):
             for time_frame in strategies_eval_class.get_required_time_frames(config):
                 time_frame_list.add(time_frame)

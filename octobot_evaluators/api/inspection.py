@@ -13,24 +13,10 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
-
 from octobot_commons.constants import CONFIG_WILDCARD
-from octobot_commons.tentacles_management.advanced_manager import create_advanced_types_list
+from octobot_commons.tentacles_management.class_inspector import get_all_classes_from_parent
 
-from octobot_evaluators.evaluator import StrategyEvaluator, TAEvaluator
-
-
-def get_relevant_evaluators_from_strategies(config, tentacles_setup_config) -> list:
-    evaluator_list = set()
-    for strategies_eval_class in create_advanced_types_list(StrategyEvaluator, config):
-        if strategies_eval_class.is_enabled(tentacles_setup_config, False):
-            required_evaluators = strategies_eval_class.get_required_evaluators()
-            if required_evaluators == CONFIG_WILDCARD:
-                return CONFIG_WILDCARD
-            else:
-                for evaluator in required_evaluators:
-                    evaluator_list.add(evaluator)
-    return evaluator_list
+from octobot_evaluators.evaluator import TAEvaluator
 
 
 def is_relevant_evaluator(evaluator_instance, relevant_evaluators, use_relevant_evaluators_only=False) -> bool:
@@ -47,10 +33,10 @@ def is_relevant_evaluator(evaluator_instance, relevant_evaluators, use_relevant_
     return False
 
 
-def get_relevant_TAs_for_strategy(strategy, config, tentacles_setup_config) -> list:
+def get_relevant_TAs_for_strategy(strategy, tentacles_setup_config) -> list:
     ta_classes_list = []
     relevant_evaluators = strategy.get_required_evaluators()
-    for ta_eval_class in create_advanced_types_list(TAEvaluator, config):
+    for ta_eval_class in get_all_classes_from_parent(TAEvaluator):
         ta_eval_class_instance = ta_eval_class()
         ta_eval_class_instance.set_tentacles_setup_config(tentacles_setup_config)
         # use ony relevant_evaluators given by the strategy
