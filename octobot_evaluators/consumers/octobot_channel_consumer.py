@@ -42,7 +42,6 @@ class OctoBotChannelEvaluatorDataKeys(Enum):
     EXCHANGE_CONFIGURATION = "exchange_configuration"
     MATRIX_ID = "matrix_id"
     TENTACLES_SETUP_CONFIG = "tentacles_setup_config"
-    CONFIG = "config"
 
 
 async def octobot_channel_callback(bot_id, subject, action, data) -> None:
@@ -62,7 +61,6 @@ async def _handle_creation(bot_id, action, data):
         try:
             exchange_configuration = data[OctoBotChannelEvaluatorDataKeys.EXCHANGE_CONFIGURATION.value]
             await create_all_type_evaluators(
-                config=data[OctoBotChannelEvaluatorDataKeys.CONFIG.value],
                 tentacles_setup_config=data[OctoBotChannelEvaluatorDataKeys.TENTACLES_SETUP_CONFIG.value],
                 matrix_id=data[OctoBotChannelEvaluatorDataKeys.MATRIX_ID.value],
                 exchange_name=exchange_configuration.exchange_name,

@@ -18,7 +18,7 @@ import copy
 from octobot_channels.channels.channel_instances import ChannelInstances
 from octobot_commons.constants import CONFIG_WILDCARD
 from octobot_commons.logging.logging_util import get_logger
-from octobot_commons.tentacles_management.advanced_manager import create_classes_list, create_advanced_types_list
+from octobot_commons.tentacles_management.class_inspector import get_all_classes_from_parent
 from octobot_commons.time_frame_manager import get_config_time_frame
 from octobot_evaluators.api.initialization import init_time_frames_from_strategies
 from octobot_evaluators.api.inspection import is_relevant_evaluator
@@ -26,9 +26,7 @@ from octobot_evaluators.channels.evaluator_channel import get_chan
 from octobot_evaluators.constants import EVALUATOR_CLASS_TYPE_MRO_INDEX, evaluator_class_str_to_matrix_type_dict
 from octobot_evaluators.data.matrix import Matrix
 from octobot_evaluators.enums import EvaluatorMatrixTypes
-from octobot_evaluators.evaluator import TAEvaluator, SocialEvaluator, RealTimeEvaluator, StrategyEvaluator, \
-    AbstractEvaluator
-from octobot_evaluators.evaluator.abstract_util import AbstractUtil
+from octobot_evaluators.evaluator import TAEvaluator, SocialEvaluator, RealTimeEvaluator, StrategyEvaluator
 from octobot_evaluators.matrices.matrices import Matrices
 
 EvaluatorClassTypes = {
@@ -40,7 +38,6 @@ EvaluatorClassTypes = {
 
 
 async def create_evaluators(evaluator_parent_class,
-                            config: dict,
                             tentacles_setup_config: object,
                             matrix_id: str,
                             exchange_name: str,
@@ -69,7 +66,7 @@ async def create_evaluators(evaluator_parent_class,
                                time_frames=time_frames,
                                real_time_time_frames=real_time_time_frames
                                )
-        for evaluator_class in create_advanced_types_list(evaluator_parent_class, config)
+        for evaluator_class in get_all_classes_from_parent(evaluator_parent_class)
         for cryptocurrency in _get_cryptocurrencies_to_create(evaluator_class,
                                                               crypto_currency_name_by_crypto_currencies)
         for symbol in _get_symbols_to_create(evaluator_class, symbols_by_crypto_currency_tickers,
@@ -117,11 +114,11 @@ async def stop_all_evaluator_channels(matrix_id) -> None:
         await stop_evaluator_channel(matrix_id, channel)
 
 
-def get_evaluator_classes_from_type(evaluator_type, config, tentacles_setup_config, activated_only=True) -> list:
+def get_evaluator_classes_from_type(evaluator_type, tentacles_setup_config, activated_only=True) -> list:
     if activated_only:
-        return [cls for cls in create_advanced_types_list(EvaluatorClassTypes[evaluator_type], config)
+        return [cls for cls in get_all_classes_from_parent(EvaluatorClassTypes[evaluator_type])
                 if cls.is_enabled(tentacles_setup_config, False)]
-    return create_advanced_types_list(EvaluatorClassTypes[evaluator_type], config)
+    return get_all_classes_from_parent(EvaluatorClassTypes[evaluator_type])
 
 
 async def create_evaluator(evaluator_class,
@@ -166,15 +163,9 @@ async def initialize_evaluators(config, tentacles_setup_config) -> str:
     :param tentacles_setup_config: tentacles configuration
     :return: initialized matrix id
     """
-    create_evaluator_classes(config)
     _init_time_frames(config, tentacles_setup_config)
 
     return create_matrix()
-
-
-def create_evaluator_classes(config):
-    create_classes_list(config, AbstractEvaluator)
-    create_classes_list(config, AbstractUtil)
 
 
 def get_evaluators_time_frames(config) -> list:
@@ -185,14 +176,6 @@ def _init_time_frames(config, tentacles_setup_config) -> list:
     # Init time frames using enabled strategies
     init_time_frames_from_strategies(config, tentacles_setup_config)
     time_frames = copy.copy(get_config_time_frame(config))
-
-    # Init display time frame
-    # config_time_frames = get_config_time_frame(config)
-
-    # if TimeFrames.ONE_HOUR not in config_time_frames and not backtesting_enabled(config):
-    #     config_time_frames.append(TimeFrames.ONE_HOUR)
-    #     sort_config_time_frames(config)
-
     return time_frames
 
 
@@ -202,8 +185,7 @@ def create_matrix() -> str:
     return created_matrix.matrix_id
 
 
-async def create_all_type_evaluators(config: dict,
-                                     tentacles_setup_config: object,
+async def create_all_type_evaluators(tentacles_setup_config: object,
                                      matrix_id: str,
                                      exchange_name: str,
                                      bot_id: str,
@@ -229,7 +211,7 @@ async def create_all_type_evaluators(config: dict,
                     symbols_by_crypto_currency_tickers.get(base, []) + symbol_list
         return [
             await create_evaluators(
-                evaluator_type, config, tentacles_setup_config,
+                evaluator_type, tentacles_setup_config,
                 matrix_id=matrix_id, exchange_name=exchange_name,
                 bot_id=bot_id,
                 crypto_currency_name_by_crypto_currencies=crypto_currency_name_by_crypto_currencies,

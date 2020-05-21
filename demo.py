@@ -60,8 +60,7 @@ async def create_evaluators_channel():
     matrix_id: str = await initialize_evaluators(config)
     await create_evaluator_channels(matrix_id)
     await get_chan(MATRIX_CHANNEL, matrix_id).new_consumer(matrix_callback)
-    await create_all_type_evaluators(config,
-                                     matrix_id=matrix_id,
+    await create_all_type_evaluators(matrix_id=matrix_id,
                                      exchange_name="test",
                                      symbols=["BTC/USDT"],
                                      time_frames=[TimeFrames.ONE_HOUR])
