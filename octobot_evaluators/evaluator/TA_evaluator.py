@@ -48,7 +48,7 @@ class TAEvaluator(AbstractEvaluator):
                 self.evaluator_ohlcv_callback,
                 cryptocurrency=self.cryptocurrency if self.cryptocurrency else CHANNEL_WILDCARD,
                 symbol=self.symbol if self.symbol else CHANNEL_WILDCARD,
-                time_frame=self.time_frame if self.time_frame else time_frame_filter,
+                time_frame=self.time_frame.value if self.time_frame else time_frame_filter,
                 priority_level=self.priority_level,
             )
             return True
