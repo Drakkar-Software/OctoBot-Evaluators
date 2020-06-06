@@ -20,7 +20,7 @@ from octobot_commons.constants import CONFIG_WILDCARD
 from octobot_commons.logging.logging_util import get_logger
 from octobot_commons.tentacles_management.class_inspector import get_all_classes_from_parent
 from octobot_commons.time_frame_manager import get_config_time_frame
-from octobot_evaluators.api.initialization import init_time_frames_from_strategies
+from octobot_evaluators.api.initialization import init_time_frames_from_strategies, get_activated_strategies_classes
 from octobot_evaluators.api.inspection import is_relevant_evaluator
 from octobot_evaluators.channels.evaluator_channel import get_chan
 from octobot_evaluators.constants import EVALUATOR_CLASS_TYPE_MRO_INDEX, evaluator_class_str_to_matrix_type_dict
@@ -29,6 +29,7 @@ from octobot_evaluators.enums import EvaluatorMatrixTypes
 from octobot_evaluators.evaluator import TAEvaluator, SocialEvaluator, RealTimeEvaluator, StrategyEvaluator
 from octobot_evaluators.matrices.matrices import Matrices
 
+LOGGER_NAME = "EvaluatorsAPI"
 EvaluatorClassTypes = {
     EvaluatorMatrixTypes.TA.value: TAEvaluator,
     EvaluatorMatrixTypes.SOCIAL.value: SocialEvaluator,
@@ -106,7 +107,7 @@ async def stop_evaluator_channel(matrix_id, chan_name) -> None:
     try:
         await get_chan(chan_name, matrix_id).stop()
     except Exception as e:
-        get_logger("EvaluatorsAPI").exception(e, True, f"Error when stopping evaluator channel {chan_name}: {e}")
+        get_logger(LOGGER_NAME).exception(e, True, f"Error when stopping evaluator channel {chan_name}: {e}")
 
 
 async def stop_all_evaluator_channels(matrix_id) -> None:
@@ -153,7 +154,7 @@ async def create_evaluator(evaluator_class,
             await eval_class_instance.start_evaluator(bot_id)
             return eval_class_instance
     except Exception as e:
-        get_logger("EvaluatorsAPI").exception(e, True, f"Error when creating evaluator {evaluator_class}: {e}")
+        get_logger(LOGGER_NAME).exception(e, True, f"Error when creating evaluator {evaluator_class}: {e}")
     return None
 
 
@@ -195,6 +196,10 @@ async def create_all_type_evaluators(tentacles_setup_config: object,
                                      real_time_time_frames: list = None,
                                      relevant_evaluators=CONFIG_WILDCARD,
                                      ) -> list:
+    if not get_activated_strategies_classes(tentacles_setup_config):
+        # If no strategy is activated, there is no evaluator to create (their evaluation would not be used)
+        get_logger(LOGGER_NAME).info(f"No evaluator to create for {exchange_name}: no activated evaluator strategy.")
+        return []
     crypto_currency_name_by_crypto_currencies = {}
     symbols_by_crypto_currency_tickers = {}
     try:
@@ -221,4 +226,4 @@ async def create_all_type_evaluators(tentacles_setup_config: object,
                 relevant_evaluators=relevant_evaluators)
             for evaluator_type in EvaluatorClassTypes.values()]
     except ImportError:
-        get_logger("EvaluatorsAPI").error("create_evaluators requires Octobot-Trading package installed")
+        get_logger(LOGGER_NAME).error("create_evaluators requires Octobot-Trading package installed")

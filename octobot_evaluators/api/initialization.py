@@ -25,12 +25,19 @@ from octobot_tentacles_manager.api.configurator import is_tentacle_activated_in_
 
 def init_time_frames_from_strategies(config, tentacles_setup_config) -> None:
     time_frame_list = set()
-    for strategies_eval_class in get_all_classes_from_parent(StrategyEvaluator):
-        if is_tentacle_activated_in_tentacles_setup_config(tentacles_setup_config, strategies_eval_class.get_name()):
-            for time_frame in strategies_eval_class.get_required_time_frames(config):
-                time_frame_list.add(time_frame)
+    for strategies_eval_class in get_activated_strategies_classes(tentacles_setup_config):
+        for time_frame in strategies_eval_class.get_required_time_frames(config):
+            time_frame_list.add(time_frame)
     time_frame_list = sort_time_frames(list(time_frame_list))
     config[CONFIG_TIME_FRAME] = time_frame_list
+
+
+def get_activated_strategies_classes(tentacles_setup_config):
+    return [
+        strategies_eval_class
+        for strategies_eval_class in get_all_classes_from_parent(StrategyEvaluator)
+        if is_tentacle_activated_in_tentacles_setup_config(tentacles_setup_config, strategies_eval_class.get_name())
+    ]
 
 
 async def create_evaluator_channels(matrix_id: str, is_backtesting: bool = False) -> None:
