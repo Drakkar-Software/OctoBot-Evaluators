@@ -15,4 +15,4 @@
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
 
-cpdef double get_eval_time(list full_candle=*, str time_frame=*, list partial_candle=*, list kline=*)
+cpdef double get_eval_time(list full_candle=*, object time_frame=*, list partial_candle=*, list kline=*)
