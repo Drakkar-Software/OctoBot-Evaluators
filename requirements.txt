@@ -1,6 +1,6 @@
 # Setup requirements
 cython==0.29.21
-numpy==1.19.1
+numpy==1.19.2
 
 # Drakkar-Software requirements
 OctoBot-Channels>=1.4.11, <1.5
