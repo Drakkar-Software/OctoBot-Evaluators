@@ -15,34 +15,34 @@
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
 
-from octobot_channels.channels.channel import Channel
-from octobot_channels.channels.channel_instances import ChannelInstances
-from octobot_channels.constants import CHANNEL_WILDCARD
-from octobot_channels.consumer import Consumer
-from octobot_channels.producer import Producer
+import async_channel.channels as channel
+import async_channel.enums as channel_enums
+import async_channel.channels as channel_instances
+import async_channel.constants as channel_constants
+import async_channel.consumer as channel_consumer
+import async_channel.producer as channel_producer
 
-from octobot_commons.enums import ChannelConsumerPriorityLevels
-from octobot_commons.logging.logging_util import get_logger
-from octobot_evaluators.constants import EVALUATORS_CHANNEL, TA_RE_EVALUATION_TRIGGER_UPDATED_DATA, RESET_EVALUATION, \
-    EVALUATOR_CHANNEL_DATA_ACTION, EVALUATOR_CHANNEL_DATA_EXCHANGE_ID, EVALUATOR_CHANNEL_DATA_TIME_FRAMES
+import octobot_commons.logging as logging
+
+import octobot_evaluators.constants as constants
 
 
-class EvaluatorChannelConsumer(Consumer):
+class EvaluatorChannelConsumer(channel_consumer.Consumer):
     """
     Consumer adapted for EvaluatorChannel
     """
 
 
-class EvaluatorChannelProducer(Producer):
+class EvaluatorChannelProducer(channel_producer.Producer):
     """
     Producer adapted for EvaluatorChannel
     """
 
 
-class EvaluatorChannel(Channel):
+class EvaluatorChannel(channel.Channel):
     PRODUCER_CLASS = EvaluatorChannelProducer
     CONSUMER_CLASS = EvaluatorChannelConsumer
-    DEFAULT_PRIORITY_LEVEL = ChannelConsumerPriorityLevels.MEDIUM.value
+    DEFAULT_PRIORITY_LEVEL = channel_enums.ChannelConsumerPriorityLevels.MEDIUM.value
 
     def __init__(self, matrix_id):
         super().__init__()
@@ -64,10 +64,10 @@ def set_chan(chan, name) -> None:
     chan_name = chan.get_name() if name else name
 
     try:
-        evaluator_chan = ChannelInstances.instance().channels[chan.matrix_id]
+        evaluator_chan = channel_instances.ChannelInstances.instance().channels[chan.matrix_id]
     except KeyError:
-        ChannelInstances.instance().channels[chan.matrix_id] = {}
-        evaluator_chan = ChannelInstances.instance().channels[chan.matrix_id]
+        channel_instances.ChannelInstances.instance().channels[chan.matrix_id] = {}
+        evaluator_chan = channel_instances.ChannelInstances.instance().channels[chan.matrix_id]
 
     if chan_name not in evaluator_chan:
         evaluator_chan[chan_name] = chan
@@ -77,30 +77,30 @@ def set_chan(chan, name) -> None:
 
 def get_evaluator_channels(matrix_id) -> dict:
     try:
-        return ChannelInstances.instance().channels[matrix_id]
+        return channel_instances.ChannelInstances.instance().channels[matrix_id]
     except KeyError:
         raise KeyError(f"Channels not found with matrix_id: {matrix_id}")
 
 
 def del_evaluator_channel_container(matrix_id):
     try:
-        ChannelInstances.instance().channels.pop(matrix_id, None)
+        channel_instances.ChannelInstances.instance().channels.pop(matrix_id, None)
     except KeyError:
         raise KeyError(f"Channels not found with matrix_id: {matrix_id}")
 
 
 def get_chan(chan_name, matrix_id) -> EvaluatorChannel:
     try:
-        return ChannelInstances.instance().channels[matrix_id][chan_name]
+        return channel_instances.ChannelInstances.instance().channels[matrix_id][chan_name]
     except KeyError:
         raise KeyError(f"Channel {chan_name} not found with matrix_id: {matrix_id}")
 
 
 def del_chan(chan_name, matrix_id) -> None:
     try:
-        ChannelInstances.instance().channels[matrix_id].pop(chan_name, None)
+        channel_instances.ChannelInstances.instance().channels[matrix_id].pop(chan_name, None)
     except KeyError:
-        get_logger(EvaluatorChannel.__name__).warning(f"Can't del chan {chan_name} with matrix_id: {matrix_id}")
+        logging.get_logger(EvaluatorChannel.__name__).warning(f"Can't del chan {chan_name} with matrix_id: {matrix_id}")
 
 
 async def trigger_technical_evaluators_re_evaluation_with_updated_data(matrix_id,
@@ -113,30 +113,30 @@ async def trigger_technical_evaluators_re_evaluation_with_updated_data(matrix_id
                                                                        time_frames
                                                                        ):
     # first reset evaluations to avoid partially updated TA cycle validation
-    await get_chan(EVALUATORS_CHANNEL, matrix_id).get_internal_producer().send(
+    await get_chan(constants.EVALUATORS_CHANNEL, matrix_id).get_internal_producer().send(
         matrix_id,
         data={
-            EVALUATOR_CHANNEL_DATA_ACTION: RESET_EVALUATION,
-            EVALUATOR_CHANNEL_DATA_TIME_FRAMES: time_frames
+            constants.EVALUATOR_CHANNEL_DATA_ACTION: constants.RESET_EVALUATION,
+            constants.EVALUATOR_CHANNEL_DATA_TIME_FRAMES: time_frames
         },
         evaluator_name=evaluator_name,
         evaluator_type=evaluator_type,
         exchange_name=exchange_name,
         cryptocurrency=cryptocurrency,
         symbol=symbol,
-        time_frame=CHANNEL_WILDCARD
+        time_frame=channel_constants.CHANNEL_WILDCARD
     )
-    await get_chan(EVALUATORS_CHANNEL, matrix_id).get_internal_producer().send(
+    await get_chan(constants.EVALUATORS_CHANNEL, matrix_id).get_internal_producer().send(
         matrix_id,
         data={
-            EVALUATOR_CHANNEL_DATA_ACTION: TA_RE_EVALUATION_TRIGGER_UPDATED_DATA,
-            EVALUATOR_CHANNEL_DATA_EXCHANGE_ID: exchange_id,
-            EVALUATOR_CHANNEL_DATA_TIME_FRAMES: time_frames
+            constants.EVALUATOR_CHANNEL_DATA_ACTION: constants.TA_RE_EVALUATION_TRIGGER_UPDATED_DATA,
+            constants.EVALUATOR_CHANNEL_DATA_EXCHANGE_ID: exchange_id,
+            constants.EVALUATOR_CHANNEL_DATA_TIME_FRAMES: time_frames
         },
         evaluator_name=evaluator_name,
         evaluator_type=evaluator_type,
         exchange_name=exchange_name,
         cryptocurrency=cryptocurrency,
         symbol=symbol,
-        time_frame=CHANNEL_WILDCARD
+        time_frame=channel_constants.CHANNEL_WILDCARD
     )

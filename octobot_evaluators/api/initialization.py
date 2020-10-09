@@ -13,14 +13,18 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
-from octobot_channels.util.channel_creator import create_all_subclasses_channel
-from octobot_commons.constants import CONFIG_TIME_FRAME
-from octobot_commons.tentacles_management.class_inspector import get_all_classes_from_parent
-from octobot_commons.time_frame_manager import sort_time_frames
-from octobot_evaluators.channels.evaluator_channel import get_chan, set_chan, EvaluatorChannel, del_chan
-from octobot_evaluators.constants import MATRIX_CHANNEL
-from octobot_evaluators.evaluator import StrategyEvaluator, EVALUATORS_CHANNEL
-from octobot_tentacles_manager.api.configurator import is_tentacle_activated_in_tentacles_setup_config
+import async_channel.util as channel_util
+
+import octobot_tentacles_manager.api as api
+
+import octobot_commons.constants as common_constants
+import octobot_commons.channels_name as channels_name
+import octobot_commons.tentacles_management as tentacles_management
+import octobot_commons.time_frame_manager as time_frame_manager
+
+import octobot_evaluators.channels as channels
+import octobot_evaluators.constants as constants
+import octobot_evaluators.evaluator as evaluator
 
 
 def init_time_frames_from_strategies(config, tentacles_setup_config) -> None:
@@ -28,30 +32,31 @@ def init_time_frames_from_strategies(config, tentacles_setup_config) -> None:
     for strategies_eval_class in get_activated_strategies_classes(tentacles_setup_config):
         for time_frame in strategies_eval_class.get_required_time_frames(config):
             time_frame_list.add(time_frame)
-    time_frame_list = sort_time_frames(list(time_frame_list))
-    config[CONFIG_TIME_FRAME] = time_frame_list
+    time_frame_list = time_frame_manager.sort_time_frames(list(time_frame_list))
+    config[common_constants.CONFIG_TIME_FRAME] = time_frame_list
 
 
 def get_activated_strategies_classes(tentacles_setup_config):
     return [
         strategies_eval_class
-        for strategies_eval_class in get_all_classes_from_parent(StrategyEvaluator)
-        if is_tentacle_activated_in_tentacles_setup_config(tentacles_setup_config, strategies_eval_class.get_name())
+        for strategies_eval_class in tentacles_management.get_all_classes_from_parent(evaluator.StrategyEvaluator)
+        if api.is_tentacle_activated_in_tentacles_setup_config(tentacles_setup_config, strategies_eval_class.get_name())
     ]
 
 
 async def create_evaluator_channels(matrix_id: str, is_backtesting: bool = False) -> None:
-    await create_all_subclasses_channel(EvaluatorChannel, set_chan, is_synchronized=is_backtesting, matrix_id=matrix_id)
+    await channel_util.create_all_subclasses_channel(channels.EvaluatorChannel, channels.set_chan,
+                                                     is_synchronized=is_backtesting, matrix_id=matrix_id)
 
 
 def del_evaluator_channels(matrix_id: str) -> None:
-    del_chan(MATRIX_CHANNEL, matrix_id)
-    del_chan(EVALUATORS_CHANNEL, matrix_id)
+    channels.del_chan(constants.MATRIX_CHANNEL, matrix_id)
+    channels.del_chan(constants.EVALUATORS_CHANNEL, matrix_id)
 
 
 def matrix_channel_exists(matrix_id: str) -> bool:
     try:
-        get_chan(MATRIX_CHANNEL, matrix_id)
+        channels.get_chan(constants.MATRIX_CHANNEL, matrix_id)
         return True
     except KeyError:
         return False

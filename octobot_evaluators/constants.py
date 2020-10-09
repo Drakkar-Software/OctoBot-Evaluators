@@ -13,11 +13,9 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
-from typing import NewType, Union
+import typing
 
-from octobot_evaluators.enums import EvaluatorMatrixTypes
-
-MatrixValueType = NewType('MatrixValueType', Union[str, int, float])
+MatrixValueType = typing.NewType('MatrixValueType', typing.Union[str, int, float])
 
 START_EVAL_PERTINENCE = 1
 MAX_TA_EVAL_TIME_SECONDS = 0.1
@@ -41,10 +39,3 @@ RESET_EVALUATION = "reset_evaluation"
 EVALUATOR_CHANNEL_DATA_ACTION = "action"
 EVALUATOR_CHANNEL_DATA_EXCHANGE_ID = "exchange_id"
 EVALUATOR_CHANNEL_DATA_TIME_FRAMES = "time_frames"
-
-evaluator_class_str_to_matrix_type_dict = {
-    "TAEvaluator": EvaluatorMatrixTypes.TA,
-    "SocialEvaluator": EvaluatorMatrixTypes.SOCIAL,
-    "RealTimeEvaluator": EvaluatorMatrixTypes.REAL_TIME,
-    "StrategyEvaluator": EvaluatorMatrixTypes.STRATEGIES
-}

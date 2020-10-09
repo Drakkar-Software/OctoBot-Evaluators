@@ -172,10 +172,10 @@ async def _create_evaluators(evaluator_parent_class, symbols_by_crypto_currencie
         ticker = split_symbol(symbol_list[0])[0]
         crypto_currency_name_by_crypto_currencies[ticker] = name
         symbols_by_crypto_currency_tickers[ticker] = symbol_list
-    with patch("octobot_evaluators.api.evaluators.create_evaluator", new=_mocked_create_evaluator), \
-            patch("octobot_evaluators.api.evaluators.get_all_classes_from_parent",
+    with patch("octobot_evaluators.evaluator.evaluator_factory.create_evaluator", new=_mocked_create_evaluator), \
+            patch("octobot_commons.tentacles_management.get_all_classes_from_parent",
                   new=_mocked_get_all_classes_from_parent):
-        return await octobot_evaluators.api.evaluators.create_evaluators(
+        return await octobot_evaluators.api.create_evaluators(
             evaluator_parent_class=evaluator_parent_class,
             tentacles_setup_config=None,
             matrix_id="",

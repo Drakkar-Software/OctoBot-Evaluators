@@ -15,7 +15,7 @@
 #  License along with this library.
 import pytest
 
-from octobot_channels.util.channel_creator import create_channel_instance
+from async_channel.util.channel_creator import create_channel_instance
 from octobot_evaluators.api.initialization import del_evaluator_channels
 from octobot_evaluators.channels.evaluator_channel import get_chan, set_chan, EvaluatorChannel
 

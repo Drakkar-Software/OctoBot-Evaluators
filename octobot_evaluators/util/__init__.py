@@ -13,3 +13,16 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
+
+from octobot_evaluators.util import evaluation_util
+
+from octobot_evaluators.util.evaluation_util import (
+    get_eval_time,
+    get_shortest_time_frame,
+)
+
+__all__ = [
+    "get_eval_time",
+    "get_shortest_time_frame",
+]
+

@@ -15,7 +15,7 @@
 #  License along with this library.
 import pytest
 
-from octobot_evaluators.data.matrix import Matrix
+from octobot_evaluators.matrix.matrix import Matrix
 
 
 def test_default_matrix():

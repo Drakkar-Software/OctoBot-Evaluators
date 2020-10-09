@@ -14,23 +14,23 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
-from asyncio import CancelledError
 
-from octobot_channels.constants import CHANNEL_WILDCARD
-from octobot_commons.logging.logging_util import get_logger
-from octobot_evaluators.channels.evaluator_channel import EvaluatorChannelConsumer, EvaluatorChannelProducer, \
-    EvaluatorChannel
-from octobot_evaluators.constants import EVALUATOR_EVAL_DEFAULT_TYPE
-from octobot_evaluators.data_manager.matrix_manager import set_tentacle_value, get_matrix_default_value_path
+import async_channel.constants as channel_constants
+
+import octobot_commons.logging as logging
+
+import octobot_evaluators.channels as channels
+import octobot_evaluators.constants as constants
+import octobot_evaluators.matrix as matrix
 
 
-class MatrixChannelConsumer(EvaluatorChannelConsumer):
+class MatrixChannelConsumer(channels.EvaluatorChannelConsumer):
     """
     EvaluatorChannelConsumer adapted for MatrixChannel
     """
 
 
-class MatrixChannelProducer(EvaluatorChannelProducer):
+class MatrixChannelProducer(channels.EvaluatorChannelProducer):
     """
     EvaluatorChannelProducer adapted for MatrixChannel
     """
@@ -41,10 +41,10 @@ class MatrixChannelProducer(EvaluatorChannelProducer):
                    evaluator_name,
                    evaluator_type,
                    eval_note,
-                   eval_note_type=EVALUATOR_EVAL_DEFAULT_TYPE,
+                   eval_note_type=constants.EVALUATOR_EVAL_DEFAULT_TYPE,
                    exchange_name=None,
-                   cryptocurrency=CHANNEL_WILDCARD,
-                   symbol=CHANNEL_WILDCARD,
+                   cryptocurrency=channel_constants.CHANNEL_WILDCARD,
+                   symbol=channel_constants.CHANNEL_WILDCARD,
                    time_frame=None,
                    origin_consumer=None):
         for consumer in self.channel.get_filtered_consumers(matrix_id=matrix_id,
@@ -80,12 +80,12 @@ class MatrixChannelProducer(EvaluatorChannelProducer):
                              time_frame=None,
                              origin_consumer=None,
                              notify: bool = True):
-        set_tentacle_value(
+        matrix.set_tentacle_value(
             matrix_id=matrix_id,
             tentacle_type=eval_note_type,
             tentacle_value=eval_note,
             timestamp=eval_time,
-            tentacle_path=get_matrix_default_value_path(
+            tentacle_path=matrix.get_matrix_default_value_path(
                 exchange_name=exchange_name,
                 tentacle_type=evaluator_type,
                 tentacle_name=evaluator_name,
@@ -107,7 +107,7 @@ class MatrixChannelProducer(EvaluatorChannelProducer):
                             origin_consumer=origin_consumer)
 
 
-class MatrixChannel(EvaluatorChannel):
+class MatrixChannel(channels.EvaluatorChannel):
     FILTER_SIZE = 1
     PRODUCER_CLASS = MatrixChannelProducer
     CONSUMER_CLASS = MatrixChannelConsumer
@@ -122,20 +122,20 @@ class MatrixChannel(EvaluatorChannel):
 
     def __init__(self, matrix_id):
         super().__init__(matrix_id)
-        self.logger = get_logger(f"{self.__class__.__name__}")
+        self.logger = logging.get_logger(f"{self.__class__.__name__}")
 
     # noinspection PyMethodOverriding
     async def new_consumer(self,
                            callback: object,
                            size: int = 0,
-                           priority_level: int = EvaluatorChannel.DEFAULT_PRIORITY_LEVEL,
-                           matrix_id: str = CHANNEL_WILDCARD,
-                           cryptocurrency: str = CHANNEL_WILDCARD,
-                           symbol: str = CHANNEL_WILDCARD,
-                           evaluator_name: str = CHANNEL_WILDCARD,
-                           evaluator_type: object = CHANNEL_WILDCARD,
-                           exchange_name: str = CHANNEL_WILDCARD,
-                           time_frame=CHANNEL_WILDCARD) -> MatrixChannelConsumer:
+                           priority_level: int = channels.EvaluatorChannel.DEFAULT_PRIORITY_LEVEL,
+                           matrix_id: str = channel_constants.CHANNEL_WILDCARD,
+                           cryptocurrency: str = channel_constants.CHANNEL_WILDCARD,
+                           symbol: str = channel_constants.CHANNEL_WILDCARD,
+                           evaluator_name: str = channel_constants.CHANNEL_WILDCARD,
+                           evaluator_type: object = channel_constants.CHANNEL_WILDCARD,
+                           exchange_name: str = channel_constants.CHANNEL_WILDCARD,
+                           time_frame=channel_constants.CHANNEL_WILDCARD) -> MatrixChannelConsumer:
         consumer = MatrixChannelConsumer(callback, size=size, priority_level=priority_level)
         await self._add_new_consumer_and_run(consumer,
                                              matrix_id=matrix_id,
@@ -148,13 +148,13 @@ class MatrixChannel(EvaluatorChannel):
         return consumer
 
     def get_filtered_consumers(self,
-                               matrix_id=CHANNEL_WILDCARD,
-                               cryptocurrency=CHANNEL_WILDCARD,
-                               symbol=CHANNEL_WILDCARD,
-                               evaluator_type=CHANNEL_WILDCARD,
-                               time_frame=CHANNEL_WILDCARD,
-                               evaluator_name=CHANNEL_WILDCARD,
-                               exchange_name=CHANNEL_WILDCARD,
+                               matrix_id=channel_constants.CHANNEL_WILDCARD,
+                               cryptocurrency=channel_constants.CHANNEL_WILDCARD,
+                               symbol=channel_constants.CHANNEL_WILDCARD,
+                               evaluator_type=channel_constants.CHANNEL_WILDCARD,
+                               time_frame=channel_constants.CHANNEL_WILDCARD,
+                               evaluator_name=channel_constants.CHANNEL_WILDCARD,
+                               exchange_name=channel_constants.CHANNEL_WILDCARD,
                                origin_consumer=None):
         return self.get_consumer_from_filters({
             self.MATRIX_ID_KEY: matrix_id,
@@ -168,12 +168,12 @@ class MatrixChannel(EvaluatorChannel):
             origin_consumer=origin_consumer)
 
     async def _add_new_consumer_and_run(self, consumer,
-                                        matrix_id=CHANNEL_WILDCARD,
-                                        cryptocurrency=CHANNEL_WILDCARD,
-                                        symbol=CHANNEL_WILDCARD,
-                                        evaluator_name=CHANNEL_WILDCARD,
-                                        evaluator_type=CHANNEL_WILDCARD,
-                                        exchange_name=CHANNEL_WILDCARD,
+                                        matrix_id=channel_constants.CHANNEL_WILDCARD,
+                                        cryptocurrency=channel_constants.CHANNEL_WILDCARD,
+                                        symbol=channel_constants.CHANNEL_WILDCARD,
+                                        evaluator_name=channel_constants.CHANNEL_WILDCARD,
+                                        evaluator_type=channel_constants.CHANNEL_WILDCARD,
+                                        exchange_name=channel_constants.CHANNEL_WILDCARD,
                                         time_frame=None):
         consumer_filters: dict = {
             self.MATRIX_ID_KEY: matrix_id,

@@ -13,20 +13,20 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
-from enum import Enum
+import enum 
 
-from octobot_channels.channels.channel_instances import get_chan_at_id
-from octobot_commons.channels_name import OctoBotChannelsName
-from octobot_commons.logging.logging_util import get_logger
+import async_channel.channels as channel_instances
+import octobot_commons.channels_name as channels_name
+import octobot_commons.logging as logging
 
-from octobot_commons.enums import OctoBotChannelSubjects
+import octobot_commons.enums as enums
 
-from octobot_evaluators.api.evaluators import create_all_type_evaluators
+import octobot_evaluators.api as api
 
 OCTOBOT_CHANNEL_EVALUATOR_CONSUMER_LOGGER_TAG = "OctoBotChannelEvaluatorConsumer"
 
 
-class OctoBotChannelEvaluatorActions(Enum):
+class OctoBotChannelEvaluatorActions(enum.Enum):
     """
     OctoBot Channel consumer supported actions
     """
@@ -34,7 +34,7 @@ class OctoBotChannelEvaluatorActions(Enum):
     EVALUATOR = "evaluator"
 
 
-class OctoBotChannelEvaluatorDataKeys(Enum):
+class OctoBotChannelEvaluatorDataKeys(enum.Enum):
     """
     OctoBot Channel consumer supported data keys
     """
@@ -52,7 +52,7 @@ async def octobot_channel_callback(bot_id, subject, action, data) -> None:
     :param action: the callback action
     :param data: the callback data
     """
-    if subject == OctoBotChannelSubjects.CREATION.value:
+    if subject == enums.OctoBotChannelSubjects.CREATION.value:
         await _handle_creation(bot_id, action, data)
 
 
@@ -60,7 +60,7 @@ async def _handle_creation(bot_id, action, data):
     if action == OctoBotChannelEvaluatorActions.EVALUATOR.value:
         try:
             exchange_configuration = data[OctoBotChannelEvaluatorDataKeys.EXCHANGE_CONFIGURATION.value]
-            await create_all_type_evaluators(
+            await api.create_all_type_evaluators(
                 tentacles_setup_config=data[OctoBotChannelEvaluatorDataKeys.TENTACLES_SETUP_CONFIG.value],
                 matrix_id=data[OctoBotChannelEvaluatorDataKeys.MATRIX_ID.value],
                 exchange_name=exchange_configuration.exchange_name,
@@ -70,12 +70,13 @@ async def _handle_creation(bot_id, action, data):
                 time_frames=exchange_configuration.time_frames_without_real_time,
                 real_time_time_frames=exchange_configuration.real_time_time_frames
             )
-            await get_chan_at_id(OctoBotChannelsName.OCTOBOT_CHANNEL.value, bot_id).get_internal_producer() \
+            await channel_instances.get_chan_at_id(channels_name.OctoBotChannelsName.OCTOBOT_CHANNEL.value,
+                                                   bot_id).get_internal_producer() \
                 .send(bot_id=bot_id,
-                      subject=OctoBotChannelSubjects.NOTIFICATION.value,
+                      subject=enums.OctoBotChannelSubjects.NOTIFICATION.value,
                       action=action,
                       data={OctoBotChannelEvaluatorDataKeys.MATRIX_ID.value:
                             data[OctoBotChannelEvaluatorDataKeys.MATRIX_ID.value]})
 
         except Exception as e:
-            get_logger(OCTOBOT_CHANNEL_EVALUATOR_CONSUMER_LOGGER_TAG).error(f"Error when creating new evaluator {e}")
+            logging.get_logger(OCTOBOT_CHANNEL_EVALUATOR_CONSUMER_LOGGER_TAG).error(f"Error when creating new evaluator {e}")

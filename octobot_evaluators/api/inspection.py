@@ -13,15 +13,15 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
-from octobot_commons.constants import CONFIG_WILDCARD
-from octobot_commons.tentacles_management.class_inspector import get_all_classes_from_parent
+import octobot_commons.constants as common_constants
+import octobot_commons.tentacles_management as tentacles_management
 
-from octobot_evaluators.evaluator import TAEvaluator
+import octobot_evaluators.evaluator as evaluator
 
 
 def is_relevant_evaluator(evaluator_instance, relevant_evaluators, use_relevant_evaluators_only=False) -> bool:
     if evaluator_instance.enabled or use_relevant_evaluators_only:
-        if relevant_evaluators == CONFIG_WILDCARD or \
+        if relevant_evaluators == common_constants.CONFIG_WILDCARD or \
                 evaluator_instance.get_name() in relevant_evaluators:
             return True
         else:
@@ -36,11 +36,11 @@ def is_relevant_evaluator(evaluator_instance, relevant_evaluators, use_relevant_
 def get_relevant_TAs_for_strategy(strategy, tentacles_setup_config) -> list:
     ta_classes_list = []
     relevant_evaluators = strategy.get_required_evaluators()
-    for ta_eval_class in get_all_classes_from_parent(TAEvaluator):
+    for ta_eval_class in tentacles_management.get_all_classes_from_parent(evaluator.TAEvaluator):
         ta_eval_class_instance = ta_eval_class()
         ta_eval_class_instance.set_tentacles_setup_config(tentacles_setup_config)
         # use ony relevant_evaluators given by the strategy
-        if CONFIG_WILDCARD in relevant_evaluators or \
+        if common_constants.CONFIG_WILDCARD in relevant_evaluators or \
                 is_relevant_evaluator(ta_eval_class_instance, relevant_evaluators, use_relevant_evaluators_only=True):
             ta_classes_list.append(ta_eval_class)
     return ta_classes_list
