@@ -13,10 +13,10 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
-from enum import Enum
+import enum 
 
 
-class EvaluatorMatrixTypes(Enum):
+class EvaluatorMatrixTypes(enum.Enum):
     TA = "TA"
     SOCIAL = "SOCIAL"
     REAL_TIME = "REAL_TIME"

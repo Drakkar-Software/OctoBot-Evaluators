@@ -13,16 +13,15 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
-from octobot_evaluators.data.matrix import Matrix
-from octobot_evaluators.matrices.matrices import Matrices
+import octobot_evaluators.matrix as matrix
 
 
-def get_matrix(matrix_id) -> Matrix:
-    return Matrices.instance().get_matrix(matrix_id)
+def get_matrix(matrix_id) -> matrix.Matrix:
+    return matrix.Matrices.instance().get_matrix(matrix_id)
 
 
-def del_matrix(matrix_id) -> Matrix:
-    return Matrices.instance().del_matrix(matrix_id)
+def del_matrix(matrix_id) -> matrix.Matrix:
+    return matrix.Matrices.instance().del_matrix(matrix_id)
 
 
 def get_node_children_by_names(matrix) -> dict:

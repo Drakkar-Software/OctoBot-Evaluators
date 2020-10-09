@@ -13,15 +13,17 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
-from abc import abstractmethod
+import abc 
 
-from octobot_channels.channels.channel import get_chan
-from octobot_evaluators.evaluator import AbstractEvaluator
-from octobot_tentacles_manager.api.configurator import get_tentacle_config
+import async_channel.channels as channels
+
+import octobot_tentacles_manager.api as api
+
+import octobot_evaluators.evaluator as evaluator
 
 
-class SocialEvaluator(AbstractEvaluator):
-    __metaclass__ = AbstractEvaluator
+class SocialEvaluator(evaluator.AbstractEvaluator):
+    __metaclass__ = evaluator.AbstractEvaluator
     SERVICE_FEED_CLASS = None
 
     def __init__(self):
@@ -31,11 +33,11 @@ class SocialEvaluator(AbstractEvaluator):
 
     def load_config(self):
         # try with this class name
-        self.specific_config = get_tentacle_config(self.__class__)
+        self.specific_config = api.get_tentacle_config(self.__class__)
         if not self.specific_config:
             # if nothing in config, try with any super-class' config file
             for super_class in self.get_parent_evaluator_classes(SocialEvaluator):
-                self.specific_config = get_tentacle_config(super_class)
+                self.specific_config = api.get_tentacle_config(super_class)
                 if self.specific_config:
                     return
         # set default config if nothing found
@@ -52,14 +54,14 @@ class SocialEvaluator(AbstractEvaluator):
         else:
             await super().start(bot_id)
             try:
-                from octobot_services.api.service_feeds import get_service_feed
-                service_feed = get_service_feed(self.SERVICE_FEED_CLASS, bot_id)
+                import octobot_services.api as service_api
+                service_feed = service_api.get_service_feed(self.SERVICE_FEED_CLASS, bot_id)
                 if service_feed is not None:
                     service_feed.update_feed_config(self.specific_config)
-                    await get_chan(service_feed.FEED_CHANNEL.get_name()).new_consumer(self._feed_callback)
+                    await channels.get_chan(service_feed.FEED_CHANNEL.get_name()).new_consumer(self._feed_callback)
                     # store exchange_id to use it later for evaluation timestamps
-                    from octobot_trading.api.exchange import get_exchange_id_from_matrix_id
-                    self.exchange_id = get_exchange_id_from_matrix_id(self.exchange_name, self.matrix_id)
+                    import octobot_trading.api as exchange_api
+                    self.exchange_id = exchange_api.get_exchange_id_from_matrix_id(self.exchange_name, self.matrix_id)
                     return True
             except ImportError as e:
                 self.logger.exception(e, True, "Can't start: requires OctoBot-Services and OctoBot-Trading "
@@ -68,11 +70,10 @@ class SocialEvaluator(AbstractEvaluator):
 
     def get_current_exchange_time(self):
         try:
-            from octobot_trading.api.exchange import get_exchange_current_time, \
-                get_exchange_manager_from_exchange_name_and_id
+            import octobot_trading.api as exchange_api
             if self.exchange_id is not None:
-                return get_exchange_current_time(
-                    get_exchange_manager_from_exchange_name_and_id(
+                return exchange_api.get_exchange_current_time(
+                    exchange_api.get_exchange_manager_from_exchange_name_and_id(
                         self.exchange_name,
                         self.exchange_id
                     )
@@ -88,9 +89,9 @@ class SocialEvaluator(AbstractEvaluator):
         symbols = [self.symbol]
         to_handle_time_frames = [self.time_frame]
         # by default no symbol registration for social evaluators
-        # by default no time frame registration for social evaluators
+        # by default no time frame re+gistration for social evaluators
         return currencies, symbols, to_handle_time_frames
 
-    @abstractmethod
+    @abc.abstractmethod
     async def _feed_callback(self, *args):
         raise NotImplementedError("_feed_callback is not implemented")

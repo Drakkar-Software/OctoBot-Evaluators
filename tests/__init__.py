@@ -16,7 +16,7 @@
 import pytest
 
 from octobot_evaluators.api.evaluators import create_matrix
-from octobot_evaluators.matrices.matrices import Matrices
+from octobot_evaluators.matrix.matrices import Matrices
 
 
 @pytest.yield_fixture()

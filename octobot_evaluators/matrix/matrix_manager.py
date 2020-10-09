@@ -13,16 +13,16 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
-import asyncio
 import time
 
-from octobot_commons.constants import MINUTE_TO_SECONDS
-from octobot_commons.enums import TimeFrames, TimeFramesMinutes
-from octobot_commons.evaluators_util import check_valid_eval_note
-from octobot_commons.logging.logging_util import get_logger
-from octobot_evaluators.enums import EvaluatorMatrixTypes
-from octobot_evaluators.errors import UnsetTentacleEvaluation
-from octobot_evaluators.matrices.matrices import Matrices
+import octobot_commons.constants as common_constants
+import octobot_commons.enums as common_enums
+import octobot_commons.evaluators_util as evaluators_util
+import octobot_commons.logging as logging
+
+import octobot_evaluators.enums as enums
+import octobot_evaluators.errors as errors
+import octobot_evaluators.matrix as matrix
 
 
 def get_matrix(matrix_id):
@@ -31,7 +31,7 @@ def get_matrix(matrix_id):
     :param matrix_id: the matrix id
     :return: the matrix instance
     """
-    return Matrices.instance().get_matrix(matrix_id)
+    return matrix.Matrices.instance().get_matrix(matrix_id)
 
 
 def set_tentacle_value(matrix_id, tentacle_path, tentacle_type, tentacle_value, timestamp=0):
@@ -214,17 +214,18 @@ def get_evaluations_by_evaluator(matrix_id,
         evaluation = get_tentacles_value_nodes(matrix_id, [node], cryptocurrency=cryptocurrency,
                                                symbol=symbol, time_frame=time_frame)
         if len(evaluation) > 1:
-            get_logger("matrix_manager").warning("More than one evaluation corresponding to the given tentacle filter, "
-                                                 "this means there is an issue in this methods given arguments")
+            logging.get_logger("matrix_manager").warning(
+                "More than one evaluation corresponding to the given tentacle filter, "
+                "this means there is an issue in this methods given arguments")
         elif evaluation:
             eval_value = evaluation[0].node_value
             if (allowed_values is not None and eval_value in allowed_values) or \
-                    check_valid_eval_note(eval_value):
+                    evaluators_util.check_valid_eval_note(eval_value):
                 evaluations_by_evaluator[evaluator_name] = evaluation[0]
             elif not allow_missing:
-                raise UnsetTentacleEvaluation(f"Missing {time_frame if time_frame else 'evaluation'} "
-                                              f"for {evaluator_name} on {symbol}, evaluation is "
-                                              f"{repr(eval_value)}).")
+                raise errors.UnsetTentacleEvaluation(f"Missing {time_frame if time_frame else 'evaluation'} "
+                                                     f"for {evaluator_name} on {symbol}, evaluation is "
+                                                     f"{repr(eval_value)}).")
     return evaluations_by_evaluator
 
 
@@ -254,8 +255,8 @@ def get_available_time_frames(matrix_id, exchange_name, tentacle_type, cryptocur
 def get_available_symbols(matrix_id,
                           exchange_name,
                           cryptocurrency,
-                          tentacle_type=EvaluatorMatrixTypes.TA.value,
-                          second_tentacle_type=EvaluatorMatrixTypes.REAL_TIME.value) -> list:
+                          tentacle_type=enums.EvaluatorMatrixTypes.TA.value,
+                          second_tentacle_type=enums.EvaluatorMatrixTypes.REAL_TIME.value) -> list:
     """
     Return the list of available symbols for the given currency
     :param matrix_id: the matrix id
@@ -298,7 +299,8 @@ def is_tentacle_value_valid(matrix_id, tentacle_path, timestamp=0, delta=10) -> 
         timestamp = time.time()
     try:
         return timestamp - (get_tentacle_node(matrix_id, tentacle_path).node_value_time +
-                            TimeFramesMinutes[TimeFrames(tentacle_path[-1])] * MINUTE_TO_SECONDS + delta) < 0
+                            common_enums.TimeFramesMinutes[common_enums.TimeFrames(tentacle_path[-1])]
+                            * common_constants.MINUTE_TO_SECONDS + delta) < 0
     except (IndexError, ValueError):
         return False
 

@@ -13,3 +13,71 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
+
+from octobot_evaluators.api import inspection
+from octobot_evaluators.api import evaluators
+from octobot_evaluators.api import initialization
+from octobot_evaluators.api import matrix
+
+from octobot_evaluators.api.inspection import (
+    is_relevant_evaluator,
+    get_relevant_TAs_for_strategy,
+)
+from octobot_evaluators.api.evaluators import (
+    get_evaluator_classes_from_type,
+    get_evaluators_time_frames,
+    create_matrix,
+    create_evaluators,
+    stop_evaluator,
+    stop_evaluator_channel,
+    stop_all_evaluator_channels,
+    create_evaluator,
+    initialize_evaluators,
+    create_all_type_evaluators,
+)
+from octobot_evaluators.api.initialization import (
+    init_time_frames_from_strategies,
+    get_activated_strategies_classes,
+    del_evaluator_channels,
+    matrix_channel_exists,
+    create_evaluator_channels,
+)
+from octobot_evaluators.api.matrix import (
+    get_matrix,
+    del_matrix,
+    get_node_children_by_names,
+    get_children_list,
+    has_children,
+    get_value,
+    get_type,
+    get_time,
+)
+
+__all__ = [
+    "is_relevant_evaluator",
+    "get_relevant_TAs_for_strategy",
+    "get_evaluator_classes_from_type",
+    "get_evaluators_time_frames",
+    "create_matrix",
+    "create_evaluators",
+    "stop_evaluator",
+    "stop_evaluator_channel",
+    "stop_all_evaluator_channels",
+    "create_evaluator",
+    "initialize_evaluators",
+    "create_all_type_evaluators",
+    "init_time_frames_from_strategies",
+    "get_activated_strategies_classes",
+    "del_evaluator_channels",
+    "matrix_channel_exists",
+    "create_evaluator_channels",
+    "get_matrix",
+    "del_matrix",
+    "get_node_children_by_names",
+    "get_children_list",
+    "has_children",
+    "get_value",
+    "get_type",
+    "get_time",
+]
+

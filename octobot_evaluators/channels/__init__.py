@@ -14,5 +14,37 @@
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
 
-from .matrix import *
-from .evaluators import *
+from octobot_evaluators.channels import evaluator_channel
+from octobot_evaluators.channels.evaluator_channel import (
+    EvaluatorChannelConsumer,
+    EvaluatorChannelProducer,
+    EvaluatorChannel,
+    set_chan,
+    get_evaluator_channels,
+    del_evaluator_channel_container,
+    get_chan,
+    del_chan,
+    trigger_technical_evaluators_re_evaluation_with_updated_data,
+)
+
+from octobot_evaluators.channels import evaluators
+from octobot_evaluators.channels.evaluators import (
+    EvaluatorsChannelConsumer,
+    EvaluatorsChannelProducer,
+    EvaluatorsChannel,
+)
+
+__all__ = [
+    "EvaluatorsChannelConsumer",
+    "EvaluatorsChannelProducer",
+    "EvaluatorsChannel",
+    "EvaluatorChannelConsumer",
+    "EvaluatorChannelProducer",
+    "EvaluatorChannel",
+    "set_chan",
+    "get_evaluator_channels",
+    "del_evaluator_channel_container",
+    "get_chan",
+    "del_chan",
+    "trigger_technical_evaluators_re_evaluation_with_updated_data",
+]

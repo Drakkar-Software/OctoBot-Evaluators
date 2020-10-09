@@ -16,19 +16,20 @@
 
 import time
 
-from octobot_commons.enums import ChannelConsumerPriorityLevels
-from octobot_commons.constants import START_PENDING_EVAL_NOTE, INIT_EVAL_NOTE
-from octobot_commons.tentacles_management.abstract_tentacle import AbstractTentacle
-from octobot_evaluators.channels.evaluator_channel import get_chan
+import octobot_tentacles_manager.api as api
 
-from octobot_evaluators.constants import START_EVAL_PERTINENCE, EVALUATOR_EVAL_DEFAULT_TYPE, MATRIX_CHANNEL, \
-    EVALUATORS_CHANNEL
-from octobot_evaluators.data_manager.matrix_manager import set_tentacle_value, get_matrix_default_value_path
-from octobot_tentacles_manager.api.configurator import is_tentacle_activated_in_tentacles_setup_config
+import async_channel.enums as channel_enums
+
+import octobot_commons.constants as common_constants
+import octobot_commons.tentacles_management as tentacles_management
+
+import octobot_evaluators.channels as channels
+import octobot_evaluators.constants as constants
+import octobot_evaluators.matrix as matrix
 
 
-class AbstractEvaluator(AbstractTentacle):
-    __metaclass__ = AbstractTentacle
+class AbstractEvaluator(tentacles_management.AbstractTentacle):
+    __metaclass__ = tentacles_management.AbstractTentacle
 
     def __init__(self):
         super().__init__()
@@ -59,17 +60,17 @@ class AbstractEvaluator(AbstractTentacle):
         # Time_frame is the chart time frame (Should be None if wildcard)
         self.time_frame = None
 
-        #  history time represents the period of time of the indicator
+        # history time represents the period of time of the indicator
         self.history_time = None
 
         # Evaluator category
         self.evaluator_type = None
 
-        #  Eval note will be set by the eval_impl at each call
-        self.eval_note = START_PENDING_EVAL_NOTE
+        # Eval note will be set by the eval_impl at each call
+        self.eval_note = common_constants.START_PENDING_EVAL_NOTE
 
         # Pertinence of indicator will be used with the eval_note to provide a relevancy
-        self.pertinence = START_EVAL_PERTINENCE
+        self.pertinence = constants.START_EVAL_PERTINENCE
 
         # Active tells if this evaluator is currently activated (an evaluator can be paused)
         self.is_active: bool = True
@@ -81,7 +82,7 @@ class AbstractEvaluator(AbstractTentacle):
         self.eval_note_changed_time = None
 
         # Define evaluators default consumer priority level
-        self.priority_level: int = ChannelConsumerPriorityLevels.MEDIUM.value
+        self.priority_level: int = channel_enums.ChannelConsumerPriorityLevels.MEDIUM.value
 
     @staticmethod
     def get_eval_type():
@@ -89,7 +90,7 @@ class AbstractEvaluator(AbstractTentacle):
         Override this method when self.eval_note is other than : START_PENDING_EVAL_NOTE or float[-1:1]
         :return: type
         """
-        return EVALUATOR_EVAL_DEFAULT_TYPE
+        return constants.EVALUATOR_EVAL_DEFAULT_TYPE
 
     @classmethod
     def get_is_cryptocurrencies_wildcard(cls) -> bool:
@@ -141,11 +142,11 @@ class AbstractEvaluator(AbstractTentacle):
             for symbol in symbols:
                 if symbol is None or symbol in all_symbols_by_crypto_currencies[currency]:
                     for time_frame in time_frames:
-                        set_tentacle_value(
+                        matrix.set_tentacle_value(
                             matrix_id=self.matrix_id,
                             tentacle_type=self.get_eval_type(),
                             tentacle_value=None,
-                            tentacle_path=get_matrix_default_value_path(
+                            tentacle_path=matrix.get_matrix_default_value_path(
                                 exchange_name=self.exchange_name,
                                 tentacle_type=self.evaluator_type.value,
                                 tentacle_name=self.get_name(),
@@ -176,10 +177,10 @@ class AbstractEvaluator(AbstractTentacle):
         """
         try:
             if eval_note is None:
-                eval_note = self.eval_note if self.eval_note is not None else START_PENDING_EVAL_NOTE
+                eval_note = self.eval_note if self.eval_note is not None else common_constants.START_PENDING_EVAL_NOTE
 
             self.ensure_eval_note_is_not_expired()
-            await get_chan(MATRIX_CHANNEL, self.matrix_id).get_internal_producer().send_eval_note(
+            await channels.get_chan(constants.MATRIX_CHANNEL, self.matrix_id).get_internal_producer().send_eval_note(
                 matrix_id=self.matrix_id,
                 evaluator_name=self.get_name(),
                 evaluator_type=self.evaluator_type.value,
@@ -199,14 +200,14 @@ class AbstractEvaluator(AbstractTentacle):
             self.logger.exception(e, True, f"Exception in evaluation_completed(): {e}")
         finally:
             if self.eval_note == "nan":
-                self.eval_note = START_PENDING_EVAL_NOTE
+                self.eval_note = common_constants.START_PENDING_EVAL_NOTE
                 self.logger.warning(str(self.symbol) + " evaluator returned 'nan' as eval_note, ignoring this value.")
 
     async def start(self, bot_id: str) -> bool:
         """
         :return: success of the evaluator's start
         """
-        self.evaluators_consumer_instance = await get_chan(EVALUATORS_CHANNEL, self.matrix_id)\
+        self.evaluators_consumer_instance = await channels.get_chan(constants.EVALUATORS_CHANNEL, self.matrix_id) \
             .new_consumer(self.evaluators_callback, priority_level=self.priority_level)
 
     async def stop(self) -> None:
@@ -254,7 +255,7 @@ class AbstractEvaluator(AbstractTentacle):
         Reset temporary parameters to enable fresh start
         :return: None
         """
-        self.eval_note = START_PENDING_EVAL_NOTE
+        self.eval_note = common_constants.START_PENDING_EVAL_NOTE
 
     @classmethod
     def has_class_in_parents(cls, klass) -> bool:
@@ -294,8 +295,8 @@ class AbstractEvaluator(AbstractTentacle):
         """
         self.eval_note_changed()
 
-        if self.eval_note == START_PENDING_EVAL_NOTE:
-            self.eval_note = INIT_EVAL_NOTE
+        if self.eval_note == common_constants.START_PENDING_EVAL_NOTE:
+            self.eval_note = common_constants.INIT_EVAL_NOTE
 
         if self.eval_note + new_eval_note > 1:
             self.eval_note = 1
@@ -313,15 +314,15 @@ class AbstractEvaluator(AbstractTentacle):
         :return: evaluator config
         """
         try:
-            return is_tentacle_activated_in_tentacles_setup_config(tentacles_setup_config,
-                                                                   cls.get_name(),
-                                                                   raise_errors=True)
+            return api.is_tentacle_activated_in_tentacles_setup_config(tentacles_setup_config,
+                                                                       cls.get_name(),
+                                                                       raise_errors=True)
         except KeyError:
             for parent in cls.mro():
                 try:
-                    return is_tentacle_activated_in_tentacles_setup_config(tentacles_setup_config,
-                                                                           parent.__name__,
-                                                                           raise_errors=True)
+                    return api.is_tentacle_activated_in_tentacles_setup_config(tentacles_setup_config,
+                                                                               parent.__name__,
+                                                                               raise_errors=True)
                 except KeyError:
                     pass
         return default
@@ -354,16 +355,15 @@ class AbstractEvaluator(AbstractTentacle):
                 self.eval_note_changed_time = time.time()
 
             if time.time() - self.eval_note_changed_time > self.eval_note_time_to_live:
-                self.eval_note = START_PENDING_EVAL_NOTE
+                self.eval_note = common_constants.START_PENDING_EVAL_NOTE
                 self.eval_note_time_to_live = None
                 self.eval_note_changed_time = None
 
     def get_exchange_symbol_data(self, exchange_name: str, exchange_id: str, symbol: str):
         try:
-            from octobot_trading.api.exchange import get_exchange_manager_from_exchange_name_and_id
-            from octobot_trading.api.symbol_data import get_symbol_data
-            exchange_manager = get_exchange_manager_from_exchange_name_and_id(exchange_name, exchange_id)
-            return get_symbol_data(exchange_manager, symbol)
+            import octobot_trading.api as exchange_api
+            exchange_manager = exchange_api.get_exchange_manager_from_exchange_name_and_id(exchange_name, exchange_id)
+            return exchange_api.get_symbol_data(exchange_manager, symbol)
         except (ImportError, KeyError):
             self.logger.error(f"Can't get {exchange_name} from exchanges instances")
         return

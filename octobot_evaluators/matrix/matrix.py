@@ -15,7 +15,7 @@
 #  License along with this library.
 import uuid
 
-from octobot_commons.event_tree import EventTree, NodeExistsError
+import octobot_commons.event_tree as event_tree
 
 
 class Matrix:
@@ -29,7 +29,7 @@ class Matrix:
         Initialize the matrix as an EventTree instance
         """
         self.matrix_id = str(uuid.uuid4())
-        self.matrix = EventTree()
+        self.matrix = event_tree.EventTree()
 
     def set_node_value(self, value, value_type, value_path, timestamp=0):
         """
@@ -50,7 +50,7 @@ class Matrix:
         """
         try:
             return list(self.matrix.get_node(node_path, starting_node=starting_node).children.values())
-        except NodeExistsError:
+        except event_tree.NodeExistsError:
             return []
 
     def get_node_children_by_names_at_path(self, node_path, starting_node=None):
@@ -63,7 +63,7 @@ class Matrix:
         try:
             return {key: val
                     for key, val in self.matrix.get_node(node_path, starting_node=starting_node).children.items()}
-        except NodeExistsError:
+        except event_tree.NodeExistsError:
             return {}
 
     def get_node_at_path(self, node_path, starting_node=None):
@@ -75,5 +75,5 @@ class Matrix:
         """
         try:
             return self.matrix.get_node(node_path, starting_node=starting_node)
-        except NodeExistsError:
+        except event_tree.NodeExistsError:
             return None

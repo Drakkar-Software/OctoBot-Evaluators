@@ -1,3 +1,4 @@
+# cython: language_level=3
 #  Drakkar-Software OctoBot-Evaluators
 #  Copyright (c) Drakkar-Software, All rights reserved.
 #
@@ -13,3 +14,12 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
+from octobot_commons.singleton.singleton_class cimport Singleton
+from octobot_evaluators.matrix.matrix cimport Matrix
+
+cdef class Matrices(Singleton):
+    cdef public dict matrices
+
+    cpdef void add_matrix(self, Matrix matrix)
+    cpdef Matrix get_matrix(self, str matrix_id)
+    cpdef void del_matrix(self, str matrix_id)

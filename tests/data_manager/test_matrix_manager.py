@@ -13,7 +13,6 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
-import asyncio
 import time
 
 import pytest
@@ -21,13 +20,13 @@ from octobot_commons.constants import MINUTE_TO_SECONDS, START_PENDING_EVAL_NOTE
 
 from octobot_commons.enums import TimeFramesMinutes, TimeFrames
 
-from octobot_evaluators.data.matrix import Matrix
-from octobot_evaluators.data_manager.matrix_manager import get_tentacle_path, get_tentacle_value_path, \
+from octobot_evaluators.matrix.matrix import Matrix
+from octobot_evaluators.matrix.matrix_manager import get_tentacle_path, get_tentacle_value_path, \
     get_tentacle_nodes, get_tentacles_value_nodes, get_matrix_default_value_path, set_tentacle_value, \
     get_tentacle_value, get_tentacle_node, get_available_symbols, \
     is_tentacle_value_valid, is_tentacles_values_valid, get_evaluations_by_evaluator, get_available_time_frames
 from octobot_evaluators.errors import UnsetTentacleEvaluation
-from octobot_evaluators.matrices.matrices import Matrices
+from octobot_evaluators.matrix.matrices import Matrices
 
 
 @pytest.mark.asyncio

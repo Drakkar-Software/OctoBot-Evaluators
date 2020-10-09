@@ -13,13 +13,13 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
-from octobot_commons.logging.logging_util import get_logger
+import octobot_commons.logging as logging
+import octobot_commons.singleton as singleton
 
-from octobot_commons.singleton.singleton_class import Singleton
-from octobot_evaluators.data.matrix import Matrix
+import octobot_evaluators.matrix as matrix 
 
 
-class Matrices(Singleton):
+class Matrices(singleton.Singleton):
     def __init__(self):
         self.matrices: dict = {}
 
@@ -27,7 +27,7 @@ class Matrices(Singleton):
         if matrix.matrix_id not in self.matrices:
             self.matrices[matrix.matrix_id] = matrix
 
-    def get_matrix(self, matrix_id) -> Matrix:
+    def get_matrix(self, matrix_id) -> matrix.Matrix:
         return self.matrices[matrix_id]
 
     def del_matrix(self, matrix_id) -> None:
@@ -35,4 +35,4 @@ class Matrices(Singleton):
             if self.matrices[matrix_id]:
                 self.matrices.pop(matrix_id, None)
         except KeyError:
-            get_logger(self.__class__.__name__).warning(f"Can't del matrix with id {matrix_id}")
+            logging.get_logger(self.__class__.__name__).warning(f"Can't del matrix with id {matrix_id}")

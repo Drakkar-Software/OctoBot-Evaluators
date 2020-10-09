@@ -13,14 +13,16 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
-from octobot_commons.enums import TimeFrames
-from octobot_evaluators.evaluator.abstract_evaluator import AbstractEvaluator
-from octobot_evaluators.util.evaluation_util import get_shortest_time_frame
-from octobot_tentacles_manager.api.configurator import get_tentacle_config
+import octobot_commons.enums as common_enums
+
+import octobot_tentacles_manager.api as api
+
+import octobot_evaluators.evaluator as evaluator
+import octobot_evaluators.util as util
 
 
-class RealTimeEvaluator(AbstractEvaluator):
-    __metaclass__ = AbstractEvaluator
+class RealTimeEvaluator(evaluator.AbstractEvaluator):
+    __metaclass__ = evaluator.AbstractEvaluator
 
     def __init__(self):
         super().__init__()
@@ -28,13 +30,13 @@ class RealTimeEvaluator(AbstractEvaluator):
 
     def load_config(self):
         self.set_default_config()
-        self.specific_config.update(get_tentacle_config(self.__class__))
+        self.specific_config.update(api.get_tentacle_config(self.__class__))
 
     def get_symbol_candles(self, exchange_name: str, exchange_id: str, symbol: str, time_frame):
         try:
-            from octobot_trading.api.symbol_data import get_symbol_candles_manager
-            return get_symbol_candles_manager(self.get_exchange_symbol_data(exchange_name, exchange_id, symbol),
-                                              time_frame)
+            import octobot_trading.api as exchange_api
+            return exchange_api.get_symbol_candles_manager(
+                self.get_exchange_symbol_data(exchange_name, exchange_id, symbol), time_frame)
         except ImportError:
             self.logger.error(f"Can't get candles manager: requires OctoBot-Trading package installed")
 
@@ -46,8 +48,8 @@ class RealTimeEvaluator(AbstractEvaluator):
         if self.time_frame is None:
             self.logger.error("Missing self.time_frame value, impossible to initialize this evaluator.")
         else:
-            ideal_time_frame = TimeFrames(self.time_frame)
-            to_handle_time_frame = get_shortest_time_frame(ideal_time_frame, real_time_time_frames, time_frames)
+            ideal_time_frame = common_enums.TimeFrames(self.time_frame)
+            to_handle_time_frame = util.get_shortest_time_frame(ideal_time_frame, real_time_time_frames, time_frames)
             if ideal_time_frame != to_handle_time_frame:
                 self.logger.warning(f"Missing {ideal_time_frame.name} time frame in available time frames, "
                                     f"using {to_handle_time_frame.name} instead.")

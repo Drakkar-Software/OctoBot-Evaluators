@@ -13,13 +13,39 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
-from octobot_commons.logging.logging_util import get_logger
+import octobot_evaluators.enums
+from octobot_evaluators.evaluator import abstract_evaluator
+from octobot_evaluators.evaluator.abstract_evaluator import (
+    AbstractEvaluator,
+)
 
-from .abstract_evaluator import *
-from .realtime_evaluator import *
-from .social_evaluator import *
-from .strategy_evaluator import *
-from .TA_evaluator import *
+from octobot_evaluators.evaluator import evaluator_factory
+from octobot_evaluators.evaluator import realtime_evaluator
+from octobot_evaluators.evaluator import social_evaluator
+from octobot_evaluators.evaluator import TA_evaluator
+from octobot_evaluators.evaluator import abstract_util
+from octobot_evaluators.evaluator import strategy_evaluator
+
+from octobot_evaluators.evaluator.evaluator_factory import (
+    create_evaluator,
+    create_all_type_evaluators,
+    create_evaluators,
+)
+from octobot_evaluators.evaluator.realtime_evaluator import (
+    RealTimeEvaluator,
+)
+from octobot_evaluators.evaluator.social_evaluator import (
+    SocialEvaluator,
+)
+from octobot_evaluators.evaluator.TA_evaluator import (
+    TAEvaluator,
+)
+from octobot_evaluators.evaluator.abstract_util import (
+    AbstractUtil,
+)
+from octobot_evaluators.evaluator.strategy_evaluator import (
+    StrategyEvaluator,
+)
 
 try:
     from tentacles.Evaluator.RealTime import *
@@ -27,4 +53,34 @@ try:
     from tentacles.Evaluator.Strategies import *
     from tentacles.Evaluator.TA import *
 except ModuleNotFoundError as e:
-    get_logger("Evaluator").error(f"tentacles folder not found raised a ModuleNotFoundError exception : {e}")
+    import octobot_commons.logging as logging
+
+    logging.get_logger("Evaluator").error(f"tentacles folder not found raised a ModuleNotFoundError exception : {e}")
+
+EvaluatorClassTypes = {
+    octobot_evaluators.enums.EvaluatorMatrixTypes.TA.value: TAEvaluator,
+    octobot_evaluators.enums.EvaluatorMatrixTypes.SOCIAL.value: SocialEvaluator,
+    octobot_evaluators.enums.EvaluatorMatrixTypes.REAL_TIME.value: RealTimeEvaluator,
+    octobot_evaluators.enums.EvaluatorMatrixTypes.STRATEGIES.value: StrategyEvaluator
+}
+
+evaluator_class_str_to_matrix_type_dict = {
+    "TAEvaluator": octobot_evaluators.enums.EvaluatorMatrixTypes.TA,
+    "SocialEvaluator": octobot_evaluators.enums.EvaluatorMatrixTypes.SOCIAL,
+    "RealTimeEvaluator": octobot_evaluators.enums.EvaluatorMatrixTypes.REAL_TIME,
+    "StrategyEvaluator": octobot_evaluators.enums.EvaluatorMatrixTypes.STRATEGIES
+}
+
+__all__ = [
+    "RealTimeEvaluator",
+    "AbstractEvaluator",
+    "SocialEvaluator",
+    "TAEvaluator",
+    "AbstractUtil",
+    "StrategyEvaluator",
+    "EvaluatorClassTypes",
+    "create_evaluator",
+    "create_all_type_evaluators",
+    "create_evaluators",
+    "evaluator_class_str_to_matrix_type_dict",
+]
