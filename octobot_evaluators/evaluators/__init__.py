@@ -14,36 +14,36 @@
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
 import octobot_evaluators.enums
-from octobot_evaluators.evaluator import abstract_evaluator
-from octobot_evaluators.evaluator.abstract_evaluator import (
+from octobot_evaluators.evaluators import abstract_evaluator
+from octobot_evaluators.evaluators.abstract_evaluator import (
     AbstractEvaluator,
 )
 
-from octobot_evaluators.evaluator import evaluator_factory
-from octobot_evaluators.evaluator import realtime_evaluator
-from octobot_evaluators.evaluator import social_evaluator
-from octobot_evaluators.evaluator import TA_evaluator
-from octobot_evaluators.evaluator import abstract_util
-from octobot_evaluators.evaluator import strategy_evaluator
+from octobot_evaluators.evaluators import evaluator_factory
+from octobot_evaluators.evaluators import realtime_evaluator
+from octobot_evaluators.evaluators import social_evaluator
+from octobot_evaluators.evaluators import TA_evaluator
+from octobot_evaluators.evaluators import abstract_util
+from octobot_evaluators.evaluators import strategy_evaluator
 
-from octobot_evaluators.evaluator.evaluator_factory import (
+from octobot_evaluators.evaluators.evaluator_factory import (
     create_evaluator,
     create_all_type_evaluators,
     create_evaluators,
 )
-from octobot_evaluators.evaluator.realtime_evaluator import (
+from octobot_evaluators.evaluators.realtime_evaluator import (
     RealTimeEvaluator,
 )
-from octobot_evaluators.evaluator.social_evaluator import (
+from octobot_evaluators.evaluators.social_evaluator import (
     SocialEvaluator,
 )
-from octobot_evaluators.evaluator.TA_evaluator import (
+from octobot_evaluators.evaluators.TA_evaluator import (
     TAEvaluator,
 )
-from octobot_evaluators.evaluator.abstract_util import (
+from octobot_evaluators.evaluators.abstract_util import (
     AbstractUtil,
 )
-from octobot_evaluators.evaluator.strategy_evaluator import (
+from octobot_evaluators.evaluators.strategy_evaluator import (
     StrategyEvaluator,
 )
 

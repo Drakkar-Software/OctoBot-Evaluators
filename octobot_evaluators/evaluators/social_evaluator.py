@@ -19,7 +19,7 @@ import async_channel.channels as channels
 
 import octobot_tentacles_manager.api as api
 
-import octobot_evaluators.evaluator as evaluator
+import octobot_evaluators.evaluators as evaluator
 
 
 class SocialEvaluator(evaluator.AbstractEvaluator):

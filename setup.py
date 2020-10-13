@@ -43,14 +43,16 @@ from octobot_evaluators import VERSION, PROJECT_NAME
 
 PACKAGES = find_packages(exclude=["tests"])
 
-packages_list: list = ["octobot_evaluators.channels.evaluators",
-                       "octobot_evaluators.channels.evaluator_channel",
-                       "octobot_evaluators.channels.matrix",
-                       "octobot_evaluators.consumers.octobot_channel_consumer",
-                       "octobot_evaluators.matrices.matrices",
-                       "octobot_evaluators.data.matrix",
-                       "octobot_evaluators.data_manager.matrix_manager",
-                       "octobot_evaluators.util.evaluation_util"]
+packages_list: list = [
+    "octobot_evaluators.octobot_channel_consumer",
+    "octobot_evaluators.evaluators.channel.evaluators",
+    "octobot_evaluators.evaluators.channel.evaluator_channel",
+    "octobot_evaluators.util.evaluation_util",
+    "octobot_evaluators.matrix.matrix",
+    "octobot_evaluators.matrix.matrices",
+    "octobot_evaluators.matrix.matrix_manager",
+    "octobot_evaluators.matrix.channel.matrix",
+]
 
 ext_modules: list = [
     Extension(package, [f"{package.replace('.', '/')}.py"])

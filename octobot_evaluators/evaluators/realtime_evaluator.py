@@ -17,7 +17,7 @@ import octobot_commons.enums as common_enums
 
 import octobot_tentacles_manager.api as api
 
-import octobot_evaluators.evaluator as evaluator
+import octobot_evaluators.evaluators as evaluator
 import octobot_evaluators.util as util
 
 

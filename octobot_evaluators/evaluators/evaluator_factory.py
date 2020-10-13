@@ -19,7 +19,7 @@ import octobot_commons.constants as common_constants
 import octobot_commons.logging as logging
 
 import octobot_evaluators.api as api
-import octobot_evaluators.evaluator as evaluator
+import octobot_evaluators.evaluators as evaluator
 import octobot_evaluators.constants as constants
 
 LOGGER_NAME = "EvaluatorsFactory"

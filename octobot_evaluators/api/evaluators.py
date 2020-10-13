@@ -23,9 +23,9 @@ import octobot_commons.tentacles_management as tentacles_management
 import octobot_commons.time_frame_manager as time_frame_manager
 
 import octobot_evaluators.api as api
-import octobot_evaluators.channels as channels
+import octobot_evaluators.evaluators.channel as evaluator_channels
 import octobot_evaluators.matrix as matrix
-import octobot_evaluators.evaluator as evaluator
+import octobot_evaluators.evaluators as evaluator
 
 LOGGER_NAME = "EvaluatorsAPI"
 
@@ -145,7 +145,7 @@ async def stop_evaluator(evaluator) -> None:
 
 async def stop_evaluator_channel(matrix_id, chan_name) -> None:
     try:
-        await channels.get_chan(chan_name, matrix_id).stop()
+        await evaluator_channels.get_chan(chan_name, matrix_id).stop()
     except Exception as e:
         logging.get_logger(LOGGER_NAME).exception(e, True, f"Error when stopping evaluator channel {chan_name}: {e}")
 

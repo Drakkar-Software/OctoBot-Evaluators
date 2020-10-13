@@ -19,16 +19,16 @@ import async_channel.constants as channel_constants
 
 import octobot_commons.logging as logging
 
-import octobot_evaluators.channels as channels
+import octobot_evaluators.evaluators.channel as evaluator_channels
 
 
-class EvaluatorsChannelConsumer(channels.EvaluatorChannelConsumer):
+class EvaluatorsChannelConsumer(evaluator_channels.EvaluatorChannelConsumer):
     """
     EvaluatorChannelConsumer adapted for EvaluatorsChannel
     """
 
 
-class EvaluatorsChannelProducer(channels.EvaluatorChannelProducer):
+class EvaluatorsChannelProducer(evaluator_channels.EvaluatorChannelProducer):
     """
     EvaluatorChannelProducer adapted for EvaluatorsChannel
     """
@@ -64,7 +64,7 @@ class EvaluatorsChannelProducer(channels.EvaluatorChannelProducer):
             })
 
 
-class EvaluatorsChannel(channels.EvaluatorChannel):
+class EvaluatorsChannel(evaluator_channels.EvaluatorChannel):
     PRODUCER_CLASS = EvaluatorsChannelProducer
     CONSUMER_CLASS = EvaluatorsChannelConsumer
 
@@ -84,7 +84,7 @@ class EvaluatorsChannel(channels.EvaluatorChannel):
     async def new_consumer(self,
                            callback: object,
                            size: int = 0,
-                           priority_level: int = channels.EvaluatorChannel.DEFAULT_PRIORITY_LEVEL,
+                           priority_level: int = evaluator_channels.EvaluatorChannel.DEFAULT_PRIORITY_LEVEL,
                            matrix_id: str = channel_constants.CHANNEL_WILDCARD,
                            evaluator_name: str = channel_constants.CHANNEL_WILDCARD,
                            evaluator_type: object = channel_constants.CHANNEL_WILDCARD,

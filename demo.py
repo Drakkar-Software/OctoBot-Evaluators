@@ -22,7 +22,7 @@ from octobot_commons.logging.logging_util import get_logger
 
 from octobot_evaluators.api.evaluators import initialize_evaluators, create_all_type_evaluators
 from octobot_evaluators.api.initialization import create_evaluator_channels
-from octobot_evaluators.channels.evaluator_channel import get_chan
+from octobot_evaluators.evaluators.channel.evaluator_channel import get_chan
 from octobot_evaluators.constants import MATRIX_CHANNEL
 
 config = {

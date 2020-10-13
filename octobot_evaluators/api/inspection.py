@@ -16,7 +16,7 @@
 import octobot_commons.constants as common_constants
 import octobot_commons.tentacles_management as tentacles_management
 
-import octobot_evaluators.evaluator as evaluator
+import octobot_evaluators.evaluators as evaluator
 
 
 def is_relevant_evaluator(evaluator_instance, relevant_evaluators, use_relevant_evaluators_only=False) -> bool:

@@ -15,31 +15,30 @@
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
 
-import async_channel.channels as channel
+import async_channel.channels as channels
 import async_channel.enums as channel_enums
-import async_channel.channels as channel_instances
 import async_channel.constants as channel_constants
-import async_channel.consumer as channel_consumer
-import async_channel.producer as channel_producer
+import async_channel.consumer as consumers
+import async_channel.producer as producers
 
 import octobot_commons.logging as logging
 
 import octobot_evaluators.constants as constants
 
 
-class EvaluatorChannelConsumer(channel_consumer.Consumer):
+class EvaluatorChannelConsumer(consumers.Consumer):
     """
     Consumer adapted for EvaluatorChannel
     """
 
 
-class EvaluatorChannelProducer(channel_producer.Producer):
+class EvaluatorChannelProducer(producers.Producer):
     """
     Producer adapted for EvaluatorChannel
     """
 
 
-class EvaluatorChannel(channel.Channel):
+class EvaluatorChannel(channels.Channel):
     PRODUCER_CLASS = EvaluatorChannelProducer
     CONSUMER_CLASS = EvaluatorChannelConsumer
     DEFAULT_PRIORITY_LEVEL = channel_enums.ChannelConsumerPriorityLevels.MEDIUM.value
@@ -64,10 +63,10 @@ def set_chan(chan, name) -> None:
     chan_name = chan.get_name() if name else name
 
     try:
-        evaluator_chan = channel_instances.ChannelInstances.instance().channels[chan.matrix_id]
+        evaluator_chan = channels.ChannelInstances.instance().channels[chan.matrix_id]
     except KeyError:
-        channel_instances.ChannelInstances.instance().channels[chan.matrix_id] = {}
-        evaluator_chan = channel_instances.ChannelInstances.instance().channels[chan.matrix_id]
+        channels.ChannelInstances.instance().channels[chan.matrix_id] = {}
+        evaluator_chan = channels.ChannelInstances.instance().channels[chan.matrix_id]
 
     if chan_name not in evaluator_chan:
         evaluator_chan[chan_name] = chan
@@ -77,28 +76,28 @@ def set_chan(chan, name) -> None:
 
 def get_evaluator_channels(matrix_id) -> dict:
     try:
-        return channel_instances.ChannelInstances.instance().channels[matrix_id]
+        return channels.ChannelInstances.instance().channels[matrix_id]
     except KeyError:
         raise KeyError(f"Channels not found with matrix_id: {matrix_id}")
 
 
 def del_evaluator_channel_container(matrix_id):
     try:
-        channel_instances.ChannelInstances.instance().channels.pop(matrix_id, None)
+        channels.ChannelInstances.instance().channels.pop(matrix_id, None)
     except KeyError:
         raise KeyError(f"Channels not found with matrix_id: {matrix_id}")
 
 
 def get_chan(chan_name, matrix_id) -> EvaluatorChannel:
     try:
-        return channel_instances.ChannelInstances.instance().channels[matrix_id][chan_name]
+        return channels.ChannelInstances.instance().channels[matrix_id][chan_name]
     except KeyError:
         raise KeyError(f"Channel {chan_name} not found with matrix_id: {matrix_id}")
 
 
 def del_chan(chan_name, matrix_id) -> None:
     try:
-        channel_instances.ChannelInstances.instance().channels[matrix_id].pop(chan_name, None)
+        channels.ChannelInstances.instance().channels[matrix_id].pop(chan_name, None)
     except KeyError:
         logging.get_logger(EvaluatorChannel.__name__).warning(f"Can't del chan {chan_name} with matrix_id: {matrix_id}")
 

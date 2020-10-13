@@ -22,9 +22,9 @@ import octobot_commons.channels_name as channels_name
 import octobot_commons.tentacles_management as tentacles_management
 import octobot_commons.time_frame_manager as time_frame_manager
 
-import octobot_evaluators.channels as channels
+import octobot_evaluators.evaluators.channel as evaluator_channels
 import octobot_evaluators.constants as constants
-import octobot_evaluators.evaluator as evaluator
+import octobot_evaluators.evaluators as evaluator
 
 
 def init_time_frames_from_strategies(config, tentacles_setup_config) -> None:
@@ -45,18 +45,19 @@ def get_activated_strategies_classes(tentacles_setup_config):
 
 
 async def create_evaluator_channels(matrix_id: str, is_backtesting: bool = False) -> None:
-    await channel_util.create_all_subclasses_channel(channels.EvaluatorChannel, channels.set_chan,
+    await channel_util.create_all_subclasses_channel(evaluator_channels.EvaluatorChannel,
+                                                     evaluator_channels.set_chan,
                                                      is_synchronized=is_backtesting, matrix_id=matrix_id)
 
 
 def del_evaluator_channels(matrix_id: str) -> None:
-    channels.del_chan(constants.MATRIX_CHANNEL, matrix_id)
-    channels.del_chan(constants.EVALUATORS_CHANNEL, matrix_id)
+    evaluator_channels.del_chan(constants.MATRIX_CHANNEL, matrix_id)
+    evaluator_channels.del_chan(constants.EVALUATORS_CHANNEL, matrix_id)
 
 
 def matrix_channel_exists(matrix_id: str) -> bool:
     try:
-        channels.get_chan(constants.MATRIX_CHANNEL, matrix_id)
+        evaluator_channels.get_chan(constants.MATRIX_CHANNEL, matrix_id)
         return True
     except KeyError:
         return False
