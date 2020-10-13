@@ -19,18 +19,18 @@ import async_channel.constants as channel_constants
 
 import octobot_commons.logging as logging
 
-import octobot_evaluators.channels as channels
+import octobot_evaluators.evaluators.channel as evaluator_channels
 import octobot_evaluators.constants as constants
 import octobot_evaluators.matrix as matrix
 
 
-class MatrixChannelConsumer(channels.EvaluatorChannelConsumer):
+class MatrixChannelConsumer(evaluator_channels.EvaluatorChannelConsumer):
     """
     EvaluatorChannelConsumer adapted for MatrixChannel
     """
 
 
-class MatrixChannelProducer(channels.EvaluatorChannelProducer):
+class MatrixChannelProducer(evaluator_channels.EvaluatorChannelProducer):
     """
     EvaluatorChannelProducer adapted for MatrixChannel
     """
@@ -107,7 +107,7 @@ class MatrixChannelProducer(channels.EvaluatorChannelProducer):
                             origin_consumer=origin_consumer)
 
 
-class MatrixChannel(channels.EvaluatorChannel):
+class MatrixChannel(evaluator_channels.EvaluatorChannel):
     FILTER_SIZE = 1
     PRODUCER_CLASS = MatrixChannelProducer
     CONSUMER_CLASS = MatrixChannelConsumer
@@ -128,7 +128,7 @@ class MatrixChannel(channels.EvaluatorChannel):
     async def new_consumer(self,
                            callback: object,
                            size: int = 0,
-                           priority_level: int = channels.EvaluatorChannel.DEFAULT_PRIORITY_LEVEL,
+                           priority_level: int = evaluator_channels.EvaluatorChannel.DEFAULT_PRIORITY_LEVEL,
                            matrix_id: str = channel_constants.CHANNEL_WILDCARD,
                            cryptocurrency: str = channel_constants.CHANNEL_WILDCARD,
                            symbol: str = channel_constants.CHANNEL_WILDCARD,

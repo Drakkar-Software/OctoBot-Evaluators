@@ -14,14 +14,13 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
-from octobot_evaluators.channels.evaluator_channel cimport EvaluatorChannel, EvaluatorChannelConsumer, \
-    EvaluatorChannelProducer
+cimport octobot_evaluators.evaluators.channel as evaluator_channels
 
-cdef class MatrixChannel(EvaluatorChannel):
+cdef class MatrixChannel(evaluator_channels.EvaluatorChannel):
     cdef public str exchange_name
 
-cdef class MatrixChannelConsumer(EvaluatorChannelConsumer):
+cdef class MatrixChannelConsumer(evaluator_channels.EvaluatorChannelConsumer):
     pass
 
-cdef class MatrixChannelProducer(EvaluatorChannelProducer):
+cdef class MatrixChannelProducer(evaluator_channels.EvaluatorChannelProducer):
     pass

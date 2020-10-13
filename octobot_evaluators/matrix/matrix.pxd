@@ -14,15 +14,14 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
-from octobot_commons.event_tree cimport EventTree
-from octobot_commons.event_tree cimport EventTreeNode
+cimport octobot_commons.event_tree as event_tree
 
 
 cdef class Matrix:
     cdef public str matrix_id
-    cdef public EventTree matrix
+    cdef public event_tree.EventTree matrix
 
     cpdef void set_node_value(self, object value, object value_type, list value_path, double timestamp=*)
-    cpdef list get_node_children_at_path(self, list node_path, EventTreeNode starting_node=*)
-    cpdef dict get_node_children_by_names_at_path(self, list node_path, EventTreeNode starting_node=*)
-    cpdef EventTreeNode get_node_at_path(self, list node_path, EventTreeNode starting_node=*)
+    cpdef list get_node_children_at_path(self, list node_path, event_tree.EventTreeNode starting_node=*)
+    cpdef dict get_node_children_by_names_at_path(self, list node_path, event_tree.EventTreeNode starting_node=*)
+    cpdef event_tree.EventTreeNode get_node_at_path(self, list node_path, event_tree.EventTreeNode starting_node=*)

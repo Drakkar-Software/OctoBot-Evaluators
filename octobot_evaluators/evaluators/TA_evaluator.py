@@ -19,7 +19,7 @@ import octobot_commons.constants as common_constants
 import octobot_commons.channels_name as channels_name
 
 import octobot_evaluators.constants as constants
-import octobot_evaluators.evaluator as evaluator
+import octobot_evaluators.evaluators as evaluator
 
 
 class TAEvaluator(evaluator.AbstractEvaluator):

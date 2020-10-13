@@ -13,19 +13,18 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
-import async_channel.constants as channel_constants
-
-import octobot_tentacles_manager.api as api
 
 import octobot_commons.constants as common_constants
 import octobot_commons.enums as common_enums
 import octobot_commons.time_frame_manager as time_frame_manager
 
-import octobot_evaluators.channels as channels
 import octobot_evaluators.constants as constants
-import octobot_evaluators.matrix as matrix
 import octobot_evaluators.enums as enums
-import octobot_evaluators.evaluator as evaluator
+import octobot_evaluators.evaluators as evaluator
+import octobot_evaluators.evaluators.channel as evaluator_channels
+import octobot_evaluators.matrix as matrix
+
+import octobot_tentacles_manager.api as api
 
 
 class StrategyEvaluator(evaluator.AbstractEvaluator):
@@ -50,7 +49,8 @@ class StrategyEvaluator(evaluator.AbstractEvaluator):
         :return: success of the evaluator's start
         """
         await super().start(bot_id)
-        self.consumer_instance = await channels.get_chan(constants.MATRIX_CHANNEL, self.matrix_id).new_consumer(
+        self.consumer_instance = await evaluator_channels.get_chan(constants.MATRIX_CHANNEL,
+                                                                   self.matrix_id).new_consumer(
             self.strategy_matrix_callback,
             priority_level=self.priority_level,
             exchange_name=self.exchange_name if self.exchange_name else common_constants.CHANNEL_WILDCARD)
@@ -111,7 +111,8 @@ class StrategyEvaluator(evaluator.AbstractEvaluator):
 
     async def stop(self) -> None:
         if self.consumer_instance:
-            await channels.get_chan(constants.MATRIX_CHANNEL, self.matrix_id).remove_consumer(self.consumer_instance)
+            await evaluator_channels.get_chan(constants.MATRIX_CHANNEL,
+                                              self.matrix_id).remove_consumer(self.consumer_instance)
 
     async def strategy_matrix_callback(self,
                                        matrix_id,

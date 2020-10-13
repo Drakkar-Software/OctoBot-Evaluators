@@ -23,7 +23,7 @@ import async_channel.enums as channel_enums
 import octobot_commons.constants as common_constants
 import octobot_commons.tentacles_management as tentacles_management
 
-import octobot_evaluators.channels as channels
+import octobot_evaluators.evaluators.channel as evaluator_channels
 import octobot_evaluators.constants as constants
 import octobot_evaluators.matrix as matrix
 
@@ -180,7 +180,8 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
                 eval_note = self.eval_note if self.eval_note is not None else common_constants.START_PENDING_EVAL_NOTE
 
             self.ensure_eval_note_is_not_expired()
-            await channels.get_chan(constants.MATRIX_CHANNEL, self.matrix_id).get_internal_producer().send_eval_note(
+            await evaluator_channels.get_chan(constants.MATRIX_CHANNEL,
+                                              self.matrix_id).get_internal_producer().send_eval_note(
                 matrix_id=self.matrix_id,
                 evaluator_name=self.get_name(),
                 evaluator_type=self.evaluator_type.value,
@@ -207,7 +208,8 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
         """
         :return: success of the evaluator's start
         """
-        self.evaluators_consumer_instance = await channels.get_chan(constants.EVALUATORS_CHANNEL, self.matrix_id) \
+        self.evaluators_consumer_instance = await evaluator_channels.get_chan(constants.EVALUATORS_CHANNEL,
+                                                                              self.matrix_id) \
             .new_consumer(self.evaluators_callback, priority_level=self.priority_level)
 
     async def stop(self) -> None:

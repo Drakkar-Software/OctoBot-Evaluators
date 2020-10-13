@@ -13,3 +13,32 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
+
+from octobot_evaluators.evaluators cimport channel
+from octobot_evaluators.evaluators.channel cimport (
+    EvaluatorsChannelConsumer,
+    EvaluatorsChannelProducer,
+    EvaluatorsChannel,
+    EvaluatorChannelConsumer,
+    EvaluatorChannelProducer,
+    EvaluatorChannel,
+    set_chan,
+    get_evaluator_channels,
+    del_evaluator_channel_container,
+    get_chan,
+    del_chan,
+)
+
+__all__ = [
+    "EvaluatorsChannelConsumer",
+    "EvaluatorsChannelProducer",
+    "EvaluatorsChannel",
+    "EvaluatorChannelConsumer",
+    "EvaluatorChannelProducer",
+    "EvaluatorChannel",
+    "set_chan",
+    "get_evaluator_channels",
+    "del_evaluator_channel_container",
+    "get_chan",
+    "del_chan",
+]

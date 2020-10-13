@@ -13,3 +13,13 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
+
+from octobot_evaluators.util cimport evaluation_util
+
+from octobot_evaluators.util.evaluation_util cimport (
+    get_eval_time,
+)
+
+__all__ = [
+    "get_eval_time",
+]

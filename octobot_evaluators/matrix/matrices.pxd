@@ -14,12 +14,13 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
-from octobot_commons.singleton.singleton_class cimport Singleton
-from octobot_evaluators.matrix.matrix cimport Matrix
+cimport octobot_commons.singleton as singleton
 
-cdef class Matrices(Singleton):
+cimport octobot_evaluators.matrix as matrix
+
+cdef class Matrices(singleton.Singleton):
     cdef public dict matrices
 
-    cpdef void add_matrix(self, Matrix matrix)
-    cpdef Matrix get_matrix(self, str matrix_id)
+    cpdef void add_matrix(self, matrix.Matrix matrix)
+    cpdef matrix.Matrix get_matrix(self, str matrix_id)
     cpdef void del_matrix(self, str matrix_id)

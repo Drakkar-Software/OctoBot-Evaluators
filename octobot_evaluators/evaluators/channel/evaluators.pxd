@@ -14,23 +14,13 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
-from octobot_channels.channels.channel cimport Channel
-from octobot_channels.consumer cimport Consumer, InternalConsumer, SupervisedConsumer
-from octobot_channels.producer cimport Producer
+cimport octobot_evaluators.evaluators.channel.evaluator_channel as evaluator_channels
 
-cdef class EvaluatorChannel(Channel):
-    cdef public str matrix_id
+cdef class EvaluatorsChannel(evaluator_channels.EvaluatorChannel):
+    cdef public str exchange_name
 
-    cpdef list get_consumer_from_filters(self, dict consumer_filters, EvaluatorChannelConsumer origin_consumer=*)
-
-cdef class EvaluatorChannelConsumer(Consumer):
+cdef class EvaluatorsChannelConsumer(evaluator_channels.EvaluatorChannelConsumer):
     pass
 
-cdef class EvaluatorChannelProducer(Producer):
+cdef class EvaluatorsChannelProducer(evaluator_channels.EvaluatorChannelProducer):
     pass
-
-cpdef EvaluatorChannel get_chan(str chan_name, str matrix_id)
-cpdef dict get_evaluator_channels(str matrix_id)
-cpdef void set_chan(EvaluatorChannel chan, str name)
-cpdef void del_evaluator_channel_container(str matrix_id)
-cpdef void del_chan(str name, str matrix_id)

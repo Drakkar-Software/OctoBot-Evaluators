@@ -13,3 +13,63 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
+
+from octobot_evaluators.matrix cimport matrix_manager
+from octobot_evaluators.matrix cimport matrices
+from octobot_evaluators.matrix cimport matrix
+
+from octobot_evaluators.matrix.matrix_manager cimport (
+    get_matrix,
+    set_tentacle_value,
+    get_tentacle_node,
+    get_tentacle_value,
+    get_tentacle_eval_time,
+    get_matrix_default_value_path,
+    get_tentacle_nodes,
+    get_node_children_by_names_at_path,
+    get_tentacles_value_nodes,
+    get_tentacle_path,
+    get_tentacle_value_path,
+    get_evaluations_by_evaluator,
+    get_available_time_frames,
+    get_available_symbols,
+    is_tentacle_value_valid,
+    is_tentacles_values_valid,
+)
+from octobot_evaluators.matrix.matrices cimport (
+    Matrices,
+)
+from octobot_evaluators.matrix.matrix cimport (
+    Matrix,
+)
+
+from octobot_evaluators.matrix cimport channel
+from octobot_evaluators.matrix.channel cimport (
+    MatrixChannelConsumer,
+    MatrixChannelProducer,
+    MatrixChannel,
+)
+
+__all__ = [
+    "get_matrix",
+    "set_tentacle_value",
+    "get_tentacle_node",
+    "get_tentacle_value",
+    "get_tentacle_eval_time",
+    "get_matrix_default_value_path",
+    "get_tentacle_nodes",
+    "get_node_children_by_names_at_path",
+    "get_tentacles_value_nodes",
+    "get_tentacle_path",
+    "get_tentacle_value_path",
+    "get_evaluations_by_evaluator",
+    "get_available_time_frames",
+    "get_available_symbols",
+    "is_tentacle_value_valid",
+    "is_tentacles_values_valid",
+    "Matrices",
+    "Matrix",
+    "MatrixChannelConsumer",
+    "MatrixChannelProducer",
+    "MatrixChannel",
+]

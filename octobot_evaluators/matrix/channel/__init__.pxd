@@ -13,3 +13,17 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
+
+from octobot_evaluators.matrix.channel cimport matrix
+
+from octobot_evaluators.matrix.channel.matrix cimport (
+    MatrixChannelConsumer,
+    MatrixChannelProducer,
+    MatrixChannel,
+)
+
+__all__ = [
+    "MatrixChannelConsumer",
+    "MatrixChannelProducer",
+    "MatrixChannel",
+]
