@@ -26,6 +26,12 @@ from octobot_evaluators.evaluators.channel.evaluator_channel import (
     del_chan,
     trigger_technical_evaluators_re_evaluation_with_updated_data,
 )
+from octobot_evaluators.evaluators.channel import evaluators
+from octobot_evaluators.evaluators.channel.evaluators import (
+    EvaluatorsChannelConsumer,
+    EvaluatorsChannelProducer,
+    EvaluatorsChannel,
+)
 
 __all__ = [
     "EvaluatorChannelConsumer",
@@ -40,4 +46,7 @@ __all__ = [
     "get_chan",
     "del_chan",
     "trigger_technical_evaluators_re_evaluation_with_updated_data",
+    "EvaluatorsChannelConsumer",
+    "EvaluatorsChannelProducer",
+    "EvaluatorsChannel",
 ]
