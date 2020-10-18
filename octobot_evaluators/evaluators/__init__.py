@@ -47,15 +47,6 @@ from octobot_evaluators.evaluators.strategy_evaluator import (
     StrategyEvaluator,
 )
 
-try:
-    from tentacles.Evaluator.RealTime import *
-    from tentacles.Evaluator.Social import *
-    from tentacles.Evaluator.Strategies import *
-    from tentacles.Evaluator.TA import *
-except ModuleNotFoundError as e:
-    import octobot_commons.logging as logging
-
-    logging.get_logger("Evaluator").error(f"tentacles folder not found raised a ModuleNotFoundError exception : {e}")
 
 EvaluatorClassTypes = {
     octobot_evaluators.enums.EvaluatorMatrixTypes.TA.value: TAEvaluator,
