@@ -104,8 +104,11 @@ venv.bak/
 .mypy_cache/
 
 .idea
+
+# tests
 tentacles
+user/
 
-*.c
-
+# cython
 cython_debug/
+*.c
