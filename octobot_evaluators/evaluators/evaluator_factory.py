@@ -64,8 +64,11 @@ async def create_evaluators(evaluator_parent_class,
 
 
 def _get_cryptocurrency_name(evaluator_class, crypto_currency_name_by_crypto_currencies, cryptocurrency):
-    return crypto_currency_name_by_crypto_currencies[cryptocurrency] if crypto_currency_name_by_crypto_currencies \
-                                                                        and cryptocurrency is not None and not evaluator_class.get_is_cryptocurrency_name_wildcard() else None
+    return crypto_currency_name_by_crypto_currencies[cryptocurrency] \
+        if crypto_currency_name_by_crypto_currencies \
+           and cryptocurrency is not None \
+           and not evaluator_class.get_is_cryptocurrency_name_wildcard() \
+        else None
 
 
 def _get_cryptocurrencies_to_create(evaluator_class, crypto_currency_name_by_crypto_currencies):
@@ -74,8 +77,7 @@ def _get_cryptocurrencies_to_create(evaluator_class, crypto_currency_name_by_cry
            not evaluator_class.get_is_cryptocurrencies_wildcard() else [None]
 
 
-def _get_symbols_to_create(evaluator_class, symbols_by_crypto_currencies, cryptocurrency,
-                           symbols):  # TODO replace with python 3.8 by :=
+def _get_symbols_to_create(evaluator_class, symbols_by_crypto_currencies, cryptocurrency, symbols):
     currency_symbols = symbols
     if cryptocurrency is not None:
         currency_symbols = symbols_by_crypto_currencies[cryptocurrency] \
@@ -83,7 +85,7 @@ def _get_symbols_to_create(evaluator_class, symbols_by_crypto_currencies, crypto
     return currency_symbols if currency_symbols and not evaluator_class.get_is_symbol_wildcard() else [None]
 
 
-def _get_time_frames_to_create(evaluator_class, time_frames):  # TODO replace with python 3.8 by :=
+def _get_time_frames_to_create(evaluator_class, time_frames):
     return time_frames if time_frames and not evaluator_class.get_is_time_frame_wildcard() else [None]
 
 
@@ -164,3 +166,4 @@ async def create_all_type_evaluators(tentacles_setup_config: object,
             for evaluator_type in evaluator.EvaluatorClassTypes.values()]
     except ImportError:
         logging.get_logger(LOGGER_NAME).error("create_evaluators requires Octobot-Trading package installed")
+    return []
