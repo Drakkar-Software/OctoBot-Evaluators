@@ -14,6 +14,7 @@
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
 import pytest
+import mock
 
 import octobot_tentacles_manager.api as tentacles_api
 import octobot_evaluators.evaluators as evaluators
@@ -92,14 +93,17 @@ async def test_create_rt_evaluators(evaluators_and_matrix_channels):
 
 async def _test_evaluators_creation(evaluator_parent_class, fixture_matrix_id, expected_evaluators):
     tentacles_setup_config = tentacles_api.get_tentacles_setup_config()
-    created_evaluators = await evaluators.create_evaluators(evaluator_parent_class=evaluator_parent_class,
-                                                            tentacles_setup_config=tentacles_setup_config,
-                                                            matrix_id=fixture_matrix_id,
-                                                            exchange_name=exchange_name,
-                                                            bot_id=bot_id,
-                                                            crypto_currency_name_by_crypto_currencies=crypto_currency_name_by_crypto_currencies,
-                                                            symbols_by_crypto_currency_tickers=symbols_by_crypto_currency_tickers,
-                                                            symbols=symbols,
-                                                            time_frames=time_frames)
+
+    # mock start method to prevent side effects (octobot-trading imports, etc)
+    with mock.patch.object(evaluator_parent_class, "start", mock.AsyncMock()):
+        created_evaluators = await evaluators.create_evaluators(evaluator_parent_class=evaluator_parent_class,
+                                                                tentacles_setup_config=tentacles_setup_config,
+                                                                matrix_id=fixture_matrix_id,
+                                                                exchange_name=exchange_name,
+                                                                bot_id=bot_id,
+                                                                crypto_currency_name_by_crypto_currencies=crypto_currency_name_by_crypto_currencies,
+                                                                symbols_by_crypto_currency_tickers=symbols_by_crypto_currency_tickers,
+                                                                symbols=symbols,
+                                                                time_frames=time_frames)
     assert created_evaluators
     assert all([evaluator.__class__ in expected_evaluators for evaluator in created_evaluators])

@@ -14,24 +14,19 @@
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
 import asyncio
-
 import pytest
-import requests
 import os.path as path
 import aiohttp
 
 import async_channel.util.channel_creator as channel_creator
-import octobot_evaluators.matrix.matrices as matrices
-import octobot_tentacles_manager.constants as constants
-import octobot_tentacles_manager.managers as managers
-import octobot_tentacles_manager.api as tentacles_api
 import octobot_commons.asyncio_tools as asyncio_tools
 import octobot_evaluators.api as evaluator_api
 import octobot_evaluators.evaluators.channel as evaluator_channels
 import octobot_evaluators.matrix.channel as matrix_channels
-from octobot_evaluators.api import create_matrix
-
-TENTACLES_LATEST_URL = "https://www.tentacles.octobot.online/repository/tentacles/officials/base/latest.zip"
+import octobot_evaluators.matrix.matrices as matrices
+import octobot_tentacles_manager.api as tentacles_api
+import octobot_tentacles_manager.constants as constants
+import octobot_tentacles_manager.managers as managers
 
 
 @pytest.yield_fixture
@@ -48,7 +43,7 @@ def event_loop():
 
 @pytest.yield_fixture()
 async def matrix_id():
-    created_matrix_id = create_matrix()
+    created_matrix_id = evaluator_api.create_matrix()
     yield created_matrix_id
     matrices.Matrices.instance().del_matrix(created_matrix_id)
 
