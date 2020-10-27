@@ -57,8 +57,10 @@ async def create_evaluators(evaluator_parent_class,
         for evaluator_class in tentacles_management.get_all_classes_from_parent(evaluator_parent_class)
         for cryptocurrency in _get_cryptocurrencies_to_create(evaluator_class,
                                                               crypto_currency_name_by_crypto_currencies)
-        for symbol in _get_symbols_to_create(evaluator_class, symbols_by_crypto_currency_tickers,
-                                             cryptocurrency, symbols)
+        for symbol in _get_symbols_to_create(evaluator_class,
+                                             symbols_by_crypto_currency_tickers,
+                                             cryptocurrency,
+                                             symbols)
         for time_frame in _get_time_frames_to_create(evaluator_class, time_frames)
     ]
 
@@ -80,8 +82,7 @@ def _get_cryptocurrencies_to_create(evaluator_class, crypto_currency_name_by_cry
 def _get_symbols_to_create(evaluator_class, symbols_by_crypto_currencies, cryptocurrency, symbols):
     currency_symbols = symbols
     if cryptocurrency is not None:
-        currency_symbols = symbols_by_crypto_currencies[cryptocurrency] \
-            if cryptocurrency in symbols_by_crypto_currencies else []
+        currency_symbols = symbols_by_crypto_currencies.get(cryptocurrency, [])
     return currency_symbols if currency_symbols and not evaluator_class.get_is_symbol_wildcard() else [None]
 
 
