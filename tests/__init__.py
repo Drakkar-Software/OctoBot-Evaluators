@@ -55,19 +55,12 @@ async def matrix_id():
 
 @pytest.yield_fixture
 async def install_tentacles():
-    def _download_tentacles():
-        r = requests.get(TENTACLES_LATEST_URL, stream=True)
-        open(_tentacles_local_path(), 'wb').write(r.content)
-
     def _cleanup(raises=True):
         if path.exists(constants.TENTACLES_PATH):
             managers.TentaclesSetupManager.delete_tentacles_arch(force=True, raises=raises)
 
     def _tentacles_local_path():
         return path.join("tests", "static", "tentacles.zip")
-
-    if not path.exists(_tentacles_local_path()):
-        _download_tentacles()
 
     _cleanup(False)
     async with aiohttp.ClientSession() as session:
