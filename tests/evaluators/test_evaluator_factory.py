@@ -56,20 +56,50 @@ async def test_create_all_type_evaluators(evaluators_and_matrix_channels):
 
 @pytest.mark.usefixtures("event_loop", "install_tentacles")
 async def test_create_strategy_evaluators(evaluators_and_matrix_channels):
+    import tentacles
+    await _test_evaluators_creation(evaluators.StrategyEvaluator, evaluators_and_matrix_channels, [
+        tentacles.SimpleStrategyEvaluator,
+        tentacles.DipAnalyserStrategyEvaluator,
+        tentacles.MoveSignalsStrategyEvaluator
+    ])
+
+
+@pytest.mark.usefixtures("event_loop", "install_tentacles")
+async def test_create_ta_evaluators(evaluators_and_matrix_channels):
+    import tentacles
+    await _test_evaluators_creation(evaluators.TAEvaluator, evaluators_and_matrix_channels, [
+        tentacles.RSIMomentumEvaluator,
+        tentacles.ADXMomentumEvaluator,
+        tentacles.StochasticRSIVolatilityEvaluator
+    ])
+
+
+@pytest.mark.usefixtures("event_loop", "install_tentacles")
+async def test_create_social_evaluators(evaluators_and_matrix_channels):
+    import tentacles
+    await _test_evaluators_creation(evaluators.SocialEvaluator, evaluators_and_matrix_channels, [
+        tentacles.RedditForumEvaluator
+    ])
+
+
+@pytest.mark.usefixtures("event_loop", "install_tentacles")
+async def test_create_rt_evaluators(evaluators_and_matrix_channels):
+    import tentacles
+    await _test_evaluators_creation(evaluators.RealTimeEvaluator, evaluators_and_matrix_channels, [
+        tentacles.InstantFluctuationsEvaluator
+    ])
+
+
+async def _test_evaluators_creation(evaluator_parent_class, fixture_matrix_id, expected_evaluators):
     tentacles_setup_config = tentacles_api.get_tentacles_setup_config()
-    created_evaluators = await evaluators.create_evaluators(evaluator_parent_class=evaluators.StrategyEvaluator,
+    created_evaluators = await evaluators.create_evaluators(evaluator_parent_class=evaluator_parent_class,
                                                             tentacles_setup_config=tentacles_setup_config,
-                                                            matrix_id=evaluators_and_matrix_channels,
+                                                            matrix_id=fixture_matrix_id,
                                                             exchange_name=exchange_name,
                                                             bot_id=bot_id,
                                                             crypto_currency_name_by_crypto_currencies=crypto_currency_name_by_crypto_currencies,
                                                             symbols_by_crypto_currency_tickers=symbols_by_crypto_currency_tickers,
                                                             symbols=symbols,
                                                             time_frames=time_frames)
-
-    assert created_evaluators != [None, None, None]
-
-    import tentacles
-    assert isinstance(created_evaluators[0], tentacles.SimpleStrategyEvaluator)
-    assert isinstance(created_evaluators[1], tentacles.DipAnalyserStrategyEvaluator)
-    assert isinstance(created_evaluators[2], tentacles.MoveSignalsStrategyEvaluator)
+    assert created_evaluators
+    assert all([evaluator.__class__ in expected_evaluators for evaluator in created_evaluators])
