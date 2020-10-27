@@ -21,7 +21,7 @@ cdef str _get_cryptocurrency_name(object evaluator_class,
 cdef list _get_cryptocurrencies_to_create(object evaluator_class,
                                           dict crypto_currency_name_by_crypto_currencies)
 cdef list _get_symbols_to_create(object evaluator_class,
-                                 list symbols_by_crypto_currencies,
+                                 dict symbols_by_crypto_currencies,
                                  str cryptocurrency,
                                  list symbols)
 cdef list _get_time_frames_to_create(object evaluator_class,

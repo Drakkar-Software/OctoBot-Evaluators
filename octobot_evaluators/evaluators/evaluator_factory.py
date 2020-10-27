@@ -72,7 +72,7 @@ def _get_cryptocurrency_name(evaluator_class, crypto_currency_name_by_crypto_cur
 
 
 def _get_cryptocurrencies_to_create(evaluator_class, crypto_currency_name_by_crypto_currencies):
-    return crypto_currency_name_by_crypto_currencies.keys() \
+    return list(crypto_currency_name_by_crypto_currencies.keys()) \
         if crypto_currency_name_by_crypto_currencies and \
            not evaluator_class.get_is_cryptocurrencies_wildcard() else [None]
 
