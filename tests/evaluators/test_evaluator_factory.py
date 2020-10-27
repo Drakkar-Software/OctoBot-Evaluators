@@ -31,7 +31,6 @@ symbols_by_crypto_currencies = {
 }
 symbols = ["BTC/USDT", "ETH/USD", "ETH/BTC"]
 time_frames = [enums.TimeFrames.ONE_HOUR, enums.TimeFrames.FOUR_HOURS]
-tentacles_setup_config = tentacles_api.get_tentacles_setup_config()
 
 crypto_currency_name_by_crypto_currencies = {}
 symbols_by_crypto_currency_tickers = {}
@@ -43,6 +42,7 @@ for name, symbol_list in symbols_by_crypto_currencies.items():
 
 @pytest.mark.usefixtures("event_loop", "install_tentacles")
 async def test_create_all_type_evaluators(evaluators_and_matrix_channels):
+    tentacles_setup_config = tentacles_api.get_tentacles_setup_config()
     created_evaluators = await evaluators.create_all_type_evaluators(tentacles_setup_config,
                                                                      matrix_id=evaluators_and_matrix_channels,
                                                                      exchange_name=exchange_name,
@@ -56,6 +56,7 @@ async def test_create_all_type_evaluators(evaluators_and_matrix_channels):
 
 @pytest.mark.usefixtures("event_loop", "install_tentacles")
 async def test_create_strategy_evaluators(evaluators_and_matrix_channels):
+    tentacles_setup_config = tentacles_api.get_tentacles_setup_config()
     created_evaluators = await evaluators.create_evaluators(evaluator_parent_class=evaluators.StrategyEvaluator,
                                                             tentacles_setup_config=tentacles_setup_config,
                                                             matrix_id=evaluators_and_matrix_channels,
