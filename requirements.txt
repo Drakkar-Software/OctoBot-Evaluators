@@ -1,6 +1,6 @@
 # Setup requirements
 cython==0.29.21
-numpy==1.19.3
+numpy==1.19.4
 
 # Drakkar-Software requirements
 async-channel>=2.0.3, <2.1
