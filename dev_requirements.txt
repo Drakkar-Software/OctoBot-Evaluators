@@ -15,3 +15,5 @@ setuptools
 wheel
 
 pur
+
+pylint
