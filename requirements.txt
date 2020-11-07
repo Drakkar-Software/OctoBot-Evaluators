@@ -3,7 +3,7 @@ cython==0.29.21
 numpy==1.19.3
 
 # Drakkar-Software requirements
-async-channel>=2.0.3, <2.1
+Async-Channel>=2.0.5, <2.1
 OctoBot-Commons>=1.4.6, <1.5
 OctoBot-Tentacles-Manager>=2.3.3, <2.4
 
