@@ -37,7 +37,7 @@ class TAEvaluator(evaluator.AbstractEvaluator):
         """
         await super().start(bot_id)
         try:
-            import octobot_trading.exchanges as exchanges
+            import octobot_trading.exchange_channel as exchanges_channel
             import octobot_trading.api as exchange_api
             exchange_id = exchange_api.get_exchange_id_from_matrix_id(self.exchange_name, self.matrix_id)
             time_frame_filter = [tf.value
@@ -45,7 +45,7 @@ class TAEvaluator(evaluator.AbstractEvaluator):
                     self.exchange_name, exchange_id)]
             if len(time_frame_filter) == 1:
                 time_frame_filter = time_frame_filter[0]
-            await exchanges.get_chan(channels_name.OctoBotTradingChannelsName.OHLCV_CHANNEL.value, exchange_id).\
+            await exchanges_channel.get_chan(channels_name.OctoBotTradingChannelsName.OHLCV_CHANNEL.value, exchange_id).\
                 new_consumer(
                     self.evaluator_ohlcv_callback,
                     cryptocurrency=self.cryptocurrency if self.cryptocurrency else channel_constants.CHANNEL_WILDCARD,
