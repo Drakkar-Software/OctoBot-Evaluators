@@ -81,12 +81,16 @@ class TAEvaluator(evaluator.AbstractEvaluator):
                                   time_frame,
                                   data):
         # Used to communicate between evaluators
+        # ignore time frames related to other instances if case of a non time frame wildcard evaluator
+        time_frames_to_update = data.get(constants.EVALUATOR_CHANNEL_DATA_TIME_FRAMES, []) \
+            if self.get_is_time_frame_wildcard() else \
+            [self.time_frame] if self.time_frame in data.get(constants.EVALUATOR_CHANNEL_DATA_TIME_FRAMES, []) else []
         if data[constants.EVALUATOR_CHANNEL_DATA_ACTION] == constants.TA_RE_EVALUATION_TRIGGER_UPDATED_DATA:
             try:
                 import octobot_trading.api as exchange_api
                 exchange_id = data[constants.EVALUATOR_CHANNEL_DATA_EXCHANGE_ID]
                 symbol_data = self.get_exchange_symbol_data(exchange_name, exchange_id, symbol)
-                for time_frame in data[constants.EVALUATOR_CHANNEL_DATA_TIME_FRAMES]:
+                for time_frame in time_frames_to_update:
                     last_full_candle = exchange_api.get_candle_as_list(
                         exchange_api.get_symbol_historical_candles(symbol_data, time_frame, limit=1))
                     await self.ohlcv_callback(exchange_name, exchange_id, cryptocurrency,
@@ -94,5 +98,5 @@ class TAEvaluator(evaluator.AbstractEvaluator):
             except ImportError:
                 self.logger.error(f"Can't get OHLCV: requires OctoBot-Trading package installed")
         elif data[constants.EVALUATOR_CHANNEL_DATA_ACTION] == constants.RESET_EVALUATION:
-            for time_frame in data[constants.EVALUATOR_CHANNEL_DATA_TIME_FRAMES]:
+            for time_frame in time_frames_to_update:
                 await self.reset_evaluation(cryptocurrency, symbol, time_frame.value)
