@@ -4,8 +4,8 @@ numpy==1.19.3
 
 # Drakkar-Software requirements
 Async-Channel>=2.0.6, <2.1
-OctoBot-Commons>=1.4.9, <1.5
-OctoBot-Tentacles-Manager>=2.3.5, <2.4
+OctoBot-Commons>=1.4.11, <1.5
+OctoBot-Tentacles-Manager>=2.3.6, <2.4
 
 # Cryptocurrency trading
 tulipy==0.4.0
