@@ -18,6 +18,7 @@ import time
 
 import octobot_tentacles_manager.api as api
 
+import async_channel.constants as channel_constants
 import async_channel.enums as channel_enums
 
 import octobot_commons.constants as common_constants
@@ -210,7 +211,13 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
         """
         self.evaluators_consumer_instance = await evaluator_channels.get_chan(constants.EVALUATORS_CHANNEL,
                                                                               self.matrix_id) \
-            .new_consumer(self.evaluators_callback, priority_level=self.priority_level)
+            .new_consumer(
+                self.evaluators_callback,
+                cryptocurrency=self.cryptocurrency if self.cryptocurrency else channel_constants.CHANNEL_WILDCARD,
+                symbol=self.symbol if self.symbol else channel_constants.CHANNEL_WILDCARD,
+                time_frame=self.time_frame if self.time_frame else channel_constants.CHANNEL_WILDCARD,
+                priority_level=self.priority_level,
+            )
 
     async def stop(self) -> None:
         """
