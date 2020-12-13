@@ -25,8 +25,8 @@ import octobot_evaluators.evaluators as evaluator
 class TAEvaluator(evaluator.AbstractEvaluator):
     __metaclass__ = evaluator.AbstractEvaluator
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, tentacles_setup_config):
+        super().__init__(tentacles_setup_config)
         self.time_frame = None
 
     async def start(self, bot_id: str) -> bool:

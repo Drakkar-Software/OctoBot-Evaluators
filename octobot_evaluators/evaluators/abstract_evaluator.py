@@ -17,6 +17,7 @@
 import time
 
 import octobot_tentacles_manager.api as api
+import octobot_tentacles_manager.configuration as tm_configuration
 
 import async_channel.constants as channel_constants
 import async_channel.enums as channel_enums
@@ -32,19 +33,19 @@ import octobot_evaluators.matrix as matrix
 class AbstractEvaluator(tentacles_management.AbstractTentacle):
     __metaclass__ = tentacles_management.AbstractTentacle
 
-    def __init__(self):
+    def __init__(self, tentacles_setup_config: tm_configuration.TentaclesSetupConfiguration):
         super().__init__()
         # Evaluator matrix id
         self.matrix_id: str = None
 
         # Tentacle global setup configuration
-        self.tentacles_setup_config: dict = {}
+        self.tentacles_setup_config: tm_configuration.TentaclesSetupConfiguration = tentacles_setup_config
 
         # Evaluator specific config (Is loaded from tentacle specific file)
         self.specific_config: dict = {}
 
         # If this indicator is enabled
-        self.enabled: bool = True
+        self.enabled: bool = self.is_enabled(self.tentacles_setup_config, False)
 
         # Specified Cryptocurrency for this instance (Should be None if wildcard)
         self.cryptocurrency: str = None
@@ -242,15 +243,6 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
             self.logger.debug("Evaluator started")
         else:
             self.logger.debug("Evaluator not started")
-
-    def set_tentacles_setup_config(self, tentacles_setup_config) -> None:
-        """
-        Used to provide the tentacles setup config
-        :param tentacles_setup_config: tentacles setup config
-        :return: None
-        """
-        self.tentacles_setup_config = tentacles_setup_config
-        self.enabled = self.is_enabled(tentacles_setup_config, False)
 
     def set_default_config(self):
         """

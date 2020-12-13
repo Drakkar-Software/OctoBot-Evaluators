@@ -25,13 +25,14 @@ import octobot_evaluators.evaluators.channel as evaluator_channels
 import octobot_evaluators.matrix as matrix
 
 import octobot_tentacles_manager.api as api
+import octobot_tentacles_manager.configuration as tm_configuration
 
 
 class StrategyEvaluator(evaluator.AbstractEvaluator):
     __metaclass__ = evaluator.AbstractEvaluator
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, tentacles_setup_config):
+        super().__init__(tentacles_setup_config)
         self.consumer_instance = None
         self.strategy_time_frames = []
         self.evaluations_last_updates = {}
@@ -375,45 +376,51 @@ class StrategyEvaluator(evaluator.AbstractEvaluator):
         return strategy_currencies, symbols, [self.time_frame]
 
     @classmethod
-    def get_required_time_frames(cls, config: dict):
+    def get_required_time_frames(cls, config: dict,
+                                 tentacles_setup_config: tm_configuration.TentaclesSetupConfiguration):
         if constants.CONFIG_FORCED_TIME_FRAME in config:
             return time_frame_manager.parse_time_frames(config[constants.CONFIG_FORCED_TIME_FRAME])
-        strategy_config: dict = api.get_tentacle_config(cls)
+        strategy_config: dict = api.get_tentacle_config(tentacles_setup_config, cls)
         if constants.STRATEGIES_REQUIRED_TIME_FRAME in strategy_config:
             return time_frame_manager.parse_time_frames(strategy_config[constants.STRATEGIES_REQUIRED_TIME_FRAME])
         else:
             raise Exception(f"'{constants.STRATEGIES_REQUIRED_TIME_FRAME}' is missing in configuration file")
 
     @classmethod
-    def get_required_evaluators(cls, strategy_config: dict = None) -> list:
+    def get_required_evaluators(cls, tentacles_config: tm_configuration.TentaclesSetupConfiguration,
+                                strategy_config: dict = None) -> list:
         """
+        :param tentacles_config: the tentacles config to find the current strategy config from
         :param strategy_config: the strategy configuration dict
         :return: the list of required evaluators, [CONFIG_WILDCARD] means any evaluator
         """
-        strategy_config: dict = strategy_config or api.get_tentacle_config(cls)
+        strategy_config: dict = strategy_config or api.get_tentacle_config(tentacles_config, cls)
         if constants.STRATEGIES_REQUIRED_EVALUATORS in strategy_config:
             return strategy_config[constants.STRATEGIES_REQUIRED_EVALUATORS]
         else:
             raise Exception(f"'{constants.STRATEGIES_REQUIRED_EVALUATORS}' is missing in configuration file")
 
     @classmethod
-    def get_compatible_evaluators_types(cls, strategy_config: dict = None) -> list:
+    def get_compatible_evaluators_types(cls, tentacles_config: tm_configuration.TentaclesSetupConfiguration,
+                                        strategy_config: dict = None) -> list:
         """
+        :param tentacles_config: the tentacles config to find the current strategy config from
         :param strategy_config: the strategy configuration dict
         :return: the list of compatible evaluator type, [CONFIG_WILDCARD] means any type
         """
-        strategy_config: dict = strategy_config or api.get_tentacle_config(cls)
+        strategy_config: dict = strategy_config or api.get_tentacle_config(tentacles_config, cls)
         if constants.STRATEGIES_COMPATIBLE_EVALUATOR_TYPES in strategy_config:
             return strategy_config[constants.STRATEGIES_COMPATIBLE_EVALUATOR_TYPES]
         return [common_constants.CONFIG_WILDCARD]
 
     @classmethod
-    def get_default_evaluators(cls, strategy_config: dict = None):
-        strategy_config: dict = strategy_config or api.get_tentacle_config(cls)
+    def get_default_evaluators(cls, tentacles_config: tm_configuration.TentaclesSetupConfiguration,
+                               strategy_config: dict = None):
+        strategy_config: dict = strategy_config or api.get_tentacle_config(tentacles_config, cls)
         if constants.TENTACLE_DEFAULT_CONFIG in strategy_config:
             return strategy_config[constants.TENTACLE_DEFAULT_CONFIG]
         else:
-            required_evaluators = cls.get_required_evaluators(strategy_config)
+            required_evaluators = cls.get_required_evaluators(tentacles_config, strategy_config)
             if required_evaluators == common_constants.CONFIG_WILDCARD:
                 return []
             return required_evaluators

@@ -104,8 +104,7 @@ async def create_evaluator(evaluator_class,
                            time_frames=None,
                            real_time_time_frames=None):
     try:
-        eval_class_instance = evaluator_class()
-        eval_class_instance.set_tentacles_setup_config(tentacles_setup_config)
+        eval_class_instance = evaluator_class(tentacles_setup_config)
         if api.is_relevant_evaluator(eval_class_instance, relevant_evaluators):
             eval_class_instance.logger = logging.get_logger(evaluator_class.get_name())
             eval_class_instance.matrix_id = matrix_id

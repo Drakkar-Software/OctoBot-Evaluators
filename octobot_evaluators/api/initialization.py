@@ -30,7 +30,7 @@ import octobot_evaluators.evaluators as evaluator
 def init_time_frames_from_strategies(config, tentacles_setup_config) -> None:
     time_frame_list = set()
     for strategies_eval_class in get_activated_strategies_classes(tentacles_setup_config):
-        for time_frame in strategies_eval_class.get_required_time_frames(config):
+        for time_frame in strategies_eval_class.get_required_time_frames(config, tentacles_setup_config):
             time_frame_list.add(time_frame)
     time_frame_list = time_frame_manager.sort_time_frames(list(time_frame_list))
     config[common_constants.CONFIG_TIME_FRAME] = time_frame_list
