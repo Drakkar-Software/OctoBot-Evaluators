@@ -26,18 +26,18 @@ class SocialEvaluator(evaluator.AbstractEvaluator):
     __metaclass__ = evaluator.AbstractEvaluator
     SERVICE_FEED_CLASS = None
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, tentacles_setup_config):
+        super().__init__(tentacles_setup_config)
         self.load_config()
         self.exchange_id = None
 
     def load_config(self):
         # try with this class name
-        self.specific_config = api.get_tentacle_config(self.__class__)
+        self.specific_config = api.get_tentacle_config(self.tentacles_setup_config, self.__class__)
         if not self.specific_config:
             # if nothing in config, try with any super-class' config file
             for super_class in self.get_parent_evaluator_classes(SocialEvaluator):
-                self.specific_config = api.get_tentacle_config(super_class)
+                self.specific_config = api.get_tentacle_config(self.tentacles_setup_config, super_class)
                 if self.specific_config:
                     return
         # set default config if nothing found

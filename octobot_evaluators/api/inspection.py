@@ -35,10 +35,9 @@ def is_relevant_evaluator(evaluator_instance, relevant_evaluators, use_relevant_
 
 def get_relevant_TAs_for_strategy(strategy, tentacles_setup_config) -> list:
     ta_classes_list = []
-    relevant_evaluators = strategy.get_required_evaluators()
+    relevant_evaluators = strategy.get_required_evaluators(tentacles_setup_config)
     for ta_eval_class in tentacles_management.get_all_classes_from_parent(evaluator.TAEvaluator):
-        ta_eval_class_instance = ta_eval_class()
-        ta_eval_class_instance.set_tentacles_setup_config(tentacles_setup_config)
+        ta_eval_class_instance = ta_eval_class(tentacles_setup_config)
         # use ony relevant_evaluators given by the strategy
         if common_constants.CONFIG_WILDCARD in relevant_evaluators or \
                 is_relevant_evaluator(ta_eval_class_instance, relevant_evaluators, use_relevant_evaluators_only=True):
