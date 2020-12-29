@@ -21,6 +21,7 @@ import octobot_evaluators.evaluators as evaluators
 import octobot_commons.enums as enums
 import octobot_commons.symbol_util as symbol_util
 from tests import event_loop, matrix_id, install_tentacles, evaluators_and_matrix_channels
+from octobot_evaluators.evaluators.evaluator_factory import _extract_traded_pairs, _filter_pairs
 
 pytestmark = pytest.mark.asyncio
 
@@ -107,3 +108,124 @@ async def _test_evaluators_creation(evaluator_parent_class, fixture_matrix_id, e
                                                                 time_frames=time_frames)
     assert created_evaluators
     assert all([evaluator.__class__ in expected_evaluators for evaluator in created_evaluators])
+
+
+async def test_extract_traded_pairs():
+    exchange_name = "binance"
+    matrix_id = "id"
+    exchange_api = ExchangeAPIMock()
+
+    # no symbol config
+    symbols_by_crypto_currencies = None
+    crypto_currency_name_by_crypto_currencies, symbols_by_crypto_currency_tickers = \
+        _extract_traded_pairs(symbols_by_crypto_currencies, exchange_name, matrix_id, exchange_api)
+    assert crypto_currency_name_by_crypto_currencies == {}
+    assert symbols_by_crypto_currency_tickers == {}
+
+    # normal symbol config
+    symbols_by_crypto_currencies = {
+        'AAVE': ['AAVE/BTC', 'AAVE/USDT'],
+        'Cardano': ['ADA/BTC']
+    }
+    crypto_currency_name_by_crypto_currencies, symbols_by_crypto_currency_tickers = \
+        _extract_traded_pairs(symbols_by_crypto_currencies, exchange_name, matrix_id, exchange_api)
+    assert crypto_currency_name_by_crypto_currencies == {
+        'AAVE': 'AAVE',
+        'ADA': 'Cardano'
+    }
+    assert symbols_by_crypto_currency_tickers == {
+        'AAVE': {'AAVE/BTC', 'AAVE/USDT'},
+        'ADA': {'ADA/BTC'}
+    }
+
+    # AAVE/USDT in Cardano symbol config
+    symbols_by_crypto_currencies = {
+        'AAVE': ['AAVE/BTC'],
+        'Cardano': ['AAVE/USDT', 'ADA/BTC']
+    }
+    crypto_currency_name_by_crypto_currencies, symbols_by_crypto_currency_tickers = \
+        _extract_traded_pairs(symbols_by_crypto_currencies, exchange_name, matrix_id, exchange_api)
+    assert crypto_currency_name_by_crypto_currencies == {
+        'AAVE': 'AAVE',
+        'ADA': 'Cardano'
+    }
+    assert symbols_by_crypto_currency_tickers == {
+        'AAVE': {'AAVE/BTC', 'AAVE/USDT'},
+        'ADA': {'ADA/BTC'}
+    }
+
+    # Many symbol config by reference market
+    symbols_by_crypto_currencies = {
+        'Bitcoin': [
+            'AAVE/BTC', 'ADA/BTC', 'ATOM/BTC', 'BAT/BTC', 'BNB/BTC', 'DASH/BTC', 'DOT/BTC',
+            'EOS/BTC', 'ETC/BTC', 'ETH/BTC', 'FIL/BTC', 'LINK/BTC', 'LTC/BTC', 'NEO/BTC',
+            'ONT/BTC', 'ROSE/BTC', 'SUSHI/BTC', 'SXP/BTC', 'THETA/BTC', 'TOMO/BTC', 'UNI/BTC',
+            'WAN/BTC', 'XLM/BTC', 'XMR/BTC', 'XTZ/BTC', 'YFI/BTC'
+        ],
+        'Tether': [
+            'AAVE/USDT', 'ADA/USDT', 'ATOM/USDT', 'BAT/USDT', 'BNB/USDT', 'BTC/USDT',
+            'DASH/USDT', 'DOT/USDT', 'EOS/USDT', 'ETC/USDT', 'ETH/USDT', 'FIL/USDT',
+            'LINK/USDT', 'LTC/USDT', 'NEO/USDT', 'ONT/USDT', 'ROSE/USDT', 'SUSHI/USDT',
+            'SXP/USDT', 'THETA/USDT', 'TOMO/USDT', 'UNI/USDT', 'WAN/USDT', 'XLM/USDT',
+            'XMR/USDT', 'XTZ/USDT', 'YFI/USDT'
+        ]
+    }
+    crypto_currency_name_by_crypto_currencies, symbols_by_crypto_currency_tickers = \
+        _extract_traded_pairs(symbols_by_crypto_currencies, exchange_name, matrix_id, exchange_api)
+    assert crypto_currency_name_by_crypto_currencies == {
+        'AAVE': 'Bitcoin', 'ADA': 'Bitcoin', 'ATOM': 'Bitcoin',
+        'BAT': 'Bitcoin', 'BNB': 'Bitcoin', 'DASH': 'Bitcoin',
+        'DOT': 'Bitcoin', 'EOS': 'Bitcoin', 'ETC': 'Bitcoin',
+        'ETH': 'Bitcoin', 'FIL': 'Bitcoin', 'LINK': 'Bitcoin',
+        'LTC': 'Bitcoin', 'NEO': 'Bitcoin', 'ONT': 'Bitcoin',
+        'ROSE': 'Bitcoin', 'SUSHI': 'Bitcoin', 'SXP': 'Bitcoin',
+        'THETA': 'Bitcoin', 'TOMO': 'Bitcoin', 'UNI': 'Bitcoin',
+        'WAN': 'Bitcoin', 'XLM': 'Bitcoin', 'XMR': 'Bitcoin',
+        'XTZ': 'Bitcoin', 'YFI': 'Bitcoin', 'BTC': 'Tether'
+    }
+    assert symbols_by_crypto_currency_tickers == {
+        'AAVE': {'AAVE/BTC', 'AAVE/USDT'}, 'ADA': {'ADA/BTC', 'ADA/USDT'}, 'ATOM': {'ATOM/BTC', 'ATOM/USDT'},
+        'BAT': {'BAT/BTC', 'BAT/USDT'}, 'BNB': {'BNB/USDT', 'BNB/BTC'}, 'DASH': {'DASH/USDT', 'DASH/BTC'},
+        'DOT': {'DOT/BTC', 'DOT/USDT'}, 'EOS': {'EOS/BTC', 'EOS/USDT'}, 'ETC': {'ETC/USDT', 'ETC/BTC'},
+        'ETH': {'ETH/USDT', 'ETH/BTC'}, 'FIL': {'FIL/BTC', 'FIL/USDT'}, 'LINK': {'LINK/USDT', 'LINK/BTC'},
+        'LTC': {'LTC/USDT', 'LTC/BTC'}, 'NEO': {'NEO/USDT', 'NEO/BTC'}, 'ONT': {'ONT/BTC', 'ONT/USDT'},
+        'ROSE': {'ROSE/USDT', 'ROSE/BTC'}, 'SUSHI': {'SUSHI/USDT', 'SUSHI/BTC'}, 'SXP': {'SXP/BTC', 'SXP/USDT'},
+        'THETA': {'THETA/USDT', 'THETA/BTC'}, 'TOMO': {'TOMO/BTC', 'TOMO/USDT'}, 'UNI': {'UNI/BTC', 'UNI/USDT'},
+        'WAN': {'WAN/BTC', 'WAN/USDT'}, 'XLM': {'XLM/USDT', 'XLM/BTC'}, 'XMR': {'XMR/BTC', 'XMR/USDT'},
+        'XTZ': {'XTZ/BTC', 'XTZ/USDT'}, 'YFI': {'YFI/USDT', 'YFI/BTC'}, 'BTC': {'BTC/USDT'}
+    }
+
+
+async def test_filter_pairs():
+    exchange_api = ExchangeAPIMock()
+    exchange_manager = None
+
+    assert _filter_pairs(['BAT/BTC', 'BAT/USDT', 'BNB/USDT', 'BNB/BTC'], 'BAT', exchange_api, exchange_manager) == \
+           {'BAT/BTC', 'BAT/USDT'}
+
+    assert _filter_pairs(['BAT/BTC', 'BAT/USDT', 'BNB/USDT', 'BNB/BTC'], 'BNB', exchange_api, exchange_manager) == \
+           {'BNB/BTC', 'BNB/USDT'}
+
+    assert _filter_pairs(['BAT/BTC', 'BAT/USDT', 'BNB/USDT', 'BNB/BTC'], 'BTC', exchange_api, exchange_manager) == \
+           set()
+
+    assert _filter_pairs(['BAT/BTC', 'BAT/USDT', 'BNB/USDT', 'BNB/BTC'], 'USDT', exchange_api, exchange_manager) == \
+           set()
+
+    assert _filter_pairs([], 'USDT', exchange_api, exchange_manager) == \
+           set()
+
+    assert _filter_pairs([], 'USDT', exchange_api, exchange_manager) == \
+           set()
+
+
+class ExchangeAPIMock:
+
+    def get_exchange_id_from_matrix_id(self, *args):
+        return "1"
+
+    def get_exchange_manager_from_exchange_name_and_id(self, *args):
+        return None
+
+    def get_base_currency(self, exchange_manager, symbol):
+        return symbol_util.split_symbol(symbol)[0]

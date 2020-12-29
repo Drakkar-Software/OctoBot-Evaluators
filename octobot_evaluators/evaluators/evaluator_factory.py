@@ -1,3 +1,4 @@
+# pylint: disable=E0401
 #  Drakkar-Software OctoBot-Evaluators
 #  Copyright (c) Drakkar-Software, All rights reserved.
 #
@@ -140,19 +141,10 @@ async def create_all_type_evaluators(tentacles_setup_config: object,
         logging.get_logger(LOGGER_NAME).info(
             f"No evaluator to create for {exchange_name}: no activated evaluator strategy.")
         return []
-    crypto_currency_name_by_crypto_currencies = {}
-    symbols_by_crypto_currency_tickers = {}
     try:
         import octobot_trading.api as exchange_api
-        exchange_id = exchange_api.get_exchange_id_from_matrix_id(exchange_name, matrix_id)
-        exchange_manager = exchange_api.get_exchange_manager_from_exchange_name_and_id(exchange_name, exchange_id)
-        for name, symbol_list in symbols_by_crypto_currencies.items():
-            if symbol_list:
-                base = exchange_api.get_base_currency(exchange_manager, symbol_list[0])
-                crypto_currency_name_by_crypto_currencies[base] = \
-                    crypto_currency_name_by_crypto_currencies.get(base, "") + name
-                symbols_by_crypto_currency_tickers[base] = \
-                    symbols_by_crypto_currency_tickers.get(base, []) + symbol_list
+        crypto_currency_name_by_crypto_currencies, symbols_by_crypto_currency_tickers = \
+            _extract_traded_pairs(symbols_by_crypto_currencies, exchange_name, matrix_id, exchange_api)
         return [
             await create_evaluators(
                 evaluator_type, tentacles_setup_config,
@@ -167,3 +159,32 @@ async def create_all_type_evaluators(tentacles_setup_config: object,
     except ImportError:
         logging.get_logger(LOGGER_NAME).error("create_evaluators requires Octobot-Trading package installed")
     return []
+
+
+def _extract_traded_pairs(symbols_by_crypto_currencies, exchange_name, matrix_id, exchange_api):
+    crypto_currency_name_by_crypto_currencies = {}
+    symbols_by_crypto_currency_tickers = {}
+    if not symbols_by_crypto_currencies:
+        return crypto_currency_name_by_crypto_currencies, symbols_by_crypto_currency_tickers
+    exchange_id = exchange_api.get_exchange_id_from_matrix_id(exchange_name, matrix_id)
+    exchange_manager = exchange_api.get_exchange_manager_from_exchange_name_and_id(exchange_name, exchange_id)
+    for name, symbol_list in symbols_by_crypto_currencies.items():
+        if symbol_list:
+            # in case pairs are listed by reference market in use config, iterate over each pair
+            for symbol in symbol_list:
+                base = exchange_api.get_base_currency(exchange_manager, symbol)
+                crypto_currency_name_by_crypto_currencies[base] = \
+                    crypto_currency_name_by_crypto_currencies.get(base, name)
+                symbols_by_crypto_currency_tickers[base] = \
+                    symbols_by_crypto_currency_tickers.get(base, set()).union(
+                        _filter_pairs(symbol_list, base, exchange_api, exchange_manager)
+                    )
+    return crypto_currency_name_by_crypto_currencies, symbols_by_crypto_currency_tickers
+
+
+def _filter_pairs(pairs, required_ticker, exchange_api, exchange_manager):
+    return set([
+        pair
+        for pair in pairs
+        if required_ticker == exchange_api.get_base_currency(exchange_manager, pair)
+    ])
