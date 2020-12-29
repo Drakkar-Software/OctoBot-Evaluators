@@ -26,3 +26,6 @@ cdef list _get_symbols_to_create(object evaluator_class,
                                  list symbols)
 cdef list _get_time_frames_to_create(object evaluator_class,
                                      list time_frames)
+
+cpdef tuple _extract_traded_pairs(dict symbols_by_crypto_currencies, str exchange_name, str matrix_id, object exchange_api)
+cpdef set _filter_pairs(list pairs, str required_ticker, object exchange_api, object exchange_manager)
