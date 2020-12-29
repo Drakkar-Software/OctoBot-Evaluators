@@ -83,7 +83,7 @@ def _get_cryptocurrencies_to_create(evaluator_class, crypto_currency_name_by_cry
 def _get_symbols_to_create(evaluator_class, symbols_by_crypto_currencies, cryptocurrency, symbols):
     currency_symbols = symbols
     if cryptocurrency is not None:
-        currency_symbols = symbols_by_crypto_currencies.get(cryptocurrency, [])
+        currency_symbols = list(symbols_by_crypto_currencies.get(cryptocurrency, set()))
     return currency_symbols if currency_symbols and not evaluator_class.get_is_symbol_wildcard() else [None]
 
 
