@@ -371,7 +371,6 @@ class StrategyEvaluator(evaluator.AbstractEvaluator):
             all_symbols_by_crypto_currencies,
             time_frames,
             real_time_time_frames)
-        self.all_symbols_by_crypto_currencies = all_symbols_by_crypto_currencies
         # by default no time frame registration for strategies
         return strategy_currencies, symbols, [self.time_frame]
 
