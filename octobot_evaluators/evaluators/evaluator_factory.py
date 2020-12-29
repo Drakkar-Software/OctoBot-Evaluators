@@ -170,7 +170,7 @@ def _extract_traded_pairs(symbols_by_crypto_currencies, exchange_name, matrix_id
     exchange_manager = exchange_api.get_exchange_manager_from_exchange_name_and_id(exchange_name, exchange_id)
     for name, symbol_list in symbols_by_crypto_currencies.items():
         if symbol_list:
-            # in case pairs are listed by reference market in use config, iterate over each pair
+            # in case pairs are listed by reference market in user config, iterate over each pair
             for symbol in symbol_list:
                 base = exchange_api.get_base_currency(exchange_manager, symbol)
                 crypto_currency_name_by_crypto_currencies[base] = \
