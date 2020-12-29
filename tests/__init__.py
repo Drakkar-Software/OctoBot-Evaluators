@@ -29,7 +29,7 @@ import octobot_tentacles_manager.constants as constants
 import octobot_tentacles_manager.managers as managers
 
 
-@pytest.yield_fixture
+@pytest.fixture
 def event_loop():
     loop = asyncio.new_event_loop()
     # use ErrorContainer to catch otherwise hidden exceptions occurring in async scheduled tasks
@@ -41,14 +41,14 @@ def event_loop():
     loop.close()
 
 
-@pytest.yield_fixture()
+@pytest.fixture()
 async def matrix_id():
     created_matrix_id = evaluator_api.create_matrix()
     yield created_matrix_id
     matrices.Matrices.instance().del_matrix(created_matrix_id)
 
 
-@pytest.yield_fixture
+@pytest.fixture
 async def install_tentacles():
     def _cleanup(raises=True):
         if path.exists(constants.TENTACLES_PATH):
@@ -64,7 +64,7 @@ async def install_tentacles():
     _cleanup()
 
 
-@pytest.yield_fixture()
+@pytest.fixture()
 async def evaluators_and_matrix_channels(matrix_id):
     evaluators_channel = await channel_creator.create_channel_instance(evaluator_channels.EvaluatorsChannel,
                                                                        evaluator_channels.set_chan,
