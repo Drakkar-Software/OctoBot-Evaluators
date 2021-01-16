@@ -41,7 +41,7 @@ def event_loop():
     loop.close()
 
 
-@pytest.fixture()
+@pytest.fixture
 async def matrix_id():
     created_matrix_id = evaluator_api.create_matrix()
     yield created_matrix_id
@@ -64,7 +64,7 @@ async def install_tentacles():
     _cleanup()
 
 
-@pytest.fixture()
+@pytest.fixture
 async def evaluators_and_matrix_channels(matrix_id):
     evaluators_channel = await channel_creator.create_channel_instance(evaluator_channels.EvaluatorsChannel,
                                                                        evaluator_channels.set_chan,

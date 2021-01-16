@@ -28,7 +28,7 @@ async def evaluator_callback():
     pass
 
 
-@pytest.fixture()
+@pytest.fixture
 async def evaluator_channel(matrix_id):
     del_evaluator_channels(matrix_id)
     await create_channel_instance(EvaluatorChannel, set_chan, matrix_id=matrix_id)
