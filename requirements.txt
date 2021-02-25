@@ -1,11 +1,11 @@
 # Setup requirements
-cython==0.29.21
+cython==0.29.22
 numpy==1.20.1
 
 # Drakkar-Software requirements
-Async-Channel>=2.0.7, <2.1
-OctoBot-Commons>=1.5.4, <1.6
-OctoBot-Tentacles-Manager>=2.4.0, <2.5
+Async-Channel>=2.0.8, <2.1
+OctoBot-Commons>=1.5.5, <1.6
+OctoBot-Tentacles-Manager>=2.4.6, <2.5
 
 # Cryptocurrency trading
 tulipy==0.4.0
