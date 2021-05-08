@@ -360,6 +360,39 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
                 self.eval_note_time_to_live = None
                 self.eval_note_changed_time = None
 
+    def load_config_or_set_default(self, parent_class, try_super_class=True) -> None:
+        """
+        Tries to load tentacle config or set to default when not found
+        :param parent_class: the evaluator parent class (can be TAEvaluator, SocialEvaluator...)
+        :param try_super_class: When True tries to find a config from a super class when tentacle config doesn't exist
+        :return: None
+        """
+        try:
+            # try with this class name
+            self.specific_config = api.get_tentacle_config(self.tentacles_setup_config, self.__class__)
+        except KeyError:
+            pass  # tentacle config not found
+        if not self.specific_config and try_super_class:
+            self.load_super_class_config(parent_class)
+        # set default config if nothing found
+        if not self.specific_config:
+            self.set_default_config()
+
+    def load_super_class_config(self, parent_class) -> None:
+        """
+        Tries to load super class config if exists
+        :param parent_class: the evaluator parent class (can be TAEvaluator, SocialEvaluator...)
+        :return: None
+        """
+        # if nothing in config, try with any 'super-class' config file
+        for super_class in self.get_parent_evaluator_classes(parent_class):
+            try:
+                self.specific_config = api.get_tentacle_config(self.tentacles_setup_config, super_class)
+                if self.specific_config:
+                    return
+            except KeyError:
+                pass  # super_class tentacle config not found
+
     def get_exchange_symbol_data(self, exchange_name: str, exchange_id: str, symbol: str):
         try:
             import octobot_trading.api as exchange_api
