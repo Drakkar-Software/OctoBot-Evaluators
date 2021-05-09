@@ -95,6 +95,11 @@ async def test_create_rt_evaluators(evaluators_and_matrix_channels):
 async def _test_evaluators_creation(evaluator_parent_class, fixture_matrix_id, expected_evaluators):
     tentacles_setup_config = tentacles_api.get_tentacles_setup_config()
 
+    # activate all evaluators in tentacle config
+    for tentacle_type_key, tentacle_type_value in tentacles_setup_config.tentacles_activation.items():
+        for tentacle_name in tentacle_type_value:
+            tentacles_setup_config.tentacles_activation[tentacle_type_key][tentacle_name] = True
+
     # mock start method to prevent side effects (octobot-trading imports, etc)
     with mock.patch.object(evaluator_parent_class, "start", mock.AsyncMock()):
         created_evaluators = await evaluators.create_evaluators(evaluator_parent_class=evaluator_parent_class,

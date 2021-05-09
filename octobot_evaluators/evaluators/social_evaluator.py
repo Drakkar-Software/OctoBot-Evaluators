@@ -32,14 +32,20 @@ class SocialEvaluator(evaluator.AbstractEvaluator):
         self.exchange_id = None
 
     def load_config(self):
-        # try with this class name
-        self.specific_config = api.get_tentacle_config(self.tentacles_setup_config, self.__class__)
+        try:
+            # try with this class name
+            self.specific_config = api.get_tentacle_config(self.tentacles_setup_config, self.__class__)
+        except KeyError:
+            self.specific_config = None  # tentacle config not found
         if not self.specific_config:
             # if nothing in config, try with any super-class' config file
             for super_class in self.get_parent_evaluator_classes(SocialEvaluator):
-                self.specific_config = api.get_tentacle_config(self.tentacles_setup_config, super_class)
-                if self.specific_config:
-                    return
+                try:
+                    self.specific_config = api.get_tentacle_config(self.tentacles_setup_config, super_class)
+                    if self.specific_config:
+                        return
+                except KeyError:
+                    pass  # super_class tentacle config not found
         # set default config if nothing found
         if not self.specific_config:
             self.set_default_config()
