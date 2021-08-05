@@ -27,6 +27,7 @@ class RealTimeEvaluator(evaluator.AbstractEvaluator):
     def __init__(self, tentacles_setup_config):
         super().__init__(tentacles_setup_config)
         self.load_config()
+        self.available_time_frame = None
 
     def load_config(self):
         self.set_default_config()
@@ -53,6 +54,8 @@ class RealTimeEvaluator(evaluator.AbstractEvaluator):
             if ideal_time_frame != to_handle_time_frame:
                 self.logger.warning(f"Missing {ideal_time_frame.name} time frame in available time frames, "
                                     f"using {to_handle_time_frame.name} instead.")
+            # set self.available_time_frame with the actually available one
+            self.available_time_frame = to_handle_time_frame.value
             to_handle_time_frames = [to_handle_time_frame]
         # by default time frame registration only for the timeframe of this real-time evaluator
         return currencies, symbols, to_handle_time_frames
