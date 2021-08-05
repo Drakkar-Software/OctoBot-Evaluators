@@ -36,3 +36,5 @@ def test_get_shortest_time_frame():
     assert get_shortest_time_frame(TimeFrames.ONE_HOUR, pref_time_frames, []) == TimeFrames.ONE_HOUR
     assert get_shortest_time_frame(TimeFrames.ONE_MINUTE, pref_time_frames, [TimeFrames.ONE_WEEK]) == TimeFrames.ONE_HOUR
     assert get_shortest_time_frame(TimeFrames.ONE_MINUTE, [], [TimeFrames.ONE_MONTH]) == TimeFrames.ONE_MONTH
+    assert get_shortest_time_frame(TimeFrames.ONE_MINUTE, [], [TimeFrames.ONE_MONTH, TimeFrames.ONE_DAY]) == TimeFrames.ONE_DAY
+    assert get_shortest_time_frame(TimeFrames.ONE_MINUTE, [], [TimeFrames.ONE_HOUR, TimeFrames.ONE_MONTH]) == TimeFrames.ONE_HOUR
