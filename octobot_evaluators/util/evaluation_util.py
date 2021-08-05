@@ -15,6 +15,7 @@
 #  License along with this library.
 import octobot_commons.enums as enums
 import octobot_commons.constants as constants
+import octobot_commons.time_frame_manager as time_frame_manager
 
 
 def get_eval_time(full_candle=None, time_frame=None, partial_candle=None, kline=None):
@@ -33,6 +34,6 @@ def get_shortest_time_frame(ideal_time_frame, preferred_available_time_frames, o
     if ideal_time_frame in preferred_available_time_frames:
         return ideal_time_frame
     if preferred_available_time_frames:
-        return preferred_available_time_frames[0]
+        return time_frame_manager.sort_time_frames(preferred_available_time_frames)[0]
     else:
-        return others[0]
+        return time_frame_manager.sort_time_frames(others)[0]
