@@ -67,7 +67,7 @@ async def _handle_creation(bot_id, action, data):
                 bot_id=bot_id,
                 symbols_by_crypto_currencies=exchange_configuration.symbols_by_crypto_currencies,
                 symbols=exchange_configuration.symbols,
-                time_frames=exchange_configuration.time_frames_without_real_time,
+                time_frames=exchange_configuration.available_required_time_frames,
                 real_time_time_frames=exchange_configuration.real_time_time_frames
             )
             await channel_instances.get_chan_at_id(channels_name.OctoBotChannelsName.OCTOBOT_CHANNEL.value,
