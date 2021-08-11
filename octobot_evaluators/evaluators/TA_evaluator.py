@@ -41,8 +41,8 @@ class TAEvaluator(evaluator.AbstractEvaluator):
             import octobot_trading.api as exchange_api
             exchange_id = exchange_api.get_exchange_id_from_matrix_id(self.exchange_name, self.matrix_id)
             time_frame_filter = [tf.value
-                                 for tf in exchange_api.get_exchange_time_frames_without_real_time(
-                    self.exchange_name, exchange_id)]
+                                 for tf in exchange_api.get_exchange_available_required_time_frames(
+                self.exchange_name, exchange_id)]
             if len(time_frame_filter) == 1:
                 time_frame_filter = time_frame_filter[0]
             await exchanges_channel.get_chan(channels_name.OctoBotTradingChannelsName.OHLCV_CHANNEL.value, exchange_id).\
