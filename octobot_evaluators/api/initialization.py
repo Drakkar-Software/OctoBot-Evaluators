@@ -36,13 +36,38 @@ def init_time_frames_from_strategies(config, tentacles_setup_config) -> None:
     config[common_constants.CONFIG_TIME_FRAME] = time_frame_list
 
 
-def get_activated_strategies_classes(tentacles_setup_config):
-    return [
-        strategies_eval_class
-        for strategies_eval_class in tentacles_management.get_all_classes_from_parent(evaluator.StrategyEvaluator)
-        if api.is_tentacle_activated_in_tentacles_setup_config(tentacles_setup_config, strategies_eval_class.get_name())
-    ]
+def init_required_candles_count_from_evaluators_and_strategies(config, tentacles_setup_config) -> None:
+    activated_classes = get_activated_strategies_classes(tentacles_setup_config) + \
+                        get_activated_TA_evaluators_classes(tentacles_setup_config) + \
+                        get_activated_real_time_evaluators_classes(tentacles_setup_config) + \
+                        get_activated_social_evaluators_classes(tentacles_setup_config)
+    candles_counts = [tentacle_class.get_required_candles_count(tentacles_setup_config)
+                      for tentacle_class in activated_classes]
+    config[common_constants.CONFIG_TENTACLES_REQUIRED_CANDLES_COUNT] = max(candles_counts)
 
+
+def get_activated_strategies_classes(tentacles_setup_config):
+    return _get_activated_classes(tentacles_setup_config, evaluator.StrategyEvaluator)
+
+
+def get_activated_TA_evaluators_classes(tentacles_setup_config):
+    return _get_activated_classes(tentacles_setup_config, evaluator.TAEvaluator)
+
+
+def get_activated_real_time_evaluators_classes(tentacles_setup_config):
+    return _get_activated_classes(tentacles_setup_config, evaluator.RealTimeEvaluator)
+
+
+def get_activated_social_evaluators_classes(tentacles_setup_config):
+    return _get_activated_classes(tentacles_setup_config, evaluator.SocialEvaluator)
+
+
+def _get_activated_classes(tentacles_setup_config, parent_class):
+    return [
+        child_class
+        for child_class in tentacles_management.get_all_classes_from_parent(parent_class)
+        if api.is_tentacle_activated_in_tentacles_setup_config(tentacles_setup_config, child_class.get_name())
+    ]
 
 async def create_evaluator_channels(matrix_id: str, is_backtesting: bool = False) -> None:
     await channel_util.create_all_subclasses_channel(evaluator_channels.EvaluatorChannel,
