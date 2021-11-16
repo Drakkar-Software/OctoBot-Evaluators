@@ -129,6 +129,32 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
             -1
         )
 
+    def get_context(self):
+        try:
+            import octobot_trading.api as exchange_api
+            import octobot_trading.modes.scripting_library as scripting_library
+            exchange_manager = exchange_api.get_exchange_manager_from_exchange_name_and_id(
+                self.exchange_name,
+                exchange_api.get_exchange_id_from_matrix_id(self.exchange_name, self.matrix_id)
+            )
+            trading_modes = exchange_api.get_trading_modes(exchange_manager)
+            return scripting_library.Context(
+                trading_modes[0],
+                exchange_manager,
+                exchange_api.get_trader(exchange_manager),
+                self.exchange_name,
+                None,
+                self.matrix_id,
+                None,
+                None,
+                None,
+                self.logger,
+                exchange_api.get_trading_mode_writer(trading_modes[0]),
+                trading_modes[0].__class__
+            )
+        except ImportError:
+            self.logger.error("Evaluator requires OctoBot-Trading package installed")
+
     def _get_tentacle_registration_topic(self, all_symbols_by_crypto_currencies, time_frames, real_time_time_frames):
         currencies = [self.cryptocurrency]
         symbols = [self.symbol]
