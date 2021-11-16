@@ -122,6 +122,13 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
         """
         return True
 
+    @classmethod
+    def get_required_candles_count(cls, tentacles_setup_config: tm_configuration.TentaclesSetupConfiguration):
+        return api.get_tentacle_config(tentacles_setup_config, cls).get(
+            common_constants.CONFIG_TENTACLES_REQUIRED_CANDLES_COUNT,
+            -1
+        )
+
     def _get_tentacle_registration_topic(self, all_symbols_by_crypto_currencies, time_frames, real_time_time_frames):
         currencies = [self.cryptocurrency]
         symbols = [self.symbol]

@@ -118,6 +118,8 @@ async def initialize_evaluators(config, tentacles_setup_config) -> str:
     :return: initialized matrix id
     """
     _init_time_frames(config, tentacles_setup_config)
+    # take evaluators and strategies candles requirements into account if any
+    api.init_required_candles_count_from_evaluators_and_strategies(config, tentacles_setup_config)
 
     return create_matrix()
 
@@ -126,11 +128,9 @@ def get_evaluators_time_frames(config) -> list:
     return time_frame_manager.get_config_time_frame(config)
 
 
-def _init_time_frames(config, tentacles_setup_config) -> list:
+def _init_time_frames(config, tentacles_setup_config):
     # Init time frames using enabled strategies
     api.init_time_frames_from_strategies(config, tentacles_setup_config)
-    time_frames = copy.copy(time_frame_manager.get_config_time_frame(config))
-    return time_frames
 
 
 def create_matrix() -> str:
