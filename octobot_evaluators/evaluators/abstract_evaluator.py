@@ -14,11 +14,7 @@
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
 import asyncio
-import json
 import time
-import os
-import inspect
-import hashlib
 
 import octobot_tentacles_manager.api as api
 import octobot_tentacles_manager.configuration as tm_configuration
@@ -27,8 +23,6 @@ import async_channel.constants as channel_constants
 import async_channel.enums as channel_enums
 
 import octobot_commons.constants as common_constants
-import octobot_commons.databases as databases
-import octobot_commons.symbol_util as symbol_util
 import octobot_commons.tentacles_management as tentacles_management
 
 import octobot_evaluators.evaluators.channel as evaluator_channels
@@ -92,8 +86,8 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
         # Define evaluators default consumer priority level
         self.priority_level: int = channel_enums.ChannelConsumerPriorityLevels.MEDIUM.value
 
-        # Local evaluator caches, initialized if getter is called
-        self._caches = {}
+        # Local evaluator caches, to be initialized if necessary
+        self.caches = {}
 
     @staticmethod
     def get_eval_type():
@@ -164,37 +158,6 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
         except ImportError:
             self.logger.error("Evaluator requires OctoBot-Trading package installed")
 
-    def get_cache(self, context):
-        try:
-            return self._caches[context.traded_pair][context.time_frame]
-        except KeyError:
-            if context.traded_pair not in self._caches:
-                self._caches[context.traded_pair] = {}
-            cache_dir, cache_path = self.get_cache_path(context)
-            if not os.path.exists(cache_dir):
-                os.makedirs(cache_dir)
-            cache = self._get_cache_database(os.path.join(cache_dir, cache_path))
-            self._caches[context.traded_pair][context.time_frame] = cache
-            return cache
-
-    def has_cache(self, pair, time_frame):
-        return pair in self._caches and time_frame in self._caches[pair]
-
-    def get_cache_path(self, context):
-        return os.path.join(common_constants.USER_FOLDER, self.get_name(),
-                            self.exchange_name, symbol_util.merge_symbol(context.traded_pair), context.time_frame,
-                            self._code_hash(), self._config_hash()), constants.CACHE_FILE
-
-    def _code_hash(self) -> str:
-        return hashlib.sha256(
-            inspect.getsource(self.__class__).replace(" ", "").replace("\n", "").encode()
-        ).hexdigest()[:constants.EVALUATORS_CACHE_HASH_SIZE]
-
-    def _config_hash(self) -> str:
-        return hashlib.sha256(
-            json.dumps(api.get_tentacle_config(self.tentacles_setup_config, self.__class__)).encode()
-        ).hexdigest()[:constants.EVALUATORS_CACHE_HASH_SIZE]
-
     @staticmethod
     def invalidate_cache_on_code_change():
         # False is not yet supported
@@ -207,22 +170,6 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
 
     def use_cache(self):
         return False
-
-    def _get_cache_database(self, file_path):
-        """
-        Override to use another cache database or adaptor
-        :return: the cache database class
-        """
-        import octobot_trading.api as exchange_api
-        exchange_manager = exchange_api.get_exchange_manager_from_exchange_name_and_id(
-            self.exchange_name,
-            exchange_api.get_exchange_id_from_matrix_id(self.exchange_name, self.matrix_id)
-        )
-        # no cache if live trading to ensure cache is always writen
-        cache_size = None if exchange_api.get_is_backtesting(exchange_manager) else 1
-        return databases.CacheTimestampDatabase(file_path,
-                                                database_adaptor=databases.TinyDBAdaptor,
-                                                cache_size=cache_size)
 
     def _get_tentacle_registration_topic(self, all_symbols_by_crypto_currencies, time_frames, real_time_time_frames):
         currencies = [self.cryptocurrency]
@@ -285,7 +232,7 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
 
             if self.use_cache():
                 ctx = self.get_context(symbol, time_frame)
-                cache = self.get_cache(ctx)
+                cache = ctx.get_cache()
                 await cache.set(eval_time, eval_note)
             self.ensure_eval_note_is_not_expired()
             await evaluator_channels.get_chan(constants.MATRIX_CHANNEL,
@@ -337,7 +284,7 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
         await asyncio.gather(
             *(
                 cache.close()
-                for caches_by_tf in self._caches.values()
+                for caches_by_tf in self.caches.values()
                 for cache in caches_by_tf.values()
             )
         )
