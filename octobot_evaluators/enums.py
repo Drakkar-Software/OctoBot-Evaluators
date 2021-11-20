@@ -20,4 +20,11 @@ class EvaluatorMatrixTypes(enum.Enum):
     TA = "TA"
     SOCIAL = "SOCIAL"
     REAL_TIME = "REAL_TIME"
+    SCRIPTED = "SCRIPTED"
     STRATEGIES = "STRATEGIES"
+
+
+class ActivationTopics(enum.Enum):
+    FULL_CANDLES = "full candles"
+    IN_CONSTRUCTION_CANDLES = "in construction candles"
+    RECENT_TRADES = "recent trades"

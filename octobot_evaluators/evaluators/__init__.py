@@ -23,6 +23,7 @@ from octobot_evaluators.evaluators import evaluator_factory
 from octobot_evaluators.evaluators import realtime_evaluator
 from octobot_evaluators.evaluators import social_evaluator
 from octobot_evaluators.evaluators import TA_evaluator
+from octobot_evaluators.evaluators import scripted_evaluator
 from octobot_evaluators.evaluators import abstract_util
 from octobot_evaluators.evaluators import strategy_evaluator
 
@@ -40,6 +41,9 @@ from octobot_evaluators.evaluators.social_evaluator import (
 from octobot_evaluators.evaluators.TA_evaluator import (
     TAEvaluator,
 )
+from octobot_evaluators.evaluators.scripted_evaluator import (
+    ScriptedEvaluator,
+)
 from octobot_evaluators.evaluators.abstract_util import (
     AbstractUtil,
 )
@@ -52,6 +56,7 @@ EvaluatorClassTypes = {
     octobot_evaluators.enums.EvaluatorMatrixTypes.TA.value: TAEvaluator,
     octobot_evaluators.enums.EvaluatorMatrixTypes.SOCIAL.value: SocialEvaluator,
     octobot_evaluators.enums.EvaluatorMatrixTypes.REAL_TIME.value: RealTimeEvaluator,
+    octobot_evaluators.enums.EvaluatorMatrixTypes.SCRIPTED.value: ScriptedEvaluator,
     octobot_evaluators.enums.EvaluatorMatrixTypes.STRATEGIES.value: StrategyEvaluator
 }
 
@@ -59,6 +64,7 @@ evaluator_class_str_to_matrix_type_dict = {
     "TAEvaluator": octobot_evaluators.enums.EvaluatorMatrixTypes.TA,
     "SocialEvaluator": octobot_evaluators.enums.EvaluatorMatrixTypes.SOCIAL,
     "RealTimeEvaluator": octobot_evaluators.enums.EvaluatorMatrixTypes.REAL_TIME,
+    "ScriptedEvaluator": octobot_evaluators.enums.EvaluatorMatrixTypes.SCRIPTED,
     "StrategyEvaluator": octobot_evaluators.enums.EvaluatorMatrixTypes.STRATEGIES
 }
 
@@ -67,6 +73,7 @@ __all__ = [
     "AbstractEvaluator",
     "SocialEvaluator",
     "TAEvaluator",
+    "ScriptedEvaluator",
     "AbstractUtil",
     "StrategyEvaluator",
     "EvaluatorClassTypes",
