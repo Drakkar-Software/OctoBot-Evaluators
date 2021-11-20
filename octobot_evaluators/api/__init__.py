@@ -38,6 +38,7 @@ from octobot_evaluators.api.evaluators import (
 from octobot_evaluators.api.initialization import (
     init_time_frames_from_strategies,
     init_required_candles_count_from_evaluators_and_strategies,
+    get_activated_evaluators,
     get_activated_strategies_classes,
     get_activated_TA_evaluators_classes,
     get_activated_real_time_evaluators_classes,
@@ -72,6 +73,7 @@ __all__ = [
     "create_all_type_evaluators",
     "init_time_frames_from_strategies",
     "init_required_candles_count_from_evaluators_and_strategies",
+    "get_activated_evaluators",
     "get_activated_strategies_classes",
     "get_activated_TA_evaluators_classes",
     "get_activated_real_time_evaluators_classes",

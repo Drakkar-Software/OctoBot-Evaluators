@@ -89,6 +89,8 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
         # Local evaluator caches, to be initialized if necessary
         self.caches = {}
 
+        self.consumers = []
+
     @staticmethod
     def get_eval_type():
         """
@@ -132,31 +134,36 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
             -1
         )
 
-    def get_context(self, symbol, time_frame):
+    def get_context(self, symbol, time_frame, trigger_cache_timestamp,
+                    cryptocurrency=None, exchange=None, exchange_id=None,
+                    trigger_source=None, trigger_value=None):
         try:
             import octobot_trading.api as exchange_api
             import octobot_trading.modes.scripting_library as scripting_library
             exchange_manager = exchange_api.get_exchange_manager_from_exchange_name_and_id(
-                self.exchange_name,
-                exchange_api.get_exchange_id_from_matrix_id(self.exchange_name, self.matrix_id)
+                exchange or self.exchange_name,
+                exchange_id or exchange_api.get_exchange_id_from_matrix_id(self.exchange_name, self.matrix_id)
             )
             trading_modes = exchange_api.get_trading_modes(exchange_manager)
             return scripting_library.Context(
                 self,
                 exchange_manager,
                 exchange_api.get_trader(exchange_manager),
-                self.exchange_name,
+                exchange or self.exchange_name,
                 symbol,
                 self.matrix_id,
-                None,
+                cryptocurrency,
                 symbol,
                 time_frame,
                 self.logger,
                 exchange_api.get_trading_mode_writer(trading_modes[0]),
-                trading_modes[0].__class__
+                trading_modes[0].__class__,
+                trigger_cache_timestamp,
+                trigger_source,
+                trigger_value,
             )
         except ImportError:
-            self.logger.error("Evaluator requires OctoBot-Trading package installed")
+            self.logger.error("Evaluator get_context requires OctoBot-Trading package installed")
 
     @staticmethod
     def invalidate_cache_on_code_change():
@@ -214,7 +221,8 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
                                    eval_note=None,
                                    eval_time=0,
                                    notify=True,
-                                   origin_consumer=None) -> None:
+                                   origin_consumer=None,
+                                   context=None) -> None:
         """
         Main async method to notify matrix to update
         :param cryptocurrency: evaluated cryptocurrency
@@ -231,9 +239,8 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
                 eval_note = self.eval_note if self.eval_note is not None else common_constants.START_PENDING_EVAL_NOTE
 
             if self.use_cache():
-                ctx = self.get_context(symbol, time_frame)
-                cache = ctx.get_cache()
-                await cache.set(eval_time, eval_note)
+                ctx = context or self.get_context(symbol, time_frame, eval_time)
+                await ctx.set_cached_value(eval_note, flush_if_necessary=True)
             self.ensure_eval_note_is_not_expired()
             await evaluator_channels.get_chan(constants.MATRIX_CHANNEL,
                                               self.matrix_id).get_internal_producer().send_eval_note(
@@ -279,6 +286,8 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
         :return: None
         """
         await self.close_caches()
+        for consumer in self.consumers:
+            await consumer.stop()
 
     async def close_caches(self):
         await asyncio.gather(

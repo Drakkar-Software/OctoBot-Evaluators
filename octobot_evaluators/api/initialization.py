@@ -37,13 +37,18 @@ def init_time_frames_from_strategies(config, tentacles_setup_config) -> None:
 
 
 def init_required_candles_count_from_evaluators_and_strategies(config, tentacles_setup_config) -> None:
-    activated_classes = get_activated_strategies_classes(tentacles_setup_config) + \
-                        get_activated_TA_evaluators_classes(tentacles_setup_config) + \
-                        get_activated_real_time_evaluators_classes(tentacles_setup_config) + \
-                        get_activated_social_evaluators_classes(tentacles_setup_config)
     candles_counts = [tentacle_class.get_required_candles_count(tentacles_setup_config)
-                      for tentacle_class in activated_classes]
-    config[common_constants.CONFIG_TENTACLES_REQUIRED_CANDLES_COUNT] = max(candles_counts) if candles_counts else -1
+                      for tentacle_class in get_activated_evaluators(tentacles_setup_config)]
+    config[common_constants.CONFIG_TENTACLES_REQUIRED_CANDLES_COUNT] = max(candles_counts) if candles_counts \
+        else common_constants.DEFAULT_IGNORED_VALUE
+
+
+def get_activated_evaluators(tentacles_setup_config):
+    return get_activated_TA_evaluators_classes(tentacles_setup_config) + \
+        get_activated_scripted_evaluators_classes(tentacles_setup_config) + \
+        get_activated_real_time_evaluators_classes(tentacles_setup_config) + \
+        get_activated_social_evaluators_classes(tentacles_setup_config) + \
+        get_activated_strategies_classes(tentacles_setup_config)
 
 
 def get_activated_strategies_classes(tentacles_setup_config):
@@ -52,6 +57,10 @@ def get_activated_strategies_classes(tentacles_setup_config):
 
 def get_activated_TA_evaluators_classes(tentacles_setup_config):
     return _get_activated_classes(tentacles_setup_config, evaluator.TAEvaluator)
+
+
+def get_activated_scripted_evaluators_classes(tentacles_setup_config):
+    return _get_activated_classes(tentacles_setup_config, evaluator.ScriptedEvaluator)
 
 
 def get_activated_real_time_evaluators_classes(tentacles_setup_config):
