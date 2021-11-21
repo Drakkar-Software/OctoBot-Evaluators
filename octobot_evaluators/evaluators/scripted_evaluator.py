@@ -35,6 +35,7 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
     def __init__(self, tentacles_setup_config):
         super().__init__(tentacles_setup_config)
         self._script = None
+        self._are_candles_initialized = False
         self.load_config()
 
     def load_config(self):
@@ -72,44 +73,58 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
                                 time_frame=time_frame, candle=candle)
 
     async def evaluator_kline_callback(self, exchange: str, exchange_id: str, cryptocurrency: str, symbol: str,
-                                       time_frame: str, kline: dict):
-        try:
-            from octobot_trading.enums import ExchangeConstantsOrderColumns
-            await self._call_script(exchange, exchange_id, cryptocurrency, symbol,
-                                    kline[ExchangeConstantsOrderColumns.TIMESTAMP.value],
-                                    enums.ActivationTopics.IN_CONSTRUCTION_CANDLES.value,
-                                    time_frame=time_frame, kline=kline)
-        except ImportError:
-            self.logger.error("Can't read octobot_trading enums")
-
-    async def evaluator_recent_trades_callback(self, exchange: str, exchange_id: str, cryptocurrency: str, symbol: str,
-                                               recent_trades):
+                                       time_frame, kline: dict):
         await self._call_script(exchange, exchange_id, cryptocurrency, symbol,
-                                recent_trades[-1][commons_enums.PriceIndexes.IND_PRICE_TIME.value],
-                                enums.ActivationTopics.RECENT_TRADES.value,
-                                recent_trades=recent_trades)
+                                kline[commons_enums.PriceIndexes.IND_PRICE_TIME.value],
+                                enums.ActivationTopics.IN_CONSTRUCTION_CANDLES.value,
+                                time_frame=time_frame, kline=kline)
 
     async def _call_script(self, exchange: str, exchange_id: str, cryptocurrency: str, symbol: str,
                            trigger_cache_timestamp: float, trigger_source: str,
-                           time_frame: str = None, candle: dict = None, kline: dict = None, recent_trades=None):
+                           time_frame: str = None, candle: dict = None, kline: dict = None):
         self.last_call = (exchange, exchange_id, cryptocurrency, symbol, trigger_cache_timestamp,
-                          trigger_source, time_frame, candle, kline, recent_trades)
+                          trigger_source, time_frame, candle, kline)
         context = self.get_context(symbol, time_frame, trigger_cache_timestamp, cryptocurrency=cryptocurrency,
                                    exchange=exchange, exchange_id=exchange_id, trigger_source=trigger_source,
-                                   trigger_value=candle or kline or recent_trades)
-        self.eval_note = await self._script(context)
-        eval_time = None
-        if trigger_source == enums.ActivationTopics.FULL_CANDLES.value:
-            eval_time = evaluators_util.get_eval_time(full_candle=candle, time_frame=time_frame)
-        elif trigger_source == enums.ActivationTopics.IN_CONSTRUCTION_CANDLES.value:
-            eval_time = evaluators_util.get_eval_time(partial_candle=kline)
-        elif trigger_source == enums.ActivationTopics.RECENT_TRADES.value:
-            eval_time = trigger_cache_timestamp
-        if eval_time is None:
-            self.logger.error("Can't compute evaluation time, using exchange time")
+                                   trigger_value=candle or kline)
+        try:
             import octobot_trading.api as trading_api
-            eval_time = trading_api.get_exchange_current_time(context.exchange_manager)
-        await self.evaluation_completed(cryptocurrency, symbol, time_frame, eval_time=eval_time, context=context)
+            if not self._are_candles_initialized:
+                self._are_candles_initialized = trading_api.are_symbol_candles_initialized(context.exchange_manager,
+                                                                                           symbol, time_frame)
+                if not self._are_candles_initialized:
+                    self.logger.debug(f"Waiting for candles to be initialized before calling script "
+                                      f"for {symbol} {time_frame}")
+                    return
+            await self._pre_script_call(context)
+            self.eval_note = await self._script(context)
+            eval_time = None
+            if trigger_source == enums.ActivationTopics.FULL_CANDLES.value:
+                eval_time = evaluators_util.get_eval_time(full_candle=candle, time_frame=time_frame)
+            elif trigger_source == enums.ActivationTopics.IN_CONSTRUCTION_CANDLES.value:
+                eval_time = evaluators_util.get_eval_time(partial_candle=kline)
+            if eval_time is None:
+                self.logger.error("Can't compute evaluation time, using exchange time")
+                eval_time = trading_api.get_exchange_current_time(context.exchange_manager)
+            await self.evaluation_completed(cryptocurrency, symbol, time_frame,
+                                            eval_time=eval_time, context=context)
+        except Exception as e:
+            self.logger.exception(f"Error when calling evaluation script: {e}", True, e)
+
+    async def _pre_script_call(self, context):
+        try:
+            import octobot_trading.modes.scripting_library as scripting_library
+            # Always register activation_topics use input to enable changing it from run metadata
+            # (where user inputs are registered)
+            activation_topic_values = [
+                enums.ActivationTopics.FULL_CANDLES.value,
+                enums.ActivationTopics.IN_CONSTRUCTION_CANDLES.value
+            ]
+            await scripting_library.user_input(context, constants.CONFIG_ACTIVATION_TOPICS, "multiple-options",
+                                               [enums.ActivationTopics.FULL_CANDLES.value],
+                                               options=activation_topic_values)
+        except ImportError:
+            self.logger.error("Can't read octobot_trading scripting_library")
 
     @classmethod
     def get_is_symbol_wildcard(cls) -> bool:
@@ -139,7 +154,7 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
             # live_script = data[AbstractScriptedTradingMode.USER_COMMAND_RELOAD_SCRIPT_IS_LIVE]
             await self._reload_script()
 
-    async def _reload_script(self, live=True):
+    async def _reload_script(self):
         importlib.reload(self.__class__.EVALUATOR_SCRIPT_MODULE)
         self.register_script_module(self.__class__.EVALUATOR_SCRIPT_MODULE)
         # reload config
@@ -184,13 +199,6 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
                     new_consumer(self.evaluator_kline_callback, cryptocurrency=cryptocurrency,
                                  symbol=symbol, time_frame=time_frame, priority_level=self.priority_level)
             )
-        if channels_name.OctoBotTradingChannelsName.RECENT_TRADES_CHANNEL.value in registration_topics:
-            consumers.append(
-                await exchanges_channel.get_chan(channels_name.OctoBotTradingChannelsName.RECENT_TRADES_CHANNEL.value,
-                                                 exchange_id). \
-                    new_consumer(self.evaluator_recent_trades_callback, cryptocurrency=cryptocurrency,
-                                 symbol=symbol, priority_level=self.priority_level)
-            )
         try:
             import octobot_services.channel as services_channels
             try:
@@ -215,8 +223,6 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
                     channels_name.OctoBotTradingChannelsName.OHLCV_CHANNEL.value,
                 enums.ActivationTopics.IN_CONSTRUCTION_CANDLES.value:
                     channels_name.OctoBotTradingChannelsName.KLINE_CHANNEL.value,
-                enums.ActivationTopics.RECENT_TRADES.value:
-                    channels_name.OctoBotTradingChannelsName.RECENT_TRADES_CHANNEL.value,
             }
             registration_channels = []
             # Activate on full candles only by default (same as technical evaluators)
