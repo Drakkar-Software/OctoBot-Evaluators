@@ -97,7 +97,7 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
                                       f"for {symbol} {time_frame}")
                     return
             await self._pre_script_call(context)
-            self.eval_note = await self._script(context)
+            self.eval_note = await self.get_script()(context)
             eval_time = None
             if trigger_source == enums.ActivationTopics.FULL_CANDLES.value:
                 eval_time = evaluators_util.get_eval_time(full_candle=candle, time_frame=time_frame)
@@ -147,6 +147,9 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
     @staticmethod
     def get_script_from_module(module):
         return module.script
+
+    def get_script(self):
+        return self._script
 
     async def _user_commands_callback(self, bot_id, subject, action, data) -> None:
         self.logger.debug(f"Received {action} command.")
