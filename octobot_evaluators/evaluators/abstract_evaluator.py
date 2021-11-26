@@ -156,11 +156,13 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
                 symbol,
                 time_frame,
                 self.logger,
-                exchange_api.get_trading_mode_writer(trading_modes[0]),
+                *exchange_api.get_trading_mode_writers(trading_modes[0]),
                 trading_modes[0].__class__,
                 trigger_cache_timestamp,
                 trigger_source,
                 trigger_value,
+                None,
+                None,
             )
         except ImportError:
             self.logger.error("Evaluator get_context requires OctoBot-Trading package installed")
