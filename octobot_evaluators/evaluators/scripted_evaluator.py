@@ -164,14 +164,14 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
         self.load_config()
         # todo cancel and restart live tasks
         # recall script with for are_data_initialized to false to re-write initial data
-        writer = self._get_trading_mode_writer()
-        writer.are_data_initialized = False
+        run_data_writer = self._get_trading_mode_writers()[0]
+        run_data_writer.are_data_initialized = False
         try:
             await self._call_script(*self.last_call)
         finally:
-            writer.are_data_initialized = True
+            run_data_writer.are_data_initialized = True
 
-    def _get_trading_mode_writer(self):
+    def _get_trading_mode_writers(self):
         try:
             import octobot_trading.api as exchange_api
             exchange_manager = exchange_api.get_exchange_manager_from_exchange_name_and_id(
@@ -179,7 +179,7 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
                 exchange_api.get_exchange_id_from_matrix_id(self.exchange_name, self.matrix_id)
             )
             trading_modes = exchange_api.get_trading_modes(exchange_manager)
-            return exchange_api.get_trading_mode_writer(trading_modes[0])
+            return exchange_api.get_trading_mode_writers(trading_modes[0])
         except ImportError:
             self.logger.error("required OctoBot-trading to get a trading mode writer")
             raise
