@@ -145,6 +145,10 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
                 exchange_id or exchange_api.get_exchange_id_from_matrix_id(self.exchange_name, self.matrix_id)
             )
             trading_modes = exchange_api.get_trading_modes(exchange_manager)
+            trading_mode = trading_modes[0]
+            for candidate_trading_mode in trading_modes:
+                if exchange_api.get_trading_mode_symbol(candidate_trading_mode) == symbol:
+                    trading_mode = candidate_trading_mode
             return scripting_library.Context(
                 self,
                 exchange_manager,
@@ -156,8 +160,8 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
                 symbol,
                 time_frame,
                 self.logger,
-                *exchange_api.get_trading_mode_writers(trading_modes[0]),
-                trading_modes[0].__class__,
+                *exchange_api.get_trading_mode_writers(trading_mode),
+                trading_mode.__class__,
                 trigger_cache_timestamp,
                 trigger_source,
                 trigger_value,
