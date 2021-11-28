@@ -86,8 +86,12 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
         # Define evaluators default consumer priority level
         self.priority_level: int = channel_enums.ChannelConsumerPriorityLevels.MEDIUM.value
 
-        # Local evaluator caches, to be initialized if necessary
+        # Local caches, to be initialized if necessary
         self.caches = {}
+
+        # Other caches, these are managed by other tentacles,
+        # they are referenced here for performances only
+        self.remote_caches = {}
 
         self.consumers = []
 
