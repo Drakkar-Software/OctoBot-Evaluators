@@ -61,6 +61,7 @@ class StrategyEvaluator(evaluator.AbstractEvaluator):
     async def strategy_completed(self,
                                  cryptocurrency: str = None,
                                  symbol: str = None,
+                                 time_frame=None,
                                  eval_note=None,
                                  eval_time=0,
                                  notify=True) -> None:
@@ -68,6 +69,7 @@ class StrategyEvaluator(evaluator.AbstractEvaluator):
         Main async method to notify that a strategy has updated its evaluation
         :param cryptocurrency: evaluated cryptocurrency
         :param symbol: evaluated symbol
+        :param time_frame: evaluated time frame
         :param eval_note: if None = self.eval_note
         :param eval_time: the time of the evaluation if relevant, default is 0
         :param notify: if true, will trigger matrix consumers
@@ -75,7 +77,7 @@ class StrategyEvaluator(evaluator.AbstractEvaluator):
         """
         return await self.evaluation_completed(cryptocurrency=cryptocurrency,
                                                symbol=symbol,
-                                               time_frame=None,
+                                               time_frame=time_frame,
                                                eval_note=eval_note,
                                                eval_time=eval_time,
                                                notify=notify,
