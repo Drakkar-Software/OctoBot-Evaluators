@@ -300,6 +300,7 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
             await consumer.stop()
 
     async def close_caches(self):
+        self.remote_caches = {}
         await asyncio.gather(
             *(
                 cache.close()
@@ -307,6 +308,7 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
                 for cache in caches_by_tf.values()
             )
         )
+        self.caches = {}
 
     async def prepare(self) -> None:
         """
