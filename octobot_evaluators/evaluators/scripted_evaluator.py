@@ -164,6 +164,7 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
         self.load_config()
         # todo cancel and restart live tasks
         # recall script with for are_data_initialized to false to re-write initial data
+        await self.close_caches()
         run_data_writer = self._get_trading_mode_writers()[0]
         run_data_writer.are_data_initialized = False
         try:
