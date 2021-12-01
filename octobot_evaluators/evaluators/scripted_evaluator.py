@@ -37,6 +37,8 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
         self._script = None
         self._are_candles_initialized = False
         self.load_config()
+        # add config folder to importable files to import the user script
+        tentacles_manager_api.import_user_tentacles_config_folder(tentacles_setup_config)
 
     def load_config(self):
         self.specific_config = tentacles_manager_api.get_tentacle_config(self.tentacles_setup_config, self.__class__)
