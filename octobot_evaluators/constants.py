@@ -25,7 +25,7 @@ STRATEGIES_REQUIRED_EVALUATORS = "required_evaluators"
 STRATEGIES_COMPATIBLE_EVALUATOR_TYPES = "compatible_evaluator_types"
 CONFIG_FORCED_TIME_FRAME = "forced_time_frame"
 TENTACLE_DEFAULT_CONFIG = "default_config"
-CONFIG_ACTIVATION_TOPICS = "activation_topics"
+CONFIG_ACTIVATION_TOPICS = "activation method"
 
 EVALUATOR_CLASS_TYPE_MRO_INDEX = -4
 
