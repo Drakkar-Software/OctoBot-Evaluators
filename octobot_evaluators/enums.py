@@ -25,6 +25,6 @@ class EvaluatorMatrixTypes(enum.Enum):
 
 
 class ActivationTopics(enum.Enum):
-    FULL_CANDLES = "full candles"
-    IN_CONSTRUCTION_CANDLES = "in construction candles"
+    FULL_CANDLES = "once per bar close"
+    IN_CONSTRUCTION_CANDLES = "once per second (Live Price)"
     RECENT_TRADES = "recent trades"
