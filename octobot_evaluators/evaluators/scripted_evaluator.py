@@ -158,6 +158,16 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
         if action == commons_enums.UserCommands.RELOAD_SCRIPT.value:
             # live_script = data[AbstractScriptedTradingMode.USER_COMMAND_RELOAD_SCRIPT_IS_LIVE]
             await self._reload_script()
+        if action == commons_enums.UserCommands.CLEAR_ALL_CACHE.value:
+            await self.clear_all_cache()
+
+    async def clear_all_cache(self):
+        try:
+            import octobot_trading.modes.scripting_library as scripting_library
+            await scripting_library.clear_tentacle_cache(self)
+        except ImportError:
+            self.logger.error("required OctoBot-trading to get the scripting_library")
+            raise
 
     async def _reload_script(self):
         importlib.reload(self.__class__.EVALUATOR_SCRIPT_MODULE)
