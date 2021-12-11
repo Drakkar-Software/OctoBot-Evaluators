@@ -17,6 +17,7 @@
 from octobot_evaluators.evaluators cimport channel
 from octobot_evaluators.evaluators.channel cimport (
     EvaluatorsChannelConsumer,
+    EvaluatorChannelSupervisedConsumer,
     EvaluatorsChannelProducer,
     EvaluatorsChannel,
     EvaluatorChannelConsumer,
@@ -31,6 +32,7 @@ from octobot_evaluators.evaluators.channel cimport (
 
 __all__ = [
     "EvaluatorsChannelConsumer",
+    "EvaluatorChannelSupervisedConsumer",
     "EvaluatorsChannelProducer",
     "EvaluatorsChannel",
     "EvaluatorChannelConsumer",
