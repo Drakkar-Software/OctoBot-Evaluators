@@ -17,6 +17,7 @@
 from octobot_evaluators.evaluators.channel import evaluator_channel
 from octobot_evaluators.evaluators.channel.evaluator_channel import (
     EvaluatorChannelConsumer,
+    EvaluatorChannelSupervisedConsumer,
     EvaluatorChannelProducer,
     EvaluatorChannel,
     set_chan,
@@ -35,6 +36,7 @@ from octobot_evaluators.evaluators.channel.evaluators import (
 
 __all__ = [
     "EvaluatorChannelConsumer",
+    "EvaluatorChannelSupervisedConsumer",
     "EvaluatorChannelProducer",
     "EvaluatorChannel",
     "EvaluatorChannelConsumer",

@@ -46,6 +46,7 @@ from octobot_evaluators.matrix.matrices import (
 )
 from octobot_evaluators.matrix.channel import (
     MatrixChannelConsumer,
+    MatrixChannelSupervisedConsumer,
     MatrixChannelProducer,
     MatrixChannel,
 )
@@ -70,6 +71,7 @@ __all__ = [
     "Matrices",
     "Matrix",
     "MatrixChannelConsumer",
+    "MatrixChannelSupervisedConsumer",
     "MatrixChannelProducer",
     "MatrixChannel",
 ]

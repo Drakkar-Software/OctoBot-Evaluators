@@ -22,5 +22,8 @@ cdef class MatrixChannel(evaluator_channels.EvaluatorChannel):
 cdef class MatrixChannelConsumer(evaluator_channels.EvaluatorChannelConsumer):
     pass
 
+cdef class MatrixChannelSupervisedConsumer(evaluator_channels.EvaluatorChannelSupervisedConsumer):
+    pass
+
 cdef class MatrixChannelProducer(evaluator_channels.EvaluatorChannelProducer):
     pass

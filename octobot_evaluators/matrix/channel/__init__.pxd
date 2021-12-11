@@ -18,12 +18,14 @@ from octobot_evaluators.matrix.channel cimport matrix
 
 from octobot_evaluators.matrix.channel.matrix cimport (
     MatrixChannelConsumer,
+    MatrixChannelSupervisedConsumer,
     MatrixChannelProducer,
     MatrixChannel,
 )
 
 __all__ = [
     "MatrixChannelConsumer",
+    "MatrixChannelSupervisedConsumer",
     "MatrixChannelProducer",
     "MatrixChannel",
 ]

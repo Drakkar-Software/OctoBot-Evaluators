@@ -26,6 +26,9 @@ cdef class EvaluatorChannel(channels.Channel):
 cdef class EvaluatorChannelConsumer(consumers.Consumer):
     pass
 
+cdef class EvaluatorChannelSupervisedConsumer(consumers.SupervisedConsumer):
+    pass
+
 cdef class EvaluatorChannelProducer(producers.Producer):
     pass
 

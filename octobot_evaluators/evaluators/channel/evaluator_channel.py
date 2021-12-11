@@ -32,6 +32,12 @@ class EvaluatorChannelConsumer(consumers.Consumer):
     """
 
 
+class EvaluatorChannelSupervisedConsumer(consumers.SupervisedConsumer):
+    """
+    SupervisedConsumer adapted for EvaluatorChannel
+    """
+
+
 class EvaluatorChannelProducer(producers.Producer):
     """
     Producer adapted for EvaluatorChannel

@@ -18,12 +18,14 @@ from octobot_evaluators.matrix.channel import matrix
 
 from octobot_evaluators.matrix.channel.matrix import (
     MatrixChannelConsumer,
+    MatrixChannelSupervisedConsumer,
     MatrixChannelProducer,
     MatrixChannel,
 )
 
 __all__ = [
     "MatrixChannelConsumer",
+    "MatrixChannelSupervisedConsumer",
     "MatrixChannelProducer",
     "MatrixChannel",
 ]

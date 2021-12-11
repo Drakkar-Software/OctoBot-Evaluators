@@ -30,6 +30,12 @@ class MatrixChannelConsumer(evaluator_channels.EvaluatorChannelConsumer):
     """
 
 
+class MatrixChannelSupervisedConsumer(evaluator_channels.EvaluatorChannelSupervisedConsumer):
+    """
+    EvaluatorChannelSupervisedConsumer adapted for MatrixChannel
+    """
+
+
 class MatrixChannelProducer(evaluator_channels.EvaluatorChannelProducer):
     """
     EvaluatorChannelProducer adapted for MatrixChannel
@@ -135,8 +141,10 @@ class MatrixChannel(evaluator_channels.EvaluatorChannel):
                            evaluator_name: str = channel_constants.CHANNEL_WILDCARD,
                            evaluator_type: object = channel_constants.CHANNEL_WILDCARD,
                            exchange_name: str = channel_constants.CHANNEL_WILDCARD,
-                           time_frame=channel_constants.CHANNEL_WILDCARD) -> MatrixChannelConsumer:
-        consumer = MatrixChannelConsumer(callback, size=size, priority_level=priority_level)
+                           time_frame=channel_constants.CHANNEL_WILDCARD,
+                           supervised: bool = False) -> MatrixChannelConsumer:
+        consumer_class = MatrixChannelSupervisedConsumer if supervised else MatrixChannelConsumer
+        consumer = consumer_class(callback, size=size, priority_level=priority_level)
         await self._add_new_consumer_and_run(consumer,
                                              matrix_id=matrix_id,
                                              cryptocurrency=cryptocurrency,
