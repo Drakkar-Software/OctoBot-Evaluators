@@ -110,6 +110,8 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
                 eval_time = trading_api.get_exchange_current_time(context.exchange_manager)
             await self.evaluation_completed(cryptocurrency, symbol, time_frame,
                                             eval_time=eval_time, context=context)
+        except ImportError:
+            self.logger.exception(f"Error when importing octobot-trading")
         except Exception as e:
             self.logger.exception(f"Error when calling evaluation script: {e}", True, e)
 
@@ -199,23 +201,23 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
 
     async def _register_on_channels(self, exchange_id, cryptocurrency, symbol, time_frame, bot_id):
         consumers = []
-        import octobot_trading.exchange_channel as exchanges_channel
-        registration_topics = self._get_channel_registration()
-        if channels_name.OctoBotTradingChannelsName.OHLCV_CHANNEL.value in registration_topics:
-            consumers.append(
-                await exchanges_channel.get_chan(channels_name.OctoBotTradingChannelsName.OHLCV_CHANNEL.value,
-                                                 exchange_id).
-                    new_consumer(self.evaluator_ohlcv_callback, cryptocurrency=cryptocurrency,
-                                 symbol=symbol, time_frame=time_frame, priority_level=self.priority_level)
-            )
-        if channels_name.OctoBotTradingChannelsName.KLINE_CHANNEL.value in registration_topics:
-            consumers.append(
-                await exchanges_channel.get_chan(channels_name.OctoBotTradingChannelsName.KLINE_CHANNEL.value,
-                                                 exchange_id). \
-                    new_consumer(self.evaluator_kline_callback, cryptocurrency=cryptocurrency,
-                                 symbol=symbol, time_frame=time_frame, priority_level=self.priority_level)
-            )
         try:
+            import octobot_trading.exchange_channel as exchanges_channel
+            registration_topics = self._get_channel_registration()
+            if channels_name.OctoBotTradingChannelsName.OHLCV_CHANNEL.value in registration_topics:
+                consumers.append(
+                    await exchanges_channel.get_chan(channels_name.OctoBotTradingChannelsName.OHLCV_CHANNEL.value,
+                                                     exchange_id).
+                        new_consumer(self.evaluator_ohlcv_callback, cryptocurrency=cryptocurrency,
+                                     symbol=symbol, time_frame=time_frame, priority_level=self.priority_level)
+                )
+            if channels_name.OctoBotTradingChannelsName.KLINE_CHANNEL.value in registration_topics:
+                consumers.append(
+                    await exchanges_channel.get_chan(channels_name.OctoBotTradingChannelsName.KLINE_CHANNEL.value,
+                                                     exchange_id). \
+                        new_consumer(self.evaluator_kline_callback, cryptocurrency=cryptocurrency,
+                                     symbol=symbol, time_frame=time_frame, priority_level=self.priority_level)
+                )
             import octobot_services.channel as services_channels
             try:
                 consumers.append(
@@ -228,7 +230,7 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
                 # UserCommandsChannel might not be available
                 pass
         except ImportError:
-            self.logger.warning("Can't connect to services channels")
+            self.logger.warning("Can't connect to trading / services channels")
         return consumers
 
     def _get_channel_registration(self):
