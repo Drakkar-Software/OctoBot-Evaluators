@@ -15,7 +15,7 @@
 #  License along with this library.
 import pytest
 from mock import patch
-import octobot_evaluators.api.evaluators
+import octobot_evaluators.evaluators.evaluator_factory as evaluator_factory
 from octobot_commons.enums import TimeFrames
 from octobot_commons.symbol_util import split_symbol
 
@@ -175,7 +175,7 @@ async def _create_evaluators(evaluator_parent_class, symbols_by_crypto_currencie
     with patch("octobot_evaluators.evaluators.evaluator_factory.create_evaluator", new=_mocked_create_evaluator), \
             patch("octobot_commons.tentacles_management.get_all_classes_from_parent",
                   new=_mocked_get_all_classes_from_parent):
-        return await octobot_evaluators.api.create_evaluators(
+        return await evaluator_factory.create_evaluators(
             evaluator_parent_class=evaluator_parent_class,
             tentacles_setup_config=None,
             matrix_id="",
@@ -196,7 +196,6 @@ async def _mocked_create_evaluator(evaluator_class,
                                    tentacles_setup_config: object,
                                    matrix_id: str,
                                    exchange_name: str,
-                                   bot_id: str,
                                    cryptocurrency: str = None,
                                    cryptocurrency_name: str = None,
                                    symbol: str = None,

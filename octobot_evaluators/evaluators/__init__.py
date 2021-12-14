@@ -29,7 +29,7 @@ from octobot_evaluators.evaluators import strategy_evaluator
 
 from octobot_evaluators.evaluators.evaluator_factory import (
     create_evaluator,
-    create_all_type_evaluators,
+    create_and_start_all_type_evaluators,
     create_evaluators,
 )
 from octobot_evaluators.evaluators.realtime_evaluator import (
@@ -78,7 +78,7 @@ __all__ = [
     "StrategyEvaluator",
     "EvaluatorClassTypes",
     "create_evaluator",
-    "create_all_type_evaluators",
+    "create_and_start_all_type_evaluators",
     "create_evaluators",
     "evaluator_class_str_to_matrix_type_dict",
 ]

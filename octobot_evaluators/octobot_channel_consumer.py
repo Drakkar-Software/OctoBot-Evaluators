@@ -60,7 +60,7 @@ async def _handle_creation(bot_id, action, data):
     if action == OctoBotChannelEvaluatorActions.EVALUATOR.value:
         try:
             exchange_configuration = data[OctoBotChannelEvaluatorDataKeys.EXCHANGE_CONFIGURATION.value]
-            await api.create_all_type_evaluators(
+            await api.create_and_start_all_type_evaluators(
                 tentacles_setup_config=data[OctoBotChannelEvaluatorDataKeys.TENTACLES_SETUP_CONFIG.value],
                 matrix_id=data[OctoBotChannelEvaluatorDataKeys.MATRIX_ID.value],
                 exchange_name=exchange_configuration.exchange_name,
