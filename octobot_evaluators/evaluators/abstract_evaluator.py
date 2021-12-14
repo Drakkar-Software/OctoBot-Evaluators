@@ -334,6 +334,19 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
         """
         self.specific_config = {}
 
+    @classmethod
+    def get_evaluator_priority(cls, tentacles_setup_config) -> float:
+        """
+        Returns the priority of the evaluator (will later be compared to other evaluators).
+        A higher priority evaluator will be called first when multiple evaluators are to
+        be called at the same time.
+        Default priority is DEFAULT_PRIORITY defined in OctoBot-Commons.
+        Order is undefined between evaluators of the same priority.
+        :return: the priority level
+        """
+        return api.get_tentacle_config(tentacles_setup_config, cls).get(common_constants.PRIORITY,
+                                                                        common_constants.DEFAULT_PRIORITY)
+
     def reset(self) -> None:
         """
         Reset temporary parameters to enable fresh start

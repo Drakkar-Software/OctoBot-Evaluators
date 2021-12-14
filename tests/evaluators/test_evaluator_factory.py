@@ -19,9 +19,12 @@ import mock
 import octobot_tentacles_manager.api as tentacles_api
 import octobot_evaluators.evaluators as evaluators
 import octobot_commons.enums as enums
+import octobot_commons.constants as constants
 import octobot_commons.symbol_util as symbol_util
-from tests import event_loop, matrix_id, install_tentacles, evaluators_and_matrix_channels
+import octobot_evaluators.evaluators.evaluator_factory as evaluator_factory
 from octobot_evaluators.evaluators.evaluator_factory import _extract_traded_pairs, _filter_pairs
+
+from tests import event_loop, matrix_id, install_tentacles, evaluators_and_matrix_channels
 
 pytestmark = pytest.mark.asyncio
 
@@ -45,13 +48,15 @@ for name, symbol_list in symbols_by_crypto_currencies.items():
 @pytest.mark.usefixtures("event_loop", "install_tentacles")
 async def test_create_all_type_evaluators(evaluators_and_matrix_channels):
     tentacles_setup_config = tentacles_api.get_tentacles_setup_config()
-    created_evaluators = await evaluators.create_all_type_evaluators(tentacles_setup_config,
-                                                                     matrix_id=evaluators_and_matrix_channels,
-                                                                     exchange_name=exchange_name,
-                                                                     bot_id=bot_id,
-                                                                     symbols_by_crypto_currencies=symbols_by_crypto_currencies,
-                                                                     symbols=symbols,
-                                                                     time_frames=time_frames)
+    with mock.patch.object(evaluator_factory, "_start_evaluators", mock.AsyncMock()) as _start_evaluators_mock:
+        created_evaluators = await evaluators.create_and_start_all_type_evaluators(tentacles_setup_config,
+                                                                                   matrix_id=evaluators_and_matrix_channels,
+                                                                                   exchange_name=exchange_name,
+                                                                                   bot_id=bot_id,
+                                                                                   symbols_by_crypto_currencies=symbols_by_crypto_currencies,
+                                                                                   symbols=symbols,
+                                                                                   time_frames=time_frames)
+        _start_evaluators_mock.assert_not_called()
 
     assert not created_evaluators  # Trading package is not installed
 
@@ -101,18 +106,49 @@ async def _test_evaluators_creation(evaluator_parent_class, fixture_matrix_id, e
             tentacles_setup_config.tentacles_activation[tentacle_type_key][tentacle_name] = True
 
     # mock start method to prevent side effects (octobot-trading imports, etc)
-    with mock.patch.object(evaluator_parent_class, "start", mock.AsyncMock()):
-        created_evaluators = await evaluators.create_evaluators(evaluator_parent_class=evaluator_parent_class,
-                                                                tentacles_setup_config=tentacles_setup_config,
-                                                                matrix_id=fixture_matrix_id,
-                                                                exchange_name=exchange_name,
-                                                                bot_id=bot_id,
-                                                                crypto_currency_name_by_crypto_currencies=crypto_currency_name_by_crypto_currencies,
-                                                                symbols_by_crypto_currency_tickers=symbols_by_crypto_currency_tickers,
-                                                                symbols=symbols,
-                                                                time_frames=time_frames)
+    created_evaluators = await evaluators.create_evaluators(evaluator_parent_class=evaluator_parent_class,
+                                                            tentacles_setup_config=tentacles_setup_config,
+                                                            matrix_id=fixture_matrix_id,
+                                                            exchange_name=exchange_name,
+                                                            bot_id=bot_id,
+                                                            crypto_currency_name_by_crypto_currencies=crypto_currency_name_by_crypto_currencies,
+                                                            symbols_by_crypto_currency_tickers=symbols_by_crypto_currency_tickers,
+                                                            symbols=symbols,
+                                                            time_frames=time_frames)
     assert created_evaluators
     assert all([evaluator.__class__ in expected_evaluators for evaluator in created_evaluators])
+
+
+async def test_start_evaluators():
+    eval_mock = mock.Mock()
+    eval_mock.start_evaluator = mock.AsyncMock()
+    with mock.patch.object(evaluator_factory, "_prioritized_evaluators", mock.Mock(return_value=[eval_mock])) \
+        as prioritized_evaluators_mock:
+        await evaluator_factory._start_evaluators([[1, 2], [3, None]], "tentacles_setup_config", "bot_id")
+        prioritized_evaluators_mock.assert_called_once_with([1, 2, 3], "tentacles_setup_config")
+        eval_mock.start_evaluator.assert_called_once_with("bot_id")
+
+
+async def test_prioritized_evaluators():
+    eval_mock_1 = mock.Mock()
+    eval_mock_1.get_evaluator_priority = mock.Mock(return_value=constants.DEFAULT_PRIORITY)
+    eval_mock_2 = mock.Mock()
+    eval_mock_2.get_evaluator_priority = mock.Mock(return_value=constants.DEFAULT_PRIORITY)
+    eval_mock_3 = mock.Mock()
+    eval_mock_3.get_evaluator_priority = mock.Mock(return_value=constants.DEFAULT_PRIORITY)
+    assert evaluator_factory._prioritized_evaluators(
+        [eval_mock_1, eval_mock_2, eval_mock_3],
+        "tentacles_setup_config") == [eval_mock_1, eval_mock_2, eval_mock_3]
+    eval_mock_1.get_evaluator_priority = mock.Mock(return_value=1)
+    eval_mock_2.get_evaluator_priority = mock.Mock(return_value=-5.6)
+    assert evaluator_factory._prioritized_evaluators(
+        [eval_mock_1, eval_mock_2, eval_mock_3],
+        "tentacles_setup_config") == [eval_mock_1, eval_mock_3, eval_mock_2]
+    eval_mock_2 = mock.Mock()
+    eval_mock_2.get_evaluator_priority = mock.Mock(return_value=5.6)
+    assert evaluator_factory._prioritized_evaluators(
+        [eval_mock_1, eval_mock_2, eval_mock_3],
+        "tentacles_setup_config") == [eval_mock_2, eval_mock_1, eval_mock_3]
 
 
 async def test_extract_traded_pairs():

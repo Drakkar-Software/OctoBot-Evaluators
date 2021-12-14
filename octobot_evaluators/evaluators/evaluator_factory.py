@@ -42,7 +42,6 @@ async def create_evaluators(evaluator_parent_class,
                                tentacles_setup_config,
                                matrix_id=matrix_id,
                                exchange_name=exchange_name,
-                               bot_id=bot_id,
                                cryptocurrency=cryptocurrency,
                                cryptocurrency_name=_get_cryptocurrency_name(
                                    evaluator_class,
@@ -95,7 +94,6 @@ async def create_evaluator(evaluator_class,
                            tentacles_setup_config: object,
                            matrix_id: str,
                            exchange_name: str,
-                           bot_id: str,
                            cryptocurrency: str = None,
                            cryptocurrency_name: str = None,
                            symbol: str = None,
@@ -118,24 +116,40 @@ async def create_evaluator(evaluator_class,
                 eval_class_instance.__class__.mro()[constants.EVALUATOR_CLASS_TYPE_MRO_INDEX].__name__]
             eval_class_instance.initialize(all_symbols_by_crypto_currencies, time_frames, real_time_time_frames)
             await eval_class_instance.prepare()
-            # handle backtesting
-            await eval_class_instance.start_evaluator(bot_id)
             return eval_class_instance
     except Exception as e:
         logging.get_logger(LOGGER_NAME).exception(e, True, f"Error when creating evaluator {evaluator_class}: {e}")
     return None
 
 
-async def create_all_type_evaluators(tentacles_setup_config: object,
-                                     matrix_id: str,
-                                     exchange_name: str,
-                                     bot_id: str,
-                                     symbols_by_crypto_currencies: dict = None,
-                                     symbols: list = None,
-                                     time_frames: list = None,
-                                     real_time_time_frames: list = None,
-                                     relevant_evaluators=common_constants.CONFIG_WILDCARD,
-                                     ) -> list:
+async def _start_evaluators(evaluator_instances, tentacles_setup_config, bot_id):
+    all_evaluators = [evaluator_instance
+                      for evaluators in evaluator_instances
+                      for evaluator_instance in evaluators
+                      if evaluator_instance is not None]
+    for evaluator_instance in _prioritized_evaluators(all_evaluators, tentacles_setup_config):
+        await evaluator_instance.start_evaluator(bot_id)
+
+
+def _prioritized_evaluators(evaluators, tentacles_setup_config):
+    # highest evaluator priority first
+    return sorted(
+        evaluators,
+        key=lambda x: x.get_evaluator_priority(tentacles_setup_config),
+        reverse=True
+    )
+
+
+async def create_and_start_all_type_evaluators(tentacles_setup_config: object,
+                                               matrix_id: str,
+                                               exchange_name: str,
+                                               bot_id: str,
+                                               symbols_by_crypto_currencies: dict = None,
+                                               symbols: list = None,
+                                               time_frames: list = None,
+                                               real_time_time_frames: list = None,
+                                               relevant_evaluators=common_constants.CONFIG_WILDCARD,
+                                               ) -> list:
     if not api.get_activated_strategies_classes(tentacles_setup_config):
         # If no strategy is activated, there is no evaluator to create (their evaluation would not be used)
         logging.get_logger(LOGGER_NAME).info(
@@ -145,7 +159,7 @@ async def create_all_type_evaluators(tentacles_setup_config: object,
         import octobot_trading.api as exchange_api
         crypto_currency_name_by_crypto_currencies, symbols_by_crypto_currency_tickers = \
             _extract_traded_pairs(symbols_by_crypto_currencies, exchange_name, matrix_id, exchange_api)
-        return [
+        evaluators = [
             await create_evaluators(
                 evaluator_type, tentacles_setup_config,
                 matrix_id=matrix_id, exchange_name=exchange_name,
@@ -156,6 +170,8 @@ async def create_all_type_evaluators(tentacles_setup_config: object,
                 real_time_time_frames=real_time_time_frames,
                 relevant_evaluators=relevant_evaluators)
             for evaluator_type in evaluator.EvaluatorClassTypes.values()]
+        await _start_evaluators(evaluators, tentacles_setup_config, bot_id)
+        return evaluators
     except ImportError:
         logging.get_logger(LOGGER_NAME).error("create_evaluators requires Octobot-Trading package installed")
     return []

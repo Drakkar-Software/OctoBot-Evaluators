@@ -244,7 +244,7 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
             }
             registration_channels = []
             # Activate on full candles only by default (same as technical evaluators)
-            for topic in self.specific_config.get(constants.CONFIG_ACTIVATION_TOPICS,
+            for topic in self.specific_config.get(constants.CONFIG_ACTIVATION_TOPICS.replace(" ", "_"),
                                                   [enums.ActivationTopics.FULL_CANDLES.value]):
                 try:
                     registration_channels.append(TOPIC_TO_CHANNEL_NAME[topic])
