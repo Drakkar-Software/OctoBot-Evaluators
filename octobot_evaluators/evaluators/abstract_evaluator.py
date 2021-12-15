@@ -89,10 +89,6 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
         # Local caches, to be initialized if necessary
         self.caches = {}
 
-        # Other caches, these are managed by other tentacles,
-        # they are referenced here for performances only
-        self.remote_caches = {}
-
         self.consumers = []
 
     @staticmethod
@@ -165,7 +161,7 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
                 time_frame,
                 self.logger,
                 *exchange_api.get_trading_mode_writers(trading_mode),
-                trading_mode.__class__,
+                trading_mode,
                 trigger_cache_timestamp,
                 trigger_source,
                 trigger_value,
@@ -300,7 +296,6 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
             await consumer.stop()
 
     async def close_caches(self):
-        self.remote_caches = {}
         await asyncio.gather(
             *(
                 cache.close()
