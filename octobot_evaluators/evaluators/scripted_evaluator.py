@@ -36,6 +36,7 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
         super().__init__(tentacles_setup_config)
         self._script = None
         self._are_candles_initialized = False
+        self._has_script_been_called_once = False
         self.load_config()
         # add config folder to importable files to import the user script
         tentacles_manager_api.import_user_tentacles_config_folder(tentacles_setup_config)
@@ -102,9 +103,11 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
             is_value_missing = True
             if self.use_cache():
                 computed_value, is_value_missing = await context.get_cached_value()
-            if is_value_missing:
+            if is_value_missing or not self._has_script_been_called_once:
+                # always call the script at least once to save plotting statements
                 await self._pre_script_call(context)
                 computed_value = await self.get_script()(context)
+                self._has_script_been_called_once = True
             self.eval_note = computed_value
             eval_time = None
             if trigger_source == enums.ActivationTopics.FULL_CANDLES.value:
