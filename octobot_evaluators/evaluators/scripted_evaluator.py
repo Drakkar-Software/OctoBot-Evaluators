@@ -188,12 +188,16 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
         # todo cancel and restart live tasks
         # recall script with for are_data_initialized to false to re-write initial data
         await self.close_caches()
-        run_data_writer = self._get_trading_mode_writers()[0]
-        run_data_writer.are_data_initialized = False
+        run_data_writer, _, _, symbol_writer = self._get_trading_mode_writers()
+        time_frames = None if self.get_is_time_frame_wildcard() else (self.time_frame.value, )
+        run_data_writer.set_initialized_flags(False)
+        symbol_writer.set_initialized_flags(False, time_frames)
+        self._has_script_been_called_once = False
         try:
             await self._call_script(*self.last_call)
         finally:
-            run_data_writer.are_data_initialized = True
+            run_data_writer.set_initialized_flags(True)
+            symbol_writer.set_initialized_flags(True, time_frames)
 
     def _get_trading_mode_writers(self):
         try:
