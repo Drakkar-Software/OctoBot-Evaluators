@@ -98,8 +98,14 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
                     self.logger.debug(f"Waiting for candles to be initialized before calling script "
                                       f"for {symbol} {time_frame}")
                     return
-            await self._pre_script_call(context)
-            self.eval_note = await self.get_script()(context)
+            computed_value = None
+            is_value_missing = True
+            if self.use_cache():
+                computed_value, is_value_missing = await context.get_cached_value()
+            if is_value_missing:
+                await self._pre_script_call(context)
+                computed_value = await self.get_script()(context)
+            self.eval_note = computed_value
             eval_time = None
             if trigger_source == enums.ActivationTopics.FULL_CANDLES.value:
                 eval_time = evaluators_util.get_eval_time(full_candle=candle, time_frame=time_frame)
