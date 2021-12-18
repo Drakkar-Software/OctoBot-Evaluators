@@ -300,12 +300,13 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
             self.logger.error("required OctoBot-trading to get the scripting_library")
             raise
 
-    async def close_caches(self):
+    async def close_caches(self, reset_cache_db_ids=False):
         await databases.CacheManager().close_cache(
             self.get_name(),
             self.exchange_name,
             None if self.get_is_symbol_wildcard() else self.symbol,
-            None if self.get_is_time_frame_wildcard() else self.time_frame.value
+            None if self.get_is_time_frame_wildcard() else self.time_frame.value,
+            reset_cache_db_ids=reset_cache_db_ids
         )
 
     async def prepare(self) -> None:

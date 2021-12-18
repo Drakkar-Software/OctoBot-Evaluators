@@ -179,7 +179,7 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
         self.load_config()
         # todo cancel and restart live tasks
         # recall script with for are_data_initialized to false to re-write initial data
-        await self.close_caches()
+        await self.close_caches(reset_cache_db_ids=True)
         run_data_writer, _, _, symbol_writer = self._get_trading_mode_writers()
         time_frames = None if self.get_is_time_frame_wildcard() else (self.time_frame.value, )
         run_data_writer.set_initialized_flags(False)
