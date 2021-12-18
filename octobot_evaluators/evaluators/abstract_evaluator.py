@@ -23,6 +23,7 @@ import async_channel.constants as channel_constants
 import async_channel.enums as channel_enums
 
 import octobot_commons.constants as common_constants
+import octobot_commons.databases as databases
 import octobot_commons.tentacles_management as tentacles_management
 
 import octobot_evaluators.evaluators.channel as evaluator_channels
@@ -85,9 +86,6 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
 
         # Define evaluators default consumer priority level
         self.priority_level: int = channel_enums.ChannelConsumerPriorityLevels.MEDIUM.value
-
-        # Local caches, to be initialized if necessary
-        self.caches = {}
 
         self.consumers = []
 
@@ -295,15 +293,20 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
         for consumer in self.consumers:
             await consumer.stop()
 
+    async def clear_all_cache(self):
+        try:
+            await databases.CacheManager().clear_cache(self.get_name())
+        except ImportError:
+            self.logger.error("required OctoBot-trading to get the scripting_library")
+            raise
+
     async def close_caches(self):
-        await asyncio.gather(
-            *(
-                cache.close()
-                for caches_by_tf in self.caches.values()
-                for cache in caches_by_tf.values()
-            )
+        await databases.CacheManager().close_cache(
+            self.get_name(),
+            self.exchange_name,
+            None if self.get_is_symbol_wildcard() else self.symbol,
+            None if self.get_is_time_frame_wildcard() else self.time_frame.value
         )
-        self.caches = {}
 
     async def prepare(self) -> None:
         """
