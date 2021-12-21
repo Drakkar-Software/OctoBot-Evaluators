@@ -343,8 +343,8 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
         Order is undefined between evaluators of the same priority.
         :return: the priority level
         """
-        return api.get_tentacle_config(tentacles_setup_config, cls).get(common_constants.PRIORITY,
-                                                                        common_constants.DEFAULT_PRIORITY)
+        return api.get_tentacle_config(tentacles_setup_config, cls).get(common_constants.EVALUATOR_PRIORITY,
+                                                                        common_constants.DEFAULT_EVALUATOR_PRIORITY)
 
     def reset(self) -> None:
         """

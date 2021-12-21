@@ -131,11 +131,11 @@ async def test_start_evaluators():
 
 async def test_prioritized_evaluators():
     eval_mock_1 = mock.Mock()
-    eval_mock_1.get_evaluator_priority = mock.Mock(return_value=constants.DEFAULT_PRIORITY)
+    eval_mock_1.get_evaluator_priority = mock.Mock(return_value=constants.DEFAULT_EVALUATOR_PRIORITY)
     eval_mock_2 = mock.Mock()
-    eval_mock_2.get_evaluator_priority = mock.Mock(return_value=constants.DEFAULT_PRIORITY)
+    eval_mock_2.get_evaluator_priority = mock.Mock(return_value=constants.DEFAULT_EVALUATOR_PRIORITY)
     eval_mock_3 = mock.Mock()
-    eval_mock_3.get_evaluator_priority = mock.Mock(return_value=constants.DEFAULT_PRIORITY)
+    eval_mock_3.get_evaluator_priority = mock.Mock(return_value=constants.DEFAULT_EVALUATOR_PRIORITY)
     assert evaluator_factory._prioritized_evaluators(
         [eval_mock_1, eval_mock_2, eval_mock_3],
         "tentacles_setup_config") == [eval_mock_1, eval_mock_2, eval_mock_3]
