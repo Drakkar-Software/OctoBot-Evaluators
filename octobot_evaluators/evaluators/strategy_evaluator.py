@@ -99,13 +99,13 @@ class StrategyEvaluator(evaluator.AbstractEvaluator):
                                                                 cryptocurrency,
                                                                 symbol,
                                                                 time_frame) and \
-               self._are_every_evaluation_valid(matrix_id,
-                                                evaluator_name,
-                                                evaluator_type,
-                                                exchange_name,
-                                                cryptocurrency,
-                                                symbol,
-                                                time_frame)
+               self._are_every_evaluation_valid_and_up_to_date(matrix_id,
+                                                               evaluator_name,
+                                                               evaluator_type,
+                                                               exchange_name,
+                                                               cryptocurrency,
+                                                               symbol,
+                                                               time_frame)
 
     def clear_cache(self):
         self.available_evaluators_cache = {}
@@ -116,6 +116,9 @@ class StrategyEvaluator(evaluator.AbstractEvaluator):
         if self.consumer_instance:
             await evaluator_channels.get_chan(constants.MATRIX_CHANNEL,
                                               self.matrix_id).remove_consumer(self.consumer_instance)
+
+    def get_full_cycle_evaluator_types(self) -> tuple:
+        return enums.EvaluatorMatrixTypes.TA.value,
 
     async def strategy_matrix_callback(self,
                                        matrix_id,
@@ -128,18 +131,19 @@ class StrategyEvaluator(evaluator.AbstractEvaluator):
                                        symbol,
                                        time_frame):
         # if this callback is from a technical evaluator: ensure strategy should be notified at this moment
-        if evaluator_type == enums.EvaluatorMatrixTypes.TA.value:
-            # ensure this time frame is within the strategy's time frames
-            if common_enums.TimeFrames(time_frame) not in self.strategy_time_frames or \
-                    not self.is_technical_evaluator_cycle_complete(matrix_id,
-                                                                   evaluator_name,
-                                                                   evaluator_type,
-                                                                   exchange_name,
-                                                                   cryptocurrency,
-                                                                   symbol,
-                                                                   time_frame):
-                # do not call the strategy
-                return
+        for full_cycle_evaluator in self.get_full_cycle_evaluator_types():
+            if evaluator_type == full_cycle_evaluator:
+                # ensure this time frame is within the strategy's time frames
+                if common_enums.TimeFrames(time_frame) not in self.strategy_time_frames or \
+                        not self.is_technical_evaluator_cycle_complete(matrix_id,
+                                                                       evaluator_name,
+                                                                       evaluator_type,
+                                                                       exchange_name,
+                                                                       cryptocurrency,
+                                                                       symbol,
+                                                                       time_frame):
+                    # do not call the strategy
+                    return
         await self.matrix_callback(
             matrix_id,
             evaluator_name,
@@ -166,15 +170,14 @@ class StrategyEvaluator(evaluator.AbstractEvaluator):
         # Do not forget to check if evaluator_name is self.name
         pass
 
-    def _are_every_evaluation_valid(self,
-                                    matrix_id,
-                                    evaluator_name,
-                                    evaluator_type,
-                                    exchange_name,
-                                    cryptocurrency,
-                                    symbol,
-                                    time_frame
-                                    ):
+    def _are_every_evaluation_valid_and_up_to_date(self,
+                                                   matrix_id,
+                                                   evaluator_name,
+                                                   evaluator_type,
+                                                   exchange_name,
+                                                   cryptocurrency,
+                                                   symbol,
+                                                   time_frame):
         to_validate_node_paths = self._get_available_node_paths(matrix_id,
                                                                 evaluator_type,
                                                                 exchange_name,
