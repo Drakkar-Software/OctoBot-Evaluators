@@ -20,6 +20,8 @@ import async_channel.channels as channels
 
 import octobot_commons.channels_name as channels_name
 import octobot_commons.enums as commons_enums
+import octobot_commons.constants as commons_constants
+import octobot_commons.errors as commons_errors
 
 import octobot_evaluators.constants as constants
 import octobot_evaluators.enums as enums
@@ -119,6 +121,8 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
                 eval_time = trading_api.get_exchange_current_time(context.exchange_manager)
             await self.evaluation_completed(cryptocurrency, symbol, time_frame,
                                             eval_time=eval_time, context=context)
+        except commons_errors.MissingDataError:
+            self.eval_note = commons_constants.DO_NOT_CACHE
         except ImportError:
             self.logger.exception(f"Error when importing octobot-trading")
         except Exception as e:
