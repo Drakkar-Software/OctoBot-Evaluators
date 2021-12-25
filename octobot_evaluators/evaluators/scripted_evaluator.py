@@ -34,11 +34,13 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
     __metaclass__ = evaluator.AbstractEvaluator
     EVALUATOR_SCRIPT_MODULE = None
 
-    def __init__(self, tentacles_setup_config):
-        super().__init__(tentacles_setup_config)
+    def __init__(self, tentacles_setup_config, post_init=True):
+        super().__init__(tentacles_setup_config, post_init=post_init)
         self._script = None
         self._are_candles_initialized = False
         self._has_script_been_called_once = False
+
+    def post_init(self, tentacles_setup_config):
         self.load_config()
         # add config folder to importable files to import the user script
         tentacles_manager_api.import_user_tentacles_config_folder(tentacles_setup_config)
@@ -84,6 +86,31 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
                                 enums.ActivationTopics.IN_CONSTRUCTION_CANDLES.value,
                                 time_frame=time_frame, kline=kline)
 
+    async def evaluator_manual_callback(self, context=None, **kwargs):
+        """
+        Called when this evaluator is triggered from a manual call
+        :param context: the calling script's context
+        :param kwargs: unused parameters
+        :return: the evaluation value
+        """
+        try:
+            return await self._get_cached_or_computed_value(context.copy(tentacle=self))
+        except commons_errors.MissingDataError as e:
+            self.logger.debug(f"Can't compute evaluator value: {e}")
+            return commons_constants.DO_NOT_CACHE
+
+    async def _get_cached_or_computed_value(self, context):
+        computed_value = None
+        is_value_missing = True
+        if self.use_cache():
+            computed_value, is_value_missing = await context.get_cached_value()
+        if is_value_missing or not self._has_script_been_called_once:
+            # always call the script at least once to save plotting statements
+            await self._pre_script_call(context)
+            computed_value = await self.get_script()(context)
+            self._has_script_been_called_once = True
+        return computed_value
+
     async def _call_script(self, exchange: str, exchange_id: str, cryptocurrency: str, symbol: str,
                            trigger_cache_timestamp: float, trigger_source: str,
                            time_frame: str = None, candle: dict = None, kline: dict = None):
@@ -101,16 +128,7 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
                     self.logger.debug(f"Waiting for candles to be initialized before calling script "
                                       f"for {symbol} {time_frame}")
                     return
-            computed_value = None
-            is_value_missing = True
-            if self.use_cache():
-                computed_value, is_value_missing = await context.get_cached_value()
-            if is_value_missing or not self._has_script_been_called_once:
-                # always call the script at least once to save plotting statements
-                await self._pre_script_call(context)
-                computed_value = await self.get_script()(context)
-                self._has_script_been_called_once = True
-            self.eval_note = computed_value
+            self.eval_note = await self._get_cached_or_computed_value(context)
             eval_time = None
             if trigger_source == enums.ActivationTopics.FULL_CANDLES.value:
                 eval_time = evaluators_util.get_eval_time(full_candle=candle, time_frame=time_frame)
