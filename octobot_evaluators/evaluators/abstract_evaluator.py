@@ -34,7 +34,7 @@ import octobot_evaluators.matrix as matrix
 class AbstractEvaluator(tentacles_management.AbstractTentacle):
     __metaclass__ = tentacles_management.AbstractTentacle
 
-    def __init__(self, tentacles_setup_config: tm_configuration.TentaclesSetupConfiguration):
+    def __init__(self, tentacles_setup_config: tm_configuration.TentaclesSetupConfiguration, post_init=True):
         super().__init__()
         # Evaluator matrix id
         self.matrix_id: str = None
@@ -88,6 +88,37 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
         self.priority_level: int = channel_enums.ChannelConsumerPriorityLevels.MEDIUM.value
 
         self.consumers = []
+        if post_init:
+            self.post_init(tentacles_setup_config)
+
+    def post_init(self, tentacles_setup_config):
+        """
+        Automatically called after __init__ when post_init is True (default)
+        Override when necessary
+        :param tentacles_setup_config: the tentacles_setup_config __init__ argument
+        :return: None
+        """
+        pass
+
+    @classmethod
+    async def single_evaluation(
+            cls,
+            tentacles_setup_config: tm_configuration.TentaclesSetupConfiguration,
+            specific_config: dict,
+            **kwargs):
+        post_init = kwargs.pop("post_init", False)
+        evaluator_instance = cls(tentacles_setup_config, post_init=post_init)
+        evaluator_instance.specific_config = specific_config
+        return await evaluator_instance.evaluator_manual_callback(**kwargs), evaluator_instance
+
+    async def evaluator_manual_callback(self, **kwargs):
+        """
+        Override this method to define the appropriate behavior when this evaluator is being
+        called manually
+        :param kwargs: keyword arguments to be used for evaluation
+        :return: the evaluation value
+        """
+        raise NotImplementedError("evaluator_manual_callback is not implemented")
 
     @staticmethod
     def get_eval_type():
