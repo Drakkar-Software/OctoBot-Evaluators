@@ -86,23 +86,28 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
                                 enums.ActivationTopics.IN_CONSTRUCTION_CANDLES.value,
                                 time_frame=time_frame, kline=kline)
 
-    async def evaluator_manual_callback(self, context=None, **kwargs):
+    async def evaluator_manual_callback(self, context=None, ignore_cache=False, **kwargs):
         """
         Called when this evaluator is triggered from a manual call
         :param context: the calling script's context
         :param kwargs: unused parameters
         :return: the evaluation value
         """
+        local_context = context.copy(tentacle=self)
         try:
-            return await self._get_cached_or_computed_value(context.copy(tentacle=self))
+            return_value = await self._get_cached_or_computed_value(local_context,
+                                                                    ignore_cache=ignore_cache)
+            if not ignore_cache and self.use_cache() and return_value != commons_constants.DO_NOT_CACHE:
+                await local_context.set_cached_value(return_value, flush_if_necessary=True)
+            return return_value
         except commons_errors.MissingDataError as e:
             self.logger.debug(f"Can't compute evaluator value: {e}")
             return commons_constants.DO_NOT_CACHE
 
-    async def _get_cached_or_computed_value(self, context):
+    async def _get_cached_or_computed_value(self, context, ignore_cache=False):
         computed_value = None
         is_value_missing = True
-        if self.use_cache():
+        if not ignore_cache and self.use_cache():
             computed_value, is_value_missing = await context.get_cached_value()
         if is_value_missing or not self._has_script_been_called_once:
             # always call the script at least once to save plotting statements
@@ -210,6 +215,7 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
         try:
             await self._call_script(*self.last_call)
         finally:
+            await run_data_writer.flush()
             run_data_writer.set_initialized_flags(True)
             symbol_writer.set_initialized_flags(True, time_frames)
 
