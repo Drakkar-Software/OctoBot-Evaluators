@@ -13,7 +13,6 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
-import asyncio
 import time
 
 import octobot_tentacles_manager.api as api
@@ -24,6 +23,7 @@ import async_channel.enums as channel_enums
 
 import octobot_commons.constants as common_constants
 import octobot_commons.databases as databases
+import octobot_commons.logging as commons_logging
 import octobot_commons.tentacles_management as tentacles_management
 
 import octobot_evaluators.evaluators.channel as evaluator_channels
@@ -88,6 +88,10 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
         self.priority_level: int = channel_enums.ChannelConsumerPriorityLevels.MEDIUM.value
 
         self.consumers = []
+
+        # Other evaluators that might have been called by this evaluator.
+        # This evaluator is now responsible for managing their cache
+        self.called_nested_evaluators = set()
         if post_init:
             self.post_init(tentacles_setup_config)
 
@@ -105,11 +109,14 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
             cls,
             tentacles_setup_config: tm_configuration.TentaclesSetupConfiguration,
             specific_config: dict,
+            ignore_cache=False,
             **kwargs):
         post_init = kwargs.pop("post_init", False)
         evaluator_instance = cls(tentacles_setup_config, post_init=post_init)
+        evaluator_instance.logger = commons_logging.get_logger(evaluator_instance.get_name())
         evaluator_instance.specific_config = specific_config
-        return await evaluator_instance.evaluator_manual_callback(**kwargs), evaluator_instance
+        return await evaluator_instance.evaluator_manual_callback(ignore_cache=ignore_cache,
+                                                                  **kwargs), evaluator_instance
 
     async def evaluator_manual_callback(self, **kwargs):
         """
@@ -210,7 +217,8 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
         # False is not yet supported
         return True
 
-    def use_cache(self):
+    @classmethod
+    def use_cache(cls):
         return False
 
     def _get_tentacle_registration_topic(self, all_symbols_by_crypto_currencies, time_frames, real_time_time_frames):
@@ -326,19 +334,22 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
 
     async def clear_all_cache(self):
         try:
-            await databases.CacheManager().clear_cache(self.get_name())
+            for evaluator_name in [self.get_name()] + [evaluator.get_name() for evaluator in
+                                                       self.called_nested_evaluators]:
+                await databases.CacheManager().clear_cache(evaluator_name)
         except ImportError:
             self.logger.error("required OctoBot-trading to get the scripting_library")
             raise
 
     async def close_caches(self, reset_cache_db_ids=False):
-        await databases.CacheManager().close_cache(
-            self.get_name(),
-            self.exchange_name,
-            None if self.get_is_symbol_wildcard() else self.symbol,
-            None if self.get_is_time_frame_wildcard() else self.time_frame.value,
-            reset_cache_db_ids=reset_cache_db_ids
-        )
+        for evaluator_name in [self.get_name()] + [evaluator.get_name() for evaluator in self.called_nested_evaluators]:
+            await databases.CacheManager().close_cache(
+                evaluator_name,
+                self.exchange_name,
+                None if self.get_is_symbol_wildcard() else self.symbol,
+                None if self.get_is_time_frame_wildcard() else self.time_frame.value,
+                reset_cache_db_ids=reset_cache_db_ids
+            )
 
     async def prepare(self) -> None:
         """
