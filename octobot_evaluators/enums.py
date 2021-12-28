@@ -22,9 +22,3 @@ class EvaluatorMatrixTypes(enum.Enum):
     REAL_TIME = "REAL_TIME"
     SCRIPTED = "SCRIPTED"
     STRATEGIES = "STRATEGIES"
-
-
-class ActivationTopics(enum.Enum):
-    FULL_CANDLES = "once per bar close"
-    IN_CONSTRUCTION_CANDLES = "once per second (Live Price)"
-    RECENT_TRADES = "recent trades"

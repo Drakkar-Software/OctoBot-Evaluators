@@ -76,14 +76,14 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
                                        time_frame: str, candle: dict):
         await self._call_script(exchange, exchange_id, cryptocurrency, symbol,
                                 candle[commons_enums.PriceIndexes.IND_PRICE_TIME.value],
-                                enums.ActivationTopics.FULL_CANDLES.value,
+                                commons_enums.ActivationTopics.FULL_CANDLES.value,
                                 time_frame=time_frame, candle=candle)
 
     async def evaluator_kline_callback(self, exchange: str, exchange_id: str, cryptocurrency: str, symbol: str,
                                        time_frame, kline: dict):
         await self._call_script(exchange, exchange_id, cryptocurrency, symbol,
                                 kline[commons_enums.PriceIndexes.IND_PRICE_TIME.value],
-                                enums.ActivationTopics.IN_CONSTRUCTION_CANDLES.value,
+                                commons_enums.ActivationTopics.IN_CONSTRUCTION_CANDLES.value,
                                 time_frame=time_frame, kline=kline)
 
     async def evaluator_manual_callback(self, context=None, ignore_cache=False, **kwargs):
@@ -135,9 +135,9 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
                     return
             self.eval_note = await self._get_cached_or_computed_value(context)
             eval_time = None
-            if trigger_source == enums.ActivationTopics.FULL_CANDLES.value:
+            if trigger_source == commons_enums.ActivationTopics.FULL_CANDLES.value:
                 eval_time = evaluators_util.get_eval_time(full_candle=candle, time_frame=time_frame)
-            elif trigger_source == enums.ActivationTopics.IN_CONSTRUCTION_CANDLES.value:
+            elif trigger_source == commons_enums.ActivationTopics.IN_CONSTRUCTION_CANDLES.value:
                 eval_time = evaluators_util.get_eval_time(partial_candle=kline)
             if eval_time is None:
                 self.logger.error("Can't compute evaluation time, using exchange time")
@@ -157,11 +157,11 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
             # Always register activation_topics use input to enable changing it from run metadata
             # (where user inputs are registered)
             activation_topic_values = [
-                enums.ActivationTopics.FULL_CANDLES.value,
-                enums.ActivationTopics.IN_CONSTRUCTION_CANDLES.value
+                commons_enums.ActivationTopics.FULL_CANDLES.value,
+                commons_enums.ActivationTopics.IN_CONSTRUCTION_CANDLES.value
             ]
-            await scripting_library.user_input(context, constants.CONFIG_ACTIVATION_TOPICS, "multiple-options",
-                                               [enums.ActivationTopics.FULL_CANDLES.value],
+            await scripting_library.user_input(context, commons_constants.CONFIG_ACTIVATION_TOPICS, "multiple-options",
+                                               [commons_enums.ActivationTopics.FULL_CANDLES.value],
                                                options=activation_topic_values)
         except ImportError:
             self.logger.error("Can't read octobot_trading scripting_library")
@@ -267,23 +267,18 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
         return consumers
 
     def _get_channel_registration(self):
-        try:
-            import octobot_trading.exchange_channel as exchanges_channel
-            TOPIC_TO_CHANNEL_NAME = {
-                enums.ActivationTopics.FULL_CANDLES.value:
-                    channels_name.OctoBotTradingChannelsName.OHLCV_CHANNEL.value,
-                enums.ActivationTopics.IN_CONSTRUCTION_CANDLES.value:
-                    channels_name.OctoBotTradingChannelsName.KLINE_CHANNEL.value,
-            }
-            registration_channels = []
-            # Activate on full candles only by default (same as technical evaluators)
-            for topic in self.specific_config.get(constants.CONFIG_ACTIVATION_TOPICS.replace(" ", "_"),
-                                                  [enums.ActivationTopics.FULL_CANDLES.value]):
-                try:
-                    registration_channels.append(TOPIC_TO_CHANNEL_NAME[topic])
-                except KeyError:
-                    self.logger.error(f"Unknown registration topic: {topic}")
-            return registration_channels
-
-        except ImportError:
-            self.logger.error("Can't connect to OHLCV trading channel")
+        TOPIC_TO_CHANNEL_NAME = {
+            commons_enums.ActivationTopics.FULL_CANDLES.value:
+                channels_name.OctoBotTradingChannelsName.OHLCV_CHANNEL.value,
+            commons_enums.ActivationTopics.IN_CONSTRUCTION_CANDLES.value:
+                channels_name.OctoBotTradingChannelsName.KLINE_CHANNEL.value,
+        }
+        registration_channels = []
+        # Activate on full candles only by default (same as technical evaluators)
+        for topic in self.specific_config.get(commons_constants.CONFIG_ACTIVATION_TOPICS.replace(" ", "_"),
+                                              [commons_enums.ActivationTopics.FULL_CANDLES.value]):
+            try:
+                registration_channels.append(TOPIC_TO_CHANNEL_NAME[topic])
+            except KeyError:
+                self.logger.error(f"Unknown registration topic: {topic}")
+        return registration_channels
