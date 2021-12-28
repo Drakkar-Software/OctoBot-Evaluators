@@ -150,6 +150,24 @@ def get_tentacles_value_nodes(matrix_id, tentacle_nodes, cryptocurrency=None, sy
             if node_at_path is not None]
 
 
+def get_latest_eval_time(matrix_id, exchange_name=None, tentacle_type=None, cryptocurrency=None,
+                         symbol=None, time_frame=None):
+    eval_times = []
+    for value_node in matrix.get_tentacles_value_nodes(
+            matrix_id,
+            get_tentacle_nodes(matrix_id,
+                               exchange_name=exchange_name,
+                               tentacle_type=tentacle_type),
+            cryptocurrency=cryptocurrency,
+            symbol=symbol,
+            time_frame=time_frame):
+
+        if evaluators_util.check_valid_eval_note(value_node.node_value) and \
+                isinstance(value_node.node_value_time, (float, int)):
+            eval_times.append(value_node.node_value_time)
+    return max(eval_times) if eval_times else None
+
+
 def get_tentacle_path(exchange_name=None, tentacle_type=None, tentacle_name=None) -> list:
     """
     Returns the path related to the tentacle name, type and exchange name
