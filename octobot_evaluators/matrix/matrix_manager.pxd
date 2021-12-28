@@ -38,6 +38,12 @@ cpdef list get_tentacles_value_nodes(str matrix_id,
                                      str cryptocurrency=*,
                                      str symbol=*,
                                      str time_frame=*)
+cpdef object get_latest_eval_time(str matrix_id,
+                                  str exchange_name=*,
+                                  object tentacle_type=*,
+                                  str cryptocurrency=*,
+                                  str symbol=*,
+                                  str time_frame=*)
 cpdef list get_tentacle_path(str exchange_name=*, object tentacle_type=*, str tentacle_name=*)
 cpdef list get_tentacle_value_path(str cryptocurrency=*, str symbol=*, str time_frame=*)
 cpdef dict get_evaluations_by_evaluator(str matrix_id,
