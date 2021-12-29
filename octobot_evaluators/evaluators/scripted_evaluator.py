@@ -95,6 +95,15 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
         """
         local_context = context.copy(tentacle=self)
         try:
+            # Cache is initialized at the 1st call: since a new instance of the evaluator is
+            # potentially created each time, use cache to figure out if it has been called already.
+            # Since self._has_script_been_called_once is only used in the context of cached evaluators,
+            # it' fine to have it False all the time when no cache is used.
+            self._has_script_been_called_once = self.use_cache() and local_context.has_cache(
+                local_context.symbol,
+                local_context.time_frame,
+                config_name=local_context.config_name
+            )
             return_value = await self._get_cached_or_computed_value(local_context,
                                                                     ignore_cache=ignore_cache)
             if not ignore_cache and self.use_cache() and return_value != commons_constants.DO_NOT_CACHE:
