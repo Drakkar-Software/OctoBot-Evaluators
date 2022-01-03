@@ -162,16 +162,16 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
 
     async def _pre_script_call(self, context):
         try:
-            import octobot_trading.modes.scripting_library as scripting_library
+            import octobot_trading.modes.basic_keywords as basic_keywords
             # Always register activation_topics use input to enable changing it from run metadata
             # (where user inputs are registered)
             activation_topic_values = [
                 commons_enums.ActivationTopics.FULL_CANDLES.value,
                 commons_enums.ActivationTopics.IN_CONSTRUCTION_CANDLES.value
             ]
-            await scripting_library.user_input(context, commons_constants.CONFIG_ACTIVATION_TOPICS, "multiple-options",
-                                               [commons_enums.ActivationTopics.FULL_CANDLES.value],
-                                               options=activation_topic_values)
+            await basic_keywords.user_input(context, commons_constants.CONFIG_ACTIVATION_TOPICS, "multiple-options",
+                                            [commons_enums.ActivationTopics.FULL_CANDLES.value],
+                                            options=activation_topic_values)
         except ImportError:
             self.logger.error("Can't read octobot_trading scripting_library")
 

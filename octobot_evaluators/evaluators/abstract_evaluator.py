@@ -175,7 +175,7 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
                     trigger_source=None, trigger_value=None):
         try:
             import octobot_trading.api as exchange_api
-            import octobot_trading.modes.scripting_library as scripting_library
+            import octobot_trading.modes as modes
             exchange_manager = exchange_api.get_exchange_manager_from_exchange_name_and_id(
                 exchange or self.exchange_name,
                 exchange_id or exchange_api.get_exchange_id_from_matrix_id(self.exchange_name, self.matrix_id)
@@ -185,7 +185,7 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
             for candidate_trading_mode in trading_modes:
                 if exchange_api.get_trading_mode_symbol(candidate_trading_mode) == symbol:
                     trading_mode = candidate_trading_mode
-            return scripting_library.Context(
+            return modes.Context(
                 self,
                 exchange_manager,
                 exchange_api.get_trader(exchange_manager),
