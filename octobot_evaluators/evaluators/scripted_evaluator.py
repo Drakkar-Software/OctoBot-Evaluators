@@ -171,8 +171,8 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
                 commons_enums.ActivationTopics.IN_CONSTRUCTION_CANDLES.value
             ]
             await basic_keywords.user_input(context, commons_constants.CONFIG_ACTIVATION_TOPICS, "multiple-options",
-                                            [commons_enums.ActivationTopics.FULL_CANDLES.value],
-                                            options=activation_topic_values)
+                                               [commons_enums.ActivationTopics.FULL_CANDLES.value],
+                                               options=activation_topic_values, show_in_optimizer=False)
         except ImportError:
             self.logger.error("Can't read octobot_trading scripting_library")
 
