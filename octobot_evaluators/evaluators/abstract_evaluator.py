@@ -89,6 +89,9 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
 
         self.consumers = []
 
+        # True when this evaluator is only triggered on closed candles
+        self.is_triggered_after_candle_close = False
+
         # Other evaluators that might have been called by this evaluator.
         # This evaluator is now responsible for managing their cache
         self.called_nested_evaluators = set()

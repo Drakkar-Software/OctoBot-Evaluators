@@ -162,8 +162,7 @@ def get_latest_eval_time(matrix_id, exchange_name=None, tentacle_type=None, cryp
             symbol=symbol,
             time_frame=time_frame):
 
-        if evaluators_util.check_valid_eval_note(value_node.node_value) and \
-                isinstance(value_node.node_value_time, (float, int)):
+        if isinstance(value_node.node_value_time, (float, int)):
             eval_times.append(value_node.node_value_time)
     return max(eval_times) if eval_times else None
 

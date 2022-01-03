@@ -29,6 +29,9 @@ class TAEvaluator(evaluator.AbstractEvaluator):
         super().__init__(tentacles_setup_config)
         self.time_frame = None
 
+        # True when this evaluator is only triggered on closed candles
+        self.is_triggered_after_candle_close = True
+
     async def start(self, bot_id: str) -> bool:
         """
         Default TA start: to be overwritten
