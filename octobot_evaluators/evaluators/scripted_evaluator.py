@@ -104,8 +104,9 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
                 local_context.time_frame,
                 config_name=local_context.config_name
             )
-            return_value, from_cache = await self._get_cached_or_computed_value(local_context,
-                                                                    ignore_cache=ignore_cache)
+            return_value, from_cache = await self._get_cached_or_computed_value(
+                local_context, ignore_cache=ignore_cache
+            )
             if not ignore_cache and not from_cache and \
                     self.use_cache() and return_value != commons_constants.DO_NOT_CACHE:
                 await local_context.set_cached_value(return_value, flush_if_necessary=True)
@@ -114,16 +115,24 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
             self.logger.debug(f"Can't compute evaluator value: {e}")
             return commons_constants.DO_NOT_CACHE
 
+    async def _inner_call_script(self, context):
+        # always call the script at least once to save plotting statements
+        await self._pre_script_call(context)
+        computed_value = await self.get_script()(context)
+        self._has_script_been_called_once = True
+        return computed_value
+
     async def _get_cached_or_computed_value(self, context, ignore_cache=False):
         computed_value = None
         is_value_missing = True
+        called = False
+        if not self._has_script_been_called_once:
+            computed_value = await self._inner_call_script(context)
+            called = True
         if not ignore_cache and self.use_cache():
             computed_value, is_value_missing = await context.get_cached_value()
-        if is_value_missing or not self._has_script_been_called_once:
-            # always call the script at least once to save plotting statements
-            await self._pre_script_call(context)
-            computed_value = await self.get_script()(context)
-            self._has_script_been_called_once = True
+        if is_value_missing and not called:
+            computed_value = await self._inner_call_script(context)
         return computed_value, not is_value_missing
 
     async def _call_script(self, exchange: str, exchange_id: str, cryptocurrency: str, symbol: str,
@@ -170,9 +179,12 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
                 commons_enums.ActivationTopics.FULL_CANDLES.value,
                 commons_enums.ActivationTopics.IN_CONSTRUCTION_CANDLES.value
             ]
-            await basic_keywords.user_input(context, commons_constants.CONFIG_ACTIVATION_TOPICS, "multiple-options",
-                                               [commons_enums.ActivationTopics.FULL_CANDLES.value],
-                                               options=activation_topic_values, show_in_optimizer=False)
+            activation_method = await basic_keywords.user_input(
+                context, commons_constants.CONFIG_ACTIVATION_TOPICS, "options",
+                commons_enums.ActivationTopics.FULL_CANDLES.value,
+                options=activation_topic_values, show_in_optimizer=False)
+            self.is_triggered_after_candle_close = activation_method == \
+                commons_enums.ActivationTopics.FULL_CANDLES.value
         except ImportError:
             self.logger.error("Can't read octobot_trading scripting_library")
 
@@ -286,10 +298,10 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
         }
         registration_channels = []
         # Activate on full candles only by default (same as technical evaluators)
-        for topic in self.specific_config.get(commons_constants.CONFIG_ACTIVATION_TOPICS.replace(" ", "_"),
-                                              [commons_enums.ActivationTopics.FULL_CANDLES.value]):
-            try:
-                registration_channels.append(TOPIC_TO_CHANNEL_NAME[topic])
-            except KeyError:
-                self.logger.error(f"Unknown registration topic: {topic}")
+        topic = self.specific_config.get(commons_constants.CONFIG_ACTIVATION_TOPICS.replace(" ", "_"),
+                                         commons_enums.ActivationTopics.FULL_CANDLES.value)
+        try:
+            registration_channels.append(TOPIC_TO_CHANNEL_NAME[topic])
+        except KeyError:
+            self.logger.error(f"Unknown registration topic: {topic}")
         return registration_channels
