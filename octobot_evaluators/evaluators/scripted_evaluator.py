@@ -227,6 +227,7 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
         finally:
             await run_data_writer.flush()
             run_data_writer.set_initialized_flags(True)
+            await symbol_writer.flush()
             symbol_writer.set_initialized_flags(True, time_frames)
 
     def _get_trading_mode_writers(self):
