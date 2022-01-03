@@ -265,7 +265,8 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
                                    eval_time=0,
                                    notify=True,
                                    origin_consumer=None,
-                                   context=None) -> None:
+                                   context=None,
+                                   cache_if_available=True) -> None:
         """
         Main async method to notify matrix to update
         :param cryptocurrency: evaluated cryptocurrency
@@ -281,7 +282,7 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
             if eval_note is None:
                 eval_note = self.eval_note if self.eval_note is not None else common_constants.START_PENDING_EVAL_NOTE
 
-            if self.use_cache() and eval_note != common_constants.DO_NOT_CACHE:
+            if self.use_cache() and cache_if_available and eval_note != common_constants.DO_NOT_CACHE:
                 ctx = context or self.get_context(symbol, time_frame, eval_time)
                 await ctx.set_cached_value(eval_note, flush_if_necessary=True)
             self.ensure_eval_note_is_not_expired()

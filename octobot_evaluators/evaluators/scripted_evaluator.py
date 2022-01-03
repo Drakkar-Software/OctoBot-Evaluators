@@ -104,9 +104,10 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
                 local_context.time_frame,
                 config_name=local_context.config_name
             )
-            return_value = await self._get_cached_or_computed_value(local_context,
+            return_value, from_cache = await self._get_cached_or_computed_value(local_context,
                                                                     ignore_cache=ignore_cache)
-            if not ignore_cache and self.use_cache() and return_value != commons_constants.DO_NOT_CACHE:
+            if not ignore_cache and not from_cache and \
+                    self.use_cache() and return_value != commons_constants.DO_NOT_CACHE:
                 await local_context.set_cached_value(return_value, flush_if_necessary=True)
             return return_value
         except commons_errors.MissingDataError as e:
@@ -123,7 +124,7 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
             await self._pre_script_call(context)
             computed_value = await self.get_script()(context)
             self._has_script_been_called_once = True
-        return computed_value
+        return computed_value, not is_value_missing
 
     async def _call_script(self, exchange: str, exchange_id: str, cryptocurrency: str, symbol: str,
                            trigger_cache_timestamp: float, trigger_source: str,
@@ -142,7 +143,7 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
                     self.logger.debug(f"Waiting for candles to be initialized before calling script "
                                       f"for {symbol} {time_frame}")
                     return
-            self.eval_note = await self._get_cached_or_computed_value(context)
+            self.eval_note, from_cache = await self._get_cached_or_computed_value(context)
             eval_time = None
             if trigger_source == commons_enums.ActivationTopics.FULL_CANDLES.value:
                 eval_time = evaluators_util.get_eval_time(full_candle=candle, time_frame=time_frame)
@@ -152,7 +153,7 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
                 self.logger.error("Can't compute evaluation time, using exchange time")
                 eval_time = trading_api.get_exchange_current_time(context.exchange_manager)
             await self.evaluation_completed(cryptocurrency, symbol, time_frame,
-                                            eval_time=eval_time, context=context)
+                                            eval_time=eval_time, context=context, cache_if_available=not from_cache)
         except commons_errors.MissingDataError:
             self.eval_note = commons_constants.DO_NOT_CACHE
         except ImportError:
