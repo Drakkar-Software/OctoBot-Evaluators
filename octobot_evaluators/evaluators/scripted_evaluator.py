@@ -93,7 +93,7 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
         :param kwargs: unused parameters
         :return: the evaluation value
         """
-        local_context = context.copy(tentacle=self)
+        local_context = context.get_nested_call_context(self)
         try:
             # Cache is initialized at the 1st call: since a new instance of the evaluator is
             # potentially created each time, use cache to figure out if it has been called already.
@@ -124,15 +124,21 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
 
     async def _get_cached_or_computed_value(self, context, ignore_cache=False):
         computed_value = None
-        is_value_missing = True
         called = False
+        is_value_missing = True
         if not self._has_script_been_called_once:
+            if self.use_cache():
+                # init necessary settings before initializing cache
+                await self._pre_script_call(context)
+                # init cache to be sure its initialized before any call
+                context.init_cache()
             computed_value = await self._inner_call_script(context)
             called = True
-        if not ignore_cache and self.use_cache():
-            computed_value, is_value_missing = await context.get_cached_value()
-        if is_value_missing and not called:
-            computed_value = await self._inner_call_script(context)
+        if not called:
+            if not ignore_cache and self.use_cache():
+                computed_value, is_value_missing = await context.get_cached_value()
+            if is_value_missing and not called:
+                computed_value = await self._inner_call_script(context)
         return computed_value, not is_value_missing
 
     async def _call_script(self, exchange: str, exchange_id: str, cryptocurrency: str, symbol: str,
