@@ -108,6 +108,17 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
         pass
 
     @classmethod
+    def factory_with_local_config(
+            cls,
+            tentacles_setup_config: tm_configuration.TentaclesSetupConfiguration,
+            specific_config: dict,
+            post_init=False):
+        evaluator_instance = cls(tentacles_setup_config, post_init=post_init)
+        evaluator_instance.logger = commons_logging.get_logger(evaluator_instance.get_name())
+        evaluator_instance.specific_config = specific_config
+        return evaluator_instance
+
+    @classmethod
     async def single_evaluation(
             cls,
             tentacles_setup_config: tm_configuration.TentaclesSetupConfiguration,
@@ -115,11 +126,9 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
             ignore_cache=False,
             **kwargs):
         post_init = kwargs.pop("post_init", False)
-        evaluator_instance = cls(tentacles_setup_config, post_init=post_init)
-        evaluator_instance.logger = commons_logging.get_logger(evaluator_instance.get_name())
-        evaluator_instance.specific_config = specific_config
-        return await evaluator_instance.evaluator_manual_callback(ignore_cache=ignore_cache,
-                                                                  **kwargs), evaluator_instance
+        evaluator_instance = cls.factory_with_local_config(tentacles_setup_config, specific_config, post_init)
+        return await evaluator_instance.evaluator_manual_callback(ignore_cache=ignore_cache, **kwargs), \
+            evaluator_instance
 
     async def evaluator_manual_callback(self, **kwargs):
         """
