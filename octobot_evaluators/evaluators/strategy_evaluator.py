@@ -177,7 +177,8 @@ class StrategyEvaluator(evaluator.AbstractEvaluator):
                                                    exchange_name,
                                                    cryptocurrency,
                                                    symbol,
-                                                   time_frame):
+                                                   time_frame,
+                                                   can_retry=True):
         to_validate_node_paths = self._get_available_node_paths(matrix_id,
                                                                 evaluator_type,
                                                                 exchange_name,
@@ -186,14 +187,27 @@ class StrategyEvaluator(evaluator.AbstractEvaluator):
                                                                 use_cache=True)
         current_time = self._get_exchange_current_time(exchange_name, matrix_id)
         # ensure all evaluations are valid (do not trigger on an expired evaluation)
-        if all(matrix.is_tentacle_value_valid(self.matrix_id, evaluation_node_path,
-                                              timestamp=current_time,
-                                              delta=self.allowed_time_delta)
-               for evaluation_node_path in to_validate_node_paths):
-            self._save_last_evaluation(matrix_id, exchange_name, evaluator_type, evaluator_name,
-                                       cryptocurrency, symbol, time_frame)
-            return True
-        return False
+        try:
+            if all(matrix.is_tentacle_value_valid(self.matrix_id, evaluation_node_path,
+                                                  timestamp=current_time,
+                                                  delta=self.allowed_time_delta)
+                   for evaluation_node_path in to_validate_node_paths):
+                self._save_last_evaluation(matrix_id, exchange_name, evaluator_type, evaluator_name,
+                                           cryptocurrency, symbol, time_frame)
+                return True
+            return False
+        except KeyError:
+            self.clear_cache()
+            if can_retry:
+                return self._are_every_evaluation_valid_and_up_to_date(matrix_id,
+                                                                       evaluator_name,
+                                                                       evaluator_type,
+                                                                       exchange_name,
+                                                                       cryptocurrency,
+                                                                       symbol,
+                                                                       time_frame,
+                                                                       can_retry=False)
+            raise
 
     def _get_available_node_paths(self,
                                   matrix_id,
@@ -225,19 +239,21 @@ class StrategyEvaluator(evaluator.AbstractEvaluator):
 
     def _inner_get_available_node_paths(self, matrix_id, evaluator_type, exchange_name, cryptocurrency, symbol,
                                         use_cache=True):
-        return [
-            matrix.get_matrix_default_value_path(tentacle_name=evaluator,
-                                                 tentacle_type=evaluator_type,
-                                                 exchange_name=exchange_name,
-                                                 cryptocurrency=cryptocurrency,
-                                                 symbol=symbol,
-                                                 time_frame=time_frame)
-            for time_frame in self.get_available_time_frames(matrix_id, exchange_name, evaluator_type,
-                                                             cryptocurrency, symbol, use_cache=use_cache)
-            if common_enums.TimeFrames(time_frame) in self.strategy_time_frames
-            for evaluator in self._get_available_evaluators(matrix_id, exchange_name, evaluator_type,
-                                                            use_cache=use_cache)
-        ]
+        paths = []
+        for time_frame in self.get_available_time_frames(matrix_id, exchange_name, evaluator_type,
+                                                         cryptocurrency, symbol, use_cache=use_cache):
+            if common_enums.TimeFrames(time_frame) in self.strategy_time_frames:
+                for evaluator_name in self._get_available_evaluators(matrix_id, exchange_name, evaluator_type,
+                                                                     use_cache=use_cache):
+                    path = matrix.get_matrix_default_value_path(tentacle_name=evaluator_name,
+                                                                tentacle_type=evaluator_type,
+                                                                exchange_name=exchange_name,
+                                                                cryptocurrency=cryptocurrency,
+                                                                symbol=symbol,
+                                                                time_frame=time_frame)
+                    if matrix.get_tentacle_node(matrix_id, path) is not None:
+                        paths.append(path)
+        return paths
 
     def _save_last_evaluation(self, matrix_id, exchange_name, evaluator_type, tentacle_name,
                               cryptocurrency, symbol, time_frame):
