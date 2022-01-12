@@ -25,3 +25,4 @@ cdef class Matrix:
     cpdef list get_node_children_at_path(self, list node_path, event_tree.EventTreeNode starting_node=*)
     cpdef dict get_node_children_by_names_at_path(self, list node_path, event_tree.EventTreeNode starting_node=*)
     cpdef event_tree.EventTreeNode get_node_at_path(self, list node_path, event_tree.EventTreeNode starting_node=*)
+    cpdef event_tree.EventTreeNode delete_node_at_path(self, list node_path, event_tree.EventTreeNode starting_node=*)

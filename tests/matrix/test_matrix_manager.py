@@ -24,7 +24,8 @@ from octobot_evaluators.matrix.matrix import Matrix
 from octobot_evaluators.matrix.matrix_manager import get_tentacle_path, get_tentacle_value_path, \
     get_tentacle_nodes, get_tentacles_value_nodes, get_matrix_default_value_path, set_tentacle_value, \
     get_tentacle_value, get_tentacle_node, get_available_symbols, \
-    is_tentacle_value_valid, is_tentacles_values_valid, get_evaluations_by_evaluator, get_available_time_frames
+    is_tentacle_value_valid, is_tentacles_values_valid, get_evaluations_by_evaluator, get_available_time_frames, \
+    delete_tentacle_node
 from octobot_evaluators.errors import UnsetTentacleEvaluation
 from octobot_evaluators.matrix.matrices import Matrices
 
@@ -351,6 +352,33 @@ async def test_get_tentacles_value_nodes_mixed():
     Matrices.instance().del_matrix(matrix.matrix_id)
 
 
+def test_delete_tentacle_node():
+    matrix = Matrix()
+    Matrices.instance().add_matrix(matrix)
+
+    evaluator_1_path = get_matrix_default_value_path(tentacle_type="TA", tentacle_name="Test-TA",
+                                                     cryptocurrency="BTC",
+                                                     symbol="BTC/USD",
+                                                     time_frame="1m")
+    evaluator_2_path = get_matrix_default_value_path(tentacle_type="TA", tentacle_name="Test-TA",
+                                                     cryptocurrency="BTC",
+                                                     symbol="BTC/USD",
+                                                     time_frame="1h")
+
+    # simulate AbstractEvaluator.initialize()
+    set_tentacle_value(matrix.matrix_id, evaluator_1_path, "TA", None)
+    set_tentacle_value(matrix.matrix_id, evaluator_2_path, "TA", None)
+
+    assert delete_tentacle_node(matrix.matrix_id, ["non_existing"]) is None
+
+    # deleted: returned the deleted node
+    assert delete_tentacle_node(matrix.matrix_id, evaluator_2_path) is not None
+
+    # already deleted
+    assert delete_tentacle_node(matrix.matrix_id, evaluator_2_path) is None
+
+
+
 @pytest.mark.asyncio
 async def test_is_tentacle_value_valid():
     matrix = Matrix()
@@ -383,6 +411,10 @@ async def test_is_tentacle_value_valid():
     set_tentacle_value(matrix.matrix_id, evaluator_2_path, "TA", None,
                        timestamp=time.time() - TimeFramesMinutes[TimeFrames.ONE_HOUR] * MINUTE_TO_SECONDS)
     assert is_tentacle_value_valid(matrix.matrix_id, evaluator_2_path)
+
+    # test non existing node
+    with pytest.raises(KeyError):
+        is_tentacle_value_valid(matrix.matrix_id, evaluator_2_path + ["other"])
 
     # test delta
     set_tentacle_value(matrix.matrix_id, evaluator_2_path, "TA", None,
