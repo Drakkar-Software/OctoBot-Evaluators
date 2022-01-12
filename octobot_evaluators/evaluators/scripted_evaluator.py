@@ -23,8 +23,6 @@ import octobot_commons.enums as commons_enums
 import octobot_commons.constants as commons_constants
 import octobot_commons.errors as commons_errors
 
-import octobot_evaluators.constants as constants
-import octobot_evaluators.enums as enums
 import octobot_evaluators.evaluators as evaluator
 import octobot_evaluators.util as evaluators_util
 import octobot_tentacles_manager.api as tentacles_manager_api
@@ -58,9 +56,18 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
         try:
             import octobot_trading.api as exchange_api
             exchange_id = exchange_api.get_exchange_id_from_matrix_id(self.exchange_name, self.matrix_id)
+            trigger_time_frames = self.get_trigger_time_frames()
             time_frame_filter = [tf.value
                                  for tf in exchange_api.get_exchange_available_required_time_frames(
-                                    self.exchange_name, exchange_id)]
+                                    self.exchange_name, exchange_id)
+                                 if tf.value in trigger_time_frames or
+                                 trigger_time_frames == commons_constants.CONFIG_WILDCARD
+                                 ]
+            if trigger_time_frames != commons_constants.CONFIG_WILDCARD and \
+               len(time_frame_filter) < len(trigger_time_frames):
+                missing_time_frames = [tf for tf in trigger_time_frames if tf not in time_frame_filter]
+                self.logger.error(f"Missing timeframe to satisfy {trigger_time_frames} required time frames. "
+                                  f"Please activate those timeframes {missing_time_frames}")
             if len(time_frame_filter) == 1:
                 time_frame_filter = time_frame_filter[0]
             cryptocurrency = self.cryptocurrency if self.cryptocurrency else channel_constants.CHANNEL_WILDCARD
@@ -169,7 +176,8 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
                 eval_time = trading_api.get_exchange_current_time(context.exchange_manager)
             await self.evaluation_completed(cryptocurrency, symbol, time_frame,
                                             eval_time=eval_time, context=context, cache_if_available=not from_cache)
-        except commons_errors.MissingDataError:
+        except (commons_errors.MissingDataError, commons_errors.ExecutionAborted) as e:
+            self.logger.debug(f"Script execution aborted: {e}")
             self.eval_note = commons_constants.DO_NOT_CACHE
         except ImportError:
             self.logger.exception(f"Error when importing octobot-trading")
