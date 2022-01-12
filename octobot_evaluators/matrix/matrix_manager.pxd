@@ -22,6 +22,7 @@ cpdef matrix.Matrix get_matrix(str matrix_id)
 cpdef void set_tentacle_value(str matrix_id, list tentacle_path, object tentacle_type,
                               object tentacle_value, double timestamp=*)
 cpdef event_tree.EventTreeNode get_tentacle_node(str matrix_id, list tentacle_path)
+cpdef event_tree.EventTreeNode delete_tentacle_node(str matrix_id, list tentacle_path)
 cpdef object get_tentacle_value(str matrix_id, list tentacle_path)
 cpdef list get_matrix_default_value_path(str tentacle_name,
                                          object tentacle_type,
@@ -64,5 +65,5 @@ cpdef list get_available_symbols(str matrix_id,
                                  str cryptocurrency,
                                  str tentacle_type=*,
                                  str second_tentacle_type=*)
-cpdef bint is_tentacle_value_valid(str matrix_id, list tentacle_path, double timestamp=*, int delta=*)
+cpdef object is_tentacle_value_valid(str matrix_id, list tentacle_path, double timestamp=*, int delta=*)    # object to allow raising errors
 cpdef bint is_tentacles_values_valid(str matrix_id, list tentacle_path_list, double timestamp=*, int delta=*)

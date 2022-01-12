@@ -77,3 +77,15 @@ class Matrix:
             return self.matrix.get_node(node_path, starting_node=starting_node)
         except event_tree.NodeExistsError:
             return None
+
+    def delete_node_at_path(self, node_path, starting_node=None):
+        """
+        Delete the EventTreeNode at path
+        :param node_path: the node path
+        :param starting_node: the node to start the relative path
+        :return: the deleted node
+        """
+        try:
+            return self.matrix.delete_node(node_path, starting_node=starting_node)
+        except event_tree.NodeExistsError:
+            return None

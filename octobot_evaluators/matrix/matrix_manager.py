@@ -57,6 +57,16 @@ def get_tentacle_node(matrix_id, tentacle_path):
     return get_matrix(matrix_id).get_node_at_path(node_path=tentacle_path)
 
 
+def delete_tentacle_node(matrix_id, tentacle_path):
+    """
+    Delete the node at tentacle path
+    :param matrix_id: the matrix id
+    :param tentacle_path: the tentacle path
+    :return: the deleted node
+    """
+    return get_matrix(matrix_id).delete_node_at_path(node_path=tentacle_path)
+
+
 def get_tentacle_value(matrix_id, tentacle_path):
     """
     Get the value of the node at tentacle path
@@ -315,7 +325,10 @@ def is_tentacle_value_valid(matrix_id, tentacle_path, timestamp=0, delta=10) -> 
     if timestamp == 0:
         timestamp = time.time()
     try:
-        return timestamp - (get_tentacle_node(matrix_id, tentacle_path).node_value_time +
+        node = get_tentacle_node(matrix_id, tentacle_path)
+        if node is None:
+            raise KeyError(f"No node at {tentacle_path}")
+        return timestamp - (node.node_value_time +
                             common_enums.TimeFramesMinutes[common_enums.TimeFrames(tentacle_path[-1])]
                             * common_constants.MINUTE_TO_SECONDS + delta) < 0
     except (IndexError, ValueError):
