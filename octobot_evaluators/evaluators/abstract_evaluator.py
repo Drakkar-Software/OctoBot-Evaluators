@@ -182,6 +182,9 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
             -1
         )
 
+    def get_trigger_time_frames(self):
+        return self.specific_config.get(common_constants.CONFIG_TRIGGER_TIMEFRAMES, common_constants.CONFIG_WILDCARD)
+
     def get_context(self, symbol, time_frame, trigger_cache_timestamp,
                     cryptocurrency=None, exchange=None, exchange_id=None,
                     trigger_source=None, trigger_value=None):
@@ -245,6 +248,11 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
                        for currency_symbol in currency_symbols]
         if self.get_is_time_frame_wildcard():
             available_time_frames = time_frames
+        trigger_timeframes = self.get_trigger_time_frames()
+        if trigger_timeframes != common_constants.CONFIG_WILDCARD:
+            available_time_frames = [tf
+                                     for tf in available_time_frames
+                                     if tf in trigger_timeframes]
         return currencies, symbols, available_time_frames
 
     def initialize(self, all_symbols_by_crypto_currencies, time_frames, real_time_time_frames):
