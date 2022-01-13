@@ -127,8 +127,8 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
             **kwargs):
         post_init = kwargs.pop("post_init", False)
         evaluator_instance = cls.factory_with_local_config(tentacles_setup_config, specific_config, post_init)
-        return await evaluator_instance.evaluator_manual_callback(ignore_cache=ignore_cache, **kwargs), \
-            evaluator_instance
+        evaluation, error = await evaluator_instance.evaluator_manual_callback(ignore_cache=ignore_cache, **kwargs)
+        return evaluation, error, evaluator_instance
 
     async def evaluator_manual_callback(self, **kwargs):
         """
