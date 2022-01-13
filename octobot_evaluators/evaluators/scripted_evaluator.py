@@ -100,27 +100,27 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
         :param kwargs: unused parameters
         :return: the evaluation value
         """
-        local_context = context.get_nested_call_context(self)
-        try:
-            # Cache is initialized at the 1st call: since a new instance of the evaluator is
-            # potentially created each time, use cache to figure out if it has been called already.
-            # Since self._has_script_been_called_once is only used in the context of cached evaluators,
-            # it' fine to have it False all the time when no cache is used.
-            self._has_script_been_called_once = self.use_cache() and local_context.has_cache(
-                local_context.symbol,
-                local_context.time_frame,
-                config_name=local_context.config_name
-            )
-            return_value, from_cache = await self._get_cached_or_computed_value(
-                local_context, ignore_cache=ignore_cache
-            )
-            if not ignore_cache and not from_cache and \
-                    self.use_cache() and return_value != commons_constants.DO_NOT_CACHE:
-                await local_context.set_cached_value(return_value, flush_if_necessary=True)
-            return return_value, None
-        except (commons_errors.MissingDataError, commons_errors.ExecutionAborted) as e:
-            self.logger.debug(f"Can't compute evaluator value: {e}")
-            return commons_constants.DO_NOT_CACHE, e
+        async with context.nested_call_context(self) as local_context:
+            try:
+                # Cache is initialized at the 1st call: since a new instance of the evaluator is
+                # potentially created each time, use cache to figure out if it has been called already.
+                # Since self._has_script_been_called_once is only used in the context of cached evaluators,
+                # it' fine to have it False all the time when no cache is used.
+                self._has_script_been_called_once = self.use_cache() and local_context.has_cache(
+                    local_context.symbol,
+                    local_context.time_frame,
+                    config_name=local_context.config_name
+                )
+                return_value, from_cache = await self._get_cached_or_computed_value(
+                    local_context, ignore_cache=ignore_cache
+                )
+                if not ignore_cache and not from_cache and \
+                        self.use_cache() and return_value != commons_constants.DO_NOT_CACHE:
+                    await local_context.set_cached_value(return_value, flush_if_necessary=True)
+                return return_value, None
+            except (commons_errors.MissingDataError, commons_errors.ExecutionAborted) as e:
+                self.logger.debug(f"Can't compute evaluator value: {e}")
+                return commons_constants.DO_NOT_CACHE, e
 
     async def _inner_call_script(self, context):
         # always call the script at least once to save plotting statements
