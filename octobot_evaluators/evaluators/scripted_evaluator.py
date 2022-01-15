@@ -114,6 +114,11 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
                 return_value, from_cache = await self._get_cached_or_computed_value(
                     local_context, ignore_cache=ignore_cache
                 )
+                if return_value == commons_constants.DO_NOT_OVERRIDE_CACHE:
+                    value, missing = await local_context.get_cached_value()
+                    local_context.ensure_no_missing_cached_value(missing)
+                    return value
+
                 if not ignore_cache and not from_cache and \
                         self.use_cache() and return_value != commons_constants.DO_NOT_CACHE:
                     await local_context.set_cached_value(return_value, flush_if_necessary=True)
