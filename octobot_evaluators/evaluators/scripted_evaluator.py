@@ -117,7 +117,7 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
                 if return_value == commons_constants.DO_NOT_OVERRIDE_CACHE:
                     value, missing = await local_context.get_cached_value()
                     local_context.ensure_no_missing_cached_value(missing)
-                    return value
+                    return value, None
 
                 if not ignore_cache and not from_cache and \
                         self.use_cache() and return_value != commons_constants.DO_NOT_CACHE:
