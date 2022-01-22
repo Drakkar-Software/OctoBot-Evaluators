@@ -83,22 +83,22 @@ def set_chan(chan, name) -> None:
 def get_evaluator_channels(matrix_id) -> dict:
     try:
         return channels.ChannelInstances.instance().channels[matrix_id]
-    except KeyError:
-        raise KeyError(f"Channels not found with matrix_id: {matrix_id}")
+    except KeyError as e:
+        raise KeyError(f"Channels not found with matrix_id: {matrix_id}") from e
 
 
 def del_evaluator_channel_container(matrix_id):
     try:
         channels.ChannelInstances.instance().channels.pop(matrix_id, None)
-    except KeyError:
-        raise KeyError(f"Channels not found with matrix_id: {matrix_id}")
+    except KeyError as e:
+        raise KeyError(f"Channels not found with matrix_id: {matrix_id}") from e
 
 
 def get_chan(chan_name, matrix_id) -> EvaluatorChannel:
     try:
         return channels.ChannelInstances.instance().channels[matrix_id][chan_name]
-    except KeyError:
-        raise KeyError(f"Channel {chan_name} not found with matrix_id: {matrix_id}")
+    except KeyError as e:
+        raise KeyError(f"Channel {chan_name} not found with matrix_id: {matrix_id}") from e
 
 
 def del_chan(chan_name, matrix_id) -> None:
