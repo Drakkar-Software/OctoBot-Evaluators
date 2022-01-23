@@ -43,7 +43,7 @@ def init_required_candles_count_from_evaluators_and_strategies(config, tentacles
                         get_activated_social_evaluators_classes(tentacles_setup_config)
     candles_counts = [tentacle_class.get_required_candles_count(tentacles_setup_config)
                       for tentacle_class in activated_classes]
-    config[common_constants.CONFIG_TENTACLES_REQUIRED_CANDLES_COUNT] = max(candles_counts)
+    config[common_constants.CONFIG_TENTACLES_REQUIRED_CANDLES_COUNT] = max(candles_counts) if candles_counts else -1
 
 
 def get_activated_strategies_classes(tentacles_setup_config):
