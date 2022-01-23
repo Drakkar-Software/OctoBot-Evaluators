@@ -202,7 +202,8 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
                 context, commons_constants.CONFIG_ACTIVATION_TOPICS, "options",
                 commons_enums.ActivationTopics.FULL_CANDLES.value,
                 options=activation_topic_values,
-                show_in_optimizer=False, show_in_summary=False)
+                show_in_optimizer=False, show_in_summary=False,
+                order=1000)
             self.is_triggered_after_candle_close = activation_method == \
                 commons_enums.ActivationTopics.FULL_CANDLES.value
         except ImportError:
