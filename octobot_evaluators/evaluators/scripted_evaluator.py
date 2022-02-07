@@ -119,8 +119,9 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
                     local_context.ensure_no_missing_cached_value(missing)
                     return value, None
 
-                if not ignore_cache and not from_cache and \
-                        self.use_cache() and return_value != commons_constants.DO_NOT_CACHE:
+                # Arriving here, we know the evaluation was completed, we would otherwise be in the except statement
+                # We can now cache the value if necessary
+                if not from_cache and self.use_cache() and return_value != commons_constants.DO_NOT_CACHE:
                     await local_context.set_cached_value(return_value, flush_if_necessary=True)
                 return return_value, None
             except (commons_errors.MissingDataError, commons_errors.ExecutionAborted) as e:
