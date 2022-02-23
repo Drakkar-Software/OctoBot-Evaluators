@@ -30,6 +30,8 @@ import octobot_evaluators.evaluators.channel as evaluator_channels
 import octobot_evaluators.constants as constants
 import octobot_evaluators.matrix as matrix
 
+import octobot_evaluators.util as util
+
 
 class AbstractEvaluator(tentacles_management.AbstractTentacle):
     __metaclass__ = tentacles_management.AbstractTentacle
@@ -185,43 +187,6 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
     def get_trigger_time_frames(self):
         return self.specific_config.get(common_constants.CONFIG_TRIGGER_TIMEFRAMES, common_constants.CONFIG_WILDCARD)
 
-    def get_context(self, symbol, time_frame, trigger_cache_timestamp,
-                    cryptocurrency=None, exchange=None, exchange_id=None,
-                    trigger_source=None, trigger_value=None):
-        try:
-            import octobot_trading.api as exchange_api
-            import octobot_trading.modes as modes
-            exchange_manager = exchange_api.get_exchange_manager_from_exchange_name_and_id(
-                exchange or self.exchange_name,
-                exchange_id or exchange_api.get_exchange_id_from_matrix_id(self.exchange_name, self.matrix_id)
-            )
-            trading_modes = exchange_api.get_trading_modes(exchange_manager)
-            trading_mode = trading_modes[0]
-            for candidate_trading_mode in trading_modes:
-                if exchange_api.get_trading_mode_symbol(candidate_trading_mode) == symbol:
-                    trading_mode = candidate_trading_mode
-            return modes.Context(
-                self,
-                exchange_manager,
-                exchange_api.get_trader(exchange_manager),
-                exchange or self.exchange_name,
-                symbol,
-                self.matrix_id,
-                cryptocurrency,
-                symbol,
-                time_frame,
-                self.logger,
-                *exchange_api.get_trading_mode_writers(trading_mode),
-                trading_mode,
-                trigger_cache_timestamp,
-                trigger_source,
-                trigger_value,
-                None,
-                None,
-            )
-        except ImportError:
-            self.logger.error("Evaluator get_context requires OctoBot-Trading package installed")
-
     @staticmethod
     def invalidate_cache_on_code_change():
         # False is not yet supported
@@ -303,7 +268,7 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
                 eval_note = self.eval_note if self.eval_note is not None else common_constants.START_PENDING_EVAL_NOTE
 
             if self.use_cache():
-                ctx = context or self.get_context(symbol, time_frame, eval_time)
+                ctx = context or util.local_trading_context(self, symbol, time_frame, eval_time)
                 if self.eval_note == common_constants.DO_NOT_OVERRIDE_CACHE:
                     self.eval_note, missing = await ctx.get_cached_value()
                     ctx.ensure_no_missing_cached_value(missing)
@@ -359,13 +324,9 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
             await consumer.stop()
 
     async def clear_all_cache(self):
-        try:
-            for evaluator_name in [self.get_name()] + [evaluator.get_name() for evaluator in
-                                                       self.called_nested_evaluators]:
-                await databases.CacheManager().clear_cache(evaluator_name)
-        except ImportError:
-            self.logger.error("required OctoBot-trading to get the scripting_library")
-            raise
+        for evaluator_name in [self.get_name()] + [evaluator.get_name() for evaluator in
+                                                   self.called_nested_evaluators]:
+            await databases.CacheManager().clear_cache(evaluator_name)
 
     async def close_caches(self, reset_cache_db_ids=False):
         for evaluator_name in [self.get_name()] + [evaluator.get_name() for evaluator in self.called_nested_evaluators]:

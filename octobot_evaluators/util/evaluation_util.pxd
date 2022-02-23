@@ -16,3 +16,6 @@
 #  License along with this library.
 
 cpdef double get_eval_time(list full_candle=*, object time_frame=*, list partial_candle=*, list kline=*)
+cpdef object local_trading_context(object evaluator=*, str symbol, object time_frame, object trigger_cache_timestamp,
+                                   str cryptocurrency=*, str exchange=*, str exchange_id=*,
+                                   object trigger_source=*, object trigger_value=*)

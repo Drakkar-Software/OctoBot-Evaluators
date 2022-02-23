@@ -37,3 +37,42 @@ def get_shortest_time_frame(ideal_time_frame, preferred_available_time_frames, o
         return time_frame_manager.sort_time_frames(preferred_available_time_frames)[0]
     else:
         return time_frame_manager.sort_time_frames(others)[0]
+
+
+def local_trading_context(evaluator, symbol, time_frame, trigger_cache_timestamp,
+                          cryptocurrency=None, exchange=None, exchange_id=None,
+                          trigger_source=None, trigger_value=None):
+    try:
+        import octobot_trading.api as exchange_api
+        import octobot_trading.modes as modes
+        exchange_manager = exchange_api.get_exchange_manager_from_exchange_name_and_id(
+            exchange or evaluator.exchange_name,
+            exchange_id or exchange_api.get_exchange_id_from_matrix_id(evaluator.exchange_name, evaluator.matrix_id)
+        )
+        trading_modes = exchange_api.get_trading_modes(exchange_manager)
+        trading_mode = trading_modes[0]
+        for candidate_trading_mode in trading_modes:
+            if exchange_api.get_trading_mode_symbol(candidate_trading_mode) == symbol:
+                trading_mode = candidate_trading_mode
+        return modes.Context(
+            evaluator,
+            exchange_manager,
+            exchange_api.get_trader(exchange_manager),
+            exchange or evaluator.exchange_name,
+            symbol,
+            evaluator.matrix_id,
+            cryptocurrency,
+            symbol,
+            time_frame,
+            evaluator.logger,
+            *exchange_api.get_trading_mode_writers(trading_mode),
+            trading_mode,
+            trigger_cache_timestamp,
+            trigger_source,
+            trigger_value,
+            None,
+            None,
+        )
+    except ImportError:
+        evaluator.logger.error("OctoBot-Evaluator local_trading_context requires OctoBot-Trading package installed")
+        raise

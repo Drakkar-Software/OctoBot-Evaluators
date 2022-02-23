@@ -163,9 +163,11 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
                            time_frame: str = None, candle: dict = None, kline: dict = None):
         self.last_call = (exchange, exchange_id, cryptocurrency, symbol, trigger_cache_timestamp,
                           trigger_source, time_frame, candle, kline)
-        context = self.get_context(symbol, time_frame, trigger_cache_timestamp, cryptocurrency=cryptocurrency,
-                                   exchange=exchange, exchange_id=exchange_id, trigger_source=trigger_source,
-                                   trigger_value=candle or kline)
+        context = evaluators_util.local_trading_context(
+            self, symbol, time_frame, trigger_cache_timestamp, cryptocurrency=cryptocurrency,
+            exchange=exchange, exchange_id=exchange_id, trigger_source=trigger_source,
+            trigger_value=candle or kline
+        )
         try:
             import octobot_trading.api as trading_api
             if not self._are_candles_initialized:
