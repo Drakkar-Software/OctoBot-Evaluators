@@ -128,7 +128,8 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
                 if not from_cache and self.use_cache() and return_value != commons_constants.DO_NOT_CACHE:
                     await local_context.set_cached_value(return_value, flush_if_necessary=True)
                 return return_value, None
-            except (commons_errors.MissingDataError, commons_errors.ExecutionAborted) as e:
+            except (commons_errors.MissingDataError, commons_errors.ExecutionAborted,
+                    commons_errors.NoCacheValue) as e:
                 self.logger.debug(f"Can't compute evaluator value: {e}")
                 return commons_constants.DO_NOT_CACHE, e
 
