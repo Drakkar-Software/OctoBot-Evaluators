@@ -23,6 +23,7 @@ import async_channel.enums as channel_enums
 
 import octobot_commons.constants as common_constants
 import octobot_commons.databases as databases
+import octobot_commons.errors as commons_errors
 import octobot_commons.logging as commons_logging
 import octobot_commons.tentacles_management as tentacles_management
 
@@ -290,6 +291,9 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
                 time_frame=time_frame,
                 notify=notify,
                 origin_consumer=origin_consumer)
+        except commons_errors.NoCacheValue:
+            self.logger.warning(f"Evaluation as \"DO_NOT_OVERRIDE_CACHE\" but the is no cache to publish an "
+                                f"evaluation from")
         except Exception as e:
             # if ConfigManager.is_in_dev_mode(self.config): # TODO
             #     raise e
