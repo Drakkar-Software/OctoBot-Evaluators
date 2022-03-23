@@ -199,7 +199,7 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
 
     async def _pre_script_call(self, context):
         try:
-            import octobot_trading.modes.basic_keywords as basic_keywords
+            import octobot_trading.modes.scripted_library.basic_keywords as basic_keywords
             # Always register activation_topics use input to enable changing it from run metadata
             # (where user inputs are registered)
             activation_topic_values = [
@@ -259,28 +259,28 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
             # todo cancel and restart live tasks
             # recall script with for are_data_initialized to false to re-write initial data
             await self.close_caches(reset_cache_db_ids=True)
-            run_data_writer, _, _, _, symbol_writer = self._get_trading_mode_writers()
+            run_data_db, symbol_db = self._get_run_and_symbol_dbs()
             time_frames = None if self.get_is_time_frame_wildcard() else (self.time_frame.value, )
-            run_data_writer.set_initialized_flags(False)
-            symbol_writer.set_initialized_flags(False, time_frames)
+            run_data_db.set_initialized_flags(False)
+            symbol_db.set_initialized_flags(False, time_frames)
             self._has_script_been_called_once = False
             try:
                 await self._call_script(*self.last_call)
             finally:
-                await run_data_writer.flush()
-                run_data_writer.set_initialized_flags(True)
-                await symbol_writer.flush()
-                symbol_writer.set_initialized_flags(True, time_frames)
+                await run_data_db.flush()
+                run_data_db.set_initialized_flags(True)
+                await symbol_db.flush()
+                symbol_db.set_initialized_flags(True, time_frames)
 
-    def _get_trading_mode_writers(self):
+    def _get_run_and_symbol_dbs(self):
         try:
-            import octobot_trading.api as exchange_api
-            exchange_manager = exchange_api.get_exchange_manager_from_exchange_name_and_id(
+            import octobot_trading.api as trading_api
+            exchange_manager = trading_api.get_exchange_manager_from_exchange_name_and_id(
                 self.exchange_name,
-                exchange_api.get_exchange_id_from_matrix_id(self.exchange_name, self.matrix_id)
+                trading_api.get_exchange_id_from_matrix_id(self.exchange_name, self.matrix_id)
             )
-            trading_modes = exchange_api.get_trading_modes(exchange_manager)
-            return exchange_api.get_trading_mode_writers(trading_modes[0])
+            bot_id = trading_api.get_bot_id(exchange_manager)
+            return trading_api.get_run_db(bot_id), trading_api.get_symbol_db(bot_id, self.exchange_name, self.symbol)
         except ImportError:
             self.logger.error("required OctoBot-trading to get a trading mode writer")
             raise

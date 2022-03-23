@@ -65,7 +65,6 @@ def local_trading_context(evaluator, symbol, time_frame, trigger_cache_timestamp
             symbol,
             time_frame,
             evaluator.logger,
-            *exchange_api.get_trading_mode_writers(trading_mode),
             trading_mode,
             trigger_cache_timestamp,
             trigger_source,
