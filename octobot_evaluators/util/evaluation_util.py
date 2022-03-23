@@ -50,7 +50,7 @@ def local_trading_context(evaluator, symbol, time_frame, trigger_cache_timestamp
             exchange_id or exchange_api.get_exchange_id_from_matrix_id(evaluator.exchange_name, evaluator.matrix_id)
         )
         trading_modes = exchange_api.get_trading_modes(exchange_manager)
-        trading_mode = trading_modes[0]
+        trading_mode_class = trading_modes[0].__class__
         for candidate_trading_mode in trading_modes:
             if exchange_api.get_trading_mode_symbol(candidate_trading_mode) == symbol:
                 trading_mode = candidate_trading_mode
@@ -65,7 +65,7 @@ def local_trading_context(evaluator, symbol, time_frame, trigger_cache_timestamp
             symbol,
             time_frame,
             evaluator.logger,
-            trading_mode,
+            trading_mode_class,
             trigger_cache_timestamp,
             trigger_source,
             trigger_value,
