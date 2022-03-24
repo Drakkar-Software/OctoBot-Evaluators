@@ -83,15 +83,15 @@ class StrategyEvaluator(evaluator.AbstractEvaluator):
                                                notify=notify,
                                                origin_consumer=self.consumer_instance)
 
-    def is_technical_evaluator_cycle_complete(self, matrix_id, evaluator_name, evaluator_type, exchange_name,
-                                              cryptocurrency, symbol, time_frame) -> bool:
+    def is_evaluator_cycle_complete(self, matrix_id, evaluator_name, evaluator_type, exchange_name,
+                                    cryptocurrency, symbol, time_frame) -> bool:
         """
-        :return: True if the strategy is to be waken up by technical evaluators at the moment of this call.
+        :return: True if the strategy is to be waken up by evaluators of the given type at the moment of this call.
         This avoids partial time frame updates wakeup.
         Override if necessary
         """
         # 1. Ensure this evaluation has not already been sent
-        # 2. Ensure every technical evaluator form this time frame are valid
+        # 2. Ensure every evaluator of the given type form this time frame are valid
         return not self._already_sent_this_technical_evaluation(matrix_id,
                                                                 evaluator_name,
                                                                 evaluator_type,
@@ -118,6 +118,7 @@ class StrategyEvaluator(evaluator.AbstractEvaluator):
                                               self.matrix_id).remove_consumer(self.consumer_instance)
 
     def get_full_cycle_evaluator_types(self) -> tuple:
+        # returns a tuple as it is faster to create than a list
         return enums.EvaluatorMatrixTypes.TA.value,
 
     async def strategy_matrix_callback(self,
@@ -135,13 +136,13 @@ class StrategyEvaluator(evaluator.AbstractEvaluator):
             if evaluator_type == full_cycle_evaluator:
                 # ensure this time frame is within the strategy's time frames
                 if common_enums.TimeFrames(time_frame) not in self.strategy_time_frames or \
-                        not self.is_technical_evaluator_cycle_complete(matrix_id,
-                                                                       evaluator_name,
-                                                                       evaluator_type,
-                                                                       exchange_name,
-                                                                       cryptocurrency,
-                                                                       symbol,
-                                                                       time_frame):
+                        not self.is_evaluator_cycle_complete(matrix_id,
+                                                             evaluator_name,
+                                                             evaluator_type,
+                                                             exchange_name,
+                                                             cryptocurrency,
+                                                             symbol,
+                                                             time_frame):
                     # do not call the strategy
                     return
         await self.matrix_callback(

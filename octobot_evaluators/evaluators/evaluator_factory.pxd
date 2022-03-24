@@ -30,3 +30,4 @@ cdef list _prioritized_evaluators(list evaluators, object tentacles_setup_config
 
 cpdef tuple _extract_traded_pairs(dict symbols_by_crypto_currencies, str exchange_name, str matrix_id, object exchange_api)
 cpdef set _filter_pairs(list pairs, str required_ticker, object exchange_api, object exchange_manager)
+cpdef object create_temporary_evaluator_with_local_config(object evaluator_class, object tentacles_setup_config, object specific_config, bint should_trigger_post_init)
