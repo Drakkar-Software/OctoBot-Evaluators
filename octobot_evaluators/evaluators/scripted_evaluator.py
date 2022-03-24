@@ -32,8 +32,8 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
     __metaclass__ = evaluator.AbstractEvaluator
     EVALUATOR_SCRIPT_MODULE = None
 
-    def __init__(self, tentacles_setup_config, post_init=True):
-        super().__init__(tentacles_setup_config, post_init=post_init)
+    def __init__(self, tentacles_setup_config, should_trigger_post_init=True):
+        super().__init__(tentacles_setup_config, should_trigger_post_init=should_trigger_post_init)
         self._script = None
         self._are_candles_initialized = False
         self._has_script_been_called_once = False
@@ -206,12 +206,11 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
                 commons_enums.ActivationTopics.FULL_CANDLES.value,
                 commons_enums.ActivationTopics.IN_CONSTRUCTION_CANDLES.value
             ]
-            activation_method = await basic_keywords.user_input(
-                context, commons_constants.CONFIG_ACTIVATION_TOPICS, "options",
+            activation_method = await basic_keywords.get_activation_topics(
+                context,
                 commons_enums.ActivationTopics.FULL_CANDLES.value,
-                options=activation_topic_values,
-                show_in_optimizer=False, show_in_summary=False,
-                order=1000)
+                activation_topic_values
+            )
             self.is_triggered_after_candle_close = activation_method == \
                 commons_enums.ActivationTopics.FULL_CANDLES.value
         except ImportError:

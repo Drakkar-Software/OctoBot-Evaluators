@@ -22,6 +22,7 @@ import octobot_commons.logging as logging
 import octobot_evaluators.api as api
 import octobot_evaluators.evaluators as evaluator
 import octobot_evaluators.constants as constants
+import octobot_tentacles_manager.configuration as tm_configuration
 
 LOGGER_NAME = "EvaluatorsFactory"
 
@@ -63,6 +64,17 @@ async def create_evaluators(evaluator_parent_class,
                                              symbols)
         for time_frame in _get_time_frames_to_create(evaluator_class, time_frames)
     ]
+
+
+def create_temporary_evaluator_with_local_config(
+        evaluator_class,
+        tentacles_setup_config: tm_configuration.TentaclesSetupConfiguration,
+        specific_config: dict,
+        should_trigger_post_init=False):
+    evaluator_instance = evaluator_class(tentacles_setup_config, should_trigger_post_init=should_trigger_post_init)
+    evaluator_instance.logger = logging.get_logger(evaluator_instance.get_name())
+    evaluator_instance.specific_config = specific_config
+    return evaluator_instance
 
 
 def _get_cryptocurrency_name(evaluator_class, crypto_currency_name_by_crypto_currencies, cryptocurrency):

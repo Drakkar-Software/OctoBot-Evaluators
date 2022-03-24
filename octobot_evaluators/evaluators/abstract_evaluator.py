@@ -24,12 +24,12 @@ import async_channel.enums as channel_enums
 import octobot_commons.constants as common_constants
 import octobot_commons.databases as databases
 import octobot_commons.errors as commons_errors
-import octobot_commons.logging as commons_logging
 import octobot_commons.tentacles_management as tentacles_management
 
 import octobot_evaluators.evaluators.channel as evaluator_channels
 import octobot_evaluators.constants as constants
 import octobot_evaluators.matrix as matrix
+import octobot_evaluators.evaluators.evaluator_factory as evaluator_factory
 
 import octobot_evaluators.util as util
 
@@ -37,7 +37,8 @@ import octobot_evaluators.util as util
 class AbstractEvaluator(tentacles_management.AbstractTentacle):
     __metaclass__ = tentacles_management.AbstractTentacle
 
-    def __init__(self, tentacles_setup_config: tm_configuration.TentaclesSetupConfiguration, post_init=True):
+    def __init__(self, tentacles_setup_config: tm_configuration.TentaclesSetupConfiguration,
+                 should_trigger_post_init=True):
         super().__init__()
         # Evaluator matrix id
         self.matrix_id: str = None
@@ -98,7 +99,7 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
         # Other evaluators that might have been called by this evaluator.
         # This evaluator is now responsible for managing their cache
         self.called_nested_evaluators = set()
-        if post_init:
+        if should_trigger_post_init:
             self.post_init(tentacles_setup_config)
 
     def post_init(self, tentacles_setup_config):
@@ -111,25 +112,15 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
         pass
 
     @classmethod
-    def factory_with_local_config(
-            cls,
-            tentacles_setup_config: tm_configuration.TentaclesSetupConfiguration,
-            specific_config: dict,
-            post_init=False):
-        evaluator_instance = cls(tentacles_setup_config, post_init=post_init)
-        evaluator_instance.logger = commons_logging.get_logger(evaluator_instance.get_name())
-        evaluator_instance.specific_config = specific_config
-        return evaluator_instance
-
-    @classmethod
     async def single_evaluation(
             cls,
             tentacles_setup_config: tm_configuration.TentaclesSetupConfiguration,
             specific_config: dict,
             ignore_cache=False,
             **kwargs):
-        post_init = kwargs.pop("post_init", False)
-        evaluator_instance = cls.factory_with_local_config(tentacles_setup_config, specific_config, post_init)
+        should_trigger_post_init = kwargs.pop("should_trigger_post_init", False)
+        evaluator_instance = evaluator_factory.create_temporary_evaluator_with_local_config(
+            cls, tentacles_setup_config, specific_config, should_trigger_post_init)
         evaluation, error = await evaluator_instance.evaluator_manual_callback(ignore_cache=ignore_cache, **kwargs)
         return evaluation, error, evaluator_instance
 
@@ -292,8 +283,8 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
                 notify=notify,
                 origin_consumer=origin_consumer)
         except commons_errors.NoCacheValue:
-            self.logger.warning(f"Evaluation as \"DO_NOT_OVERRIDE_CACHE\" but the is no cache to publish an "
-                                f"evaluation from")
+            self.logger.warning(f"Evaluation as \"{common_constants.DO_NOT_OVERRIDE_CACHE}\" "
+                                f"but the is no cache to publish an evaluation from")
         except Exception as e:
             # if ConfigManager.is_in_dev_mode(self.config): # TODO
             #     raise e
@@ -328,14 +319,13 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
             await consumer.stop()
 
     async def clear_all_cache(self):
-        for evaluator_name in [self.get_name()] + [evaluator.get_name() for evaluator in
-                                                   self.called_nested_evaluators]:
-            await databases.CacheManager().clear_cache(evaluator_name)
+        for evaluator_identifier in util.get_related_cache_identifiers(self):
+            await databases.CacheManager().clear_cache(evaluator_identifier)
 
     async def close_caches(self, reset_cache_db_ids=False):
-        for evaluator_name in [self.get_name()] + [evaluator.get_name() for evaluator in self.called_nested_evaluators]:
+        for evaluator_identifier in util.get_related_cache_identifiers(self):
             await databases.CacheManager().close_cache(
-                evaluator_name,
+                evaluator_identifier,
                 self.exchange_name,
                 None if self.get_is_symbol_wildcard() else self.symbol,
                 None if self.get_is_time_frame_wildcard() else self.time_frame.value,

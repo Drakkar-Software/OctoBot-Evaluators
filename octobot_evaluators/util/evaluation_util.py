@@ -50,10 +50,6 @@ def local_trading_context(evaluator, symbol, time_frame, trigger_cache_timestamp
             exchange_id or exchange_api.get_exchange_id_from_matrix_id(evaluator.exchange_name, evaluator.matrix_id)
         )
         trading_modes = exchange_api.get_trading_modes(exchange_manager)
-        trading_mode_class = trading_modes[0].__class__
-        for candidate_trading_mode in trading_modes:
-            if exchange_api.get_trading_mode_symbol(candidate_trading_mode) == symbol:
-                trading_mode = candidate_trading_mode
         return modes.Context(
             evaluator,
             exchange_manager,
@@ -65,7 +61,7 @@ def local_trading_context(evaluator, symbol, time_frame, trigger_cache_timestamp
             symbol,
             time_frame,
             evaluator.logger,
-            trading_mode_class,
+            trading_modes[0].__class__,
             trigger_cache_timestamp,
             trigger_source,
             trigger_value,
@@ -75,3 +71,8 @@ def local_trading_context(evaluator, symbol, time_frame, trigger_cache_timestamp
     except ImportError:
         evaluator.logger.error("OctoBot-Evaluator local_trading_context requires OctoBot-Trading package installed")
         raise
+
+
+def get_related_cache_identifiers(evaluator):
+    return [evaluator.get_name()] + [nested_evaluator.get_name()
+                                     for nested_evaluator in evaluator.called_nested_evaluators]
