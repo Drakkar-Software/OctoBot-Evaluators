@@ -327,8 +327,8 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
             await databases.CacheManager().close_cache(
                 evaluator_identifier,
                 self.exchange_name,
-                None if self.get_is_symbol_wildcard() else self.symbol,
-                None if self.get_is_time_frame_wildcard() else self.time_frame.value,
+                common_constants.UNPROVIDED_CACHE_IDENTIFIER if self.get_is_symbol_wildcard() else self.symbol,
+                common_constants.UNPROVIDED_CACHE_IDENTIFIER if self.get_is_time_frame_wildcard() else self.time_frame.value,
                 reset_cache_db_ids=reset_cache_db_ids
             )
 
