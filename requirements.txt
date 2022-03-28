@@ -4,6 +4,6 @@ numpy==1.22.0
 
 # Drakkar-Software requirements
 Async-Channel>=2.0.13, <2.1
-OctoBot-Commons>=1.6.20, <1.7
+OctoBot-Commons>=1.6.20, <1.8
 OctoBot-Tentacles-Manager>=2.6.4, <2.7
 OctoBot-Tulipy==0.4.2
