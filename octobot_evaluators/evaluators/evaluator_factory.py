@@ -71,8 +71,7 @@ def create_temporary_evaluator_with_local_config(
         tentacles_setup_config: tm_configuration.TentaclesSetupConfiguration,
         specific_config: dict,
         should_trigger_post_init=False):
-    evaluator_instance = evaluator_class(tentacles_setup_config, should_trigger_post_init=should_trigger_post_init)
-    evaluator_instance.logger = logging.get_logger(evaluator_instance.get_name())
+    evaluator_instance = _instantiate_evaluator(evaluator_class, tentacles_setup_config, should_trigger_post_init)
     evaluator_instance.specific_config = specific_config
     return evaluator_instance
 
@@ -115,9 +114,8 @@ async def create_evaluator(evaluator_class,
                            time_frames=None,
                            real_time_time_frames=None):
     try:
-        eval_class_instance = evaluator_class(tentacles_setup_config)
+        eval_class_instance = _instantiate_evaluator(evaluator_class, tentacles_setup_config, True)
         if api.is_relevant_evaluator(eval_class_instance, relevant_evaluators):
-            eval_class_instance.logger = logging.get_logger(evaluator_class.get_name())
             eval_class_instance.matrix_id = matrix_id
             eval_class_instance.exchange_name = exchange_name if exchange_name else None
             eval_class_instance.cryptocurrency = cryptocurrency
@@ -132,6 +130,14 @@ async def create_evaluator(evaluator_class,
     except Exception as e:
         logging.get_logger(LOGGER_NAME).exception(e, True, f"Error when creating evaluator {evaluator_class}: {e}")
     return None
+
+
+def _instantiate_evaluator(evaluator_class, tentacles_setup_config, should_trigger_post_init):
+    eval_class_instance = evaluator_class(tentacles_setup_config)
+    eval_class_instance.logger = logging.get_logger(evaluator_class.get_name())
+    if should_trigger_post_init:
+        eval_class_instance.post_init(tentacles_setup_config)
+    return eval_class_instance
 
 
 async def _start_evaluators(evaluator_instances, tentacles_setup_config, bot_id):

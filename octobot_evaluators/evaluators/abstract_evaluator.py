@@ -37,8 +37,7 @@ import octobot_evaluators.util as util
 class AbstractEvaluator(tentacles_management.AbstractTentacle):
     __metaclass__ = tentacles_management.AbstractTentacle
 
-    def __init__(self, tentacles_setup_config: tm_configuration.TentaclesSetupConfiguration,
-                 should_trigger_post_init=True):
+    def __init__(self, tentacles_setup_config: tm_configuration.TentaclesSetupConfiguration):
         super().__init__()
         # Evaluator matrix id
         self.matrix_id: str = None
@@ -99,12 +98,10 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
         # Other evaluators that might have been called by this evaluator.
         # This evaluator is now responsible for managing their cache
         self.called_nested_evaluators = set()
-        if should_trigger_post_init:
-            self.post_init(tentacles_setup_config)
 
     def post_init(self, tentacles_setup_config):
         """
-        Automatically called after __init__ when post_init is True (default)
+        Automatically called after __init__ when post_init is True (default) in evaluator_factory
         Override when necessary
         :param tentacles_setup_config: the tentacles_setup_config __init__ argument
         :return: None
@@ -117,8 +114,8 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
             tentacles_setup_config: tm_configuration.TentaclesSetupConfiguration,
             specific_config: dict,
             ignore_cache=False,
+            should_trigger_post_init=False,
             **kwargs):
-        should_trigger_post_init = kwargs.pop("should_trigger_post_init", False)
         evaluator_instance = evaluator_factory.create_temporary_evaluator_with_local_config(
             cls, tentacles_setup_config, specific_config, should_trigger_post_init)
         evaluation, error = await evaluator_instance.evaluator_manual_callback(ignore_cache=ignore_cache, **kwargs)

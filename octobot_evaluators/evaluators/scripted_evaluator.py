@@ -32,8 +32,8 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
     __metaclass__ = evaluator.AbstractEvaluator
     EVALUATOR_SCRIPT_MODULE = None
 
-    def __init__(self, tentacles_setup_config, should_trigger_post_init=True):
-        super().__init__(tentacles_setup_config, should_trigger_post_init=should_trigger_post_init)
+    def __init__(self, tentacles_setup_config):
+        super().__init__(tentacles_setup_config)
         self._script = None
         self._are_candles_initialized = False
         self._has_script_been_called_once = False
