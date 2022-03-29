@@ -20,6 +20,7 @@ from octobot_evaluators.util.evaluation_util import (
     get_eval_time,
     get_shortest_time_frame,
     local_trading_context,
+    local_cache_client,
     get_related_cache_identifiers,
 )
 
@@ -27,6 +28,7 @@ __all__ = [
     "get_eval_time",
     "get_shortest_time_frame",
     "local_trading_context",
+    "local_cache_client",
     "get_related_cache_identifiers",
 ]
 

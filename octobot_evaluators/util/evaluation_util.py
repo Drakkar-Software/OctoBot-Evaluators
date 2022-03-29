@@ -15,6 +15,7 @@
 #  License along with this library.
 import octobot_commons.enums as enums
 import octobot_commons.constants as constants
+import octobot_commons.databases as databases
 import octobot_commons.time_frame_manager as time_frame_manager
 
 
@@ -70,6 +71,22 @@ def local_trading_context(evaluator, symbol, time_frame, trigger_cache_timestamp
         )
     except ImportError:
         evaluator.logger.error("OctoBot-Evaluator local_trading_context requires OctoBot-Trading package installed")
+        raise
+
+
+def local_cache_client(evaluator, symbol, time_frame, exchange_name=None):
+    try:
+        exchange_name = exchange_name or evaluator.exchange_name
+        import octobot_trading.api as exchange_api
+        exchange_manager = exchange_api.get_exchange_manager_from_exchange_name_and_id(
+            exchange_name,
+            exchange_api.get_exchange_id_from_matrix_id(exchange_name, evaluator.matrix_id)
+        )
+        return databases.CacheClient(evaluator, exchange_name, symbol, time_frame,
+                                     evaluator.tentacles_setup_config,
+                                     not exchange_api.get_is_backtesting(exchange_manager))
+    except ImportError:
+        evaluator.logger.error("OctoBot-Evaluator local_cache_client requires OctoBot-Trading package installed")
         raise
 
 

@@ -239,7 +239,7 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
                                    eval_time=0,
                                    notify=True,
                                    origin_consumer=None,
-                                   context=None,
+                                   cache_client=None,
                                    cache_if_available=True) -> None:
         """
         Main async method to notify matrix to update
@@ -250,6 +250,8 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
         :param eval_time: the time of the evaluation if relevant, default is 0
         :param notify: if true, will trigger matrix consumers
         :param origin_consumer: the sender consumer if it doesn't want to be notified
+        :param cache_client: an existing cache client to avoid creating a local one
+        :param cache_if_available: when True, if the evaluator is using cache, its value will be cached
         :return: None
         """
         try:
@@ -257,13 +259,13 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
                 eval_note = self.eval_note if self.eval_note is not None else common_constants.START_PENDING_EVAL_NOTE
 
             if self.use_cache():
-                ctx = context or util.local_trading_context(self, symbol, time_frame, eval_time)
+                cache_client = cache_client or util.local_cache_client(self, symbol, time_frame)
                 if self.eval_note == common_constants.DO_NOT_OVERRIDE_CACHE:
-                    self.eval_note, missing = await ctx.get_cached_value()
-                    ctx.ensure_no_missing_cached_value(missing)
+                    self.eval_note, missing = await cache_client.get_cached_value(cache_key=eval_time)
+                    cache_client.ensure_no_missing_cached_value(missing)
                     eval_note = self.eval_note
                 elif cache_if_available and eval_note != common_constants.DO_NOT_CACHE:
-                    await ctx.set_cached_value(eval_note, flush_if_necessary=True)
+                    await cache_client.set_cached_value(eval_note, cache_key=eval_time, flush_if_necessary=True)
             self.ensure_eval_note_is_not_expired()
             await evaluator_channels.get_chan(constants.MATRIX_CHANNEL,
                                               self.matrix_id).get_internal_producer().send_eval_note(

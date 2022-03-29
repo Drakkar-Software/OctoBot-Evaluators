@@ -188,7 +188,8 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
                 self.logger.error("Can't compute evaluation time, using exchange time")
                 eval_time = trading_api.get_exchange_current_time(context.exchange_manager)
             await self.evaluation_completed(cryptocurrency, symbol, time_frame,
-                                            eval_time=eval_time, context=context, cache_if_available=not from_cache)
+                                            eval_time=eval_time, cache_client=context,
+                                            cache_if_available=not from_cache)
         except (commons_errors.MissingDataError, commons_errors.ExecutionAborted) as e:
             self.logger.debug(f"Script execution aborted: {e}")
             self.eval_note = commons_constants.DO_NOT_CACHE

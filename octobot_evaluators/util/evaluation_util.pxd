@@ -20,4 +20,5 @@ cpdef object get_shortest_time_frame(object ideal_time_frame, object preferred_a
 cpdef object local_trading_context(object evaluator=*, str symbol, object time_frame, object trigger_cache_timestamp,
                                    str cryptocurrency=*, str exchange=*, str exchange_id=*,
                                    object trigger_source=*, object trigger_value=*)
+cpdef object local_cache_client(object evaluator, str symbol, object time_frame, str exchange_name=*)
 cpdef list get_related_cache_identifiers(object evaluator)
