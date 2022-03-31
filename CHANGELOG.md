@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
  
+## [1.7.0] - 2022-03-31
+### Added
+- [Scripted] Support for scripted evaluators
+- [Caching] Support for cache in evaluators
+
 ## [1.6.24] - 2022-01-23
 ### Fixed
 -  [API] Fix init_required_candles_count when candles_count is empty
