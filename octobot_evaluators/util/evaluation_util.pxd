@@ -17,7 +17,7 @@
 
 cpdef double get_eval_time(list full_candle=*, object time_frame=*, list partial_candle=*, list kline=*)
 cpdef object get_shortest_time_frame(object ideal_time_frame, object preferred_available_time_frames, object others)
-cpdef object local_trading_context(object evaluator=*, str symbol, object time_frame, object trigger_cache_timestamp,
+cpdef object local_trading_context(object evaluator, str symbol, object time_frame, object trigger_cache_timestamp,
                                    str cryptocurrency=*, str exchange=*, str exchange_id=*,
                                    object trigger_source=*, object trigger_value=*)
 cpdef object local_cache_client(object evaluator, str symbol, object time_frame, str exchange_name=*)
