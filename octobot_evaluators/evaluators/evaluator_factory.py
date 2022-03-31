@@ -69,7 +69,7 @@ async def create_evaluators(evaluator_parent_class,
 def create_temporary_evaluator_with_local_config(
         evaluator_class,
         tentacles_setup_config: tm_configuration.TentaclesSetupConfiguration,
-        specific_config: dict,
+        specific_config,
         should_trigger_post_init=False):
     evaluator_instance = _instantiate_evaluator(evaluator_class, tentacles_setup_config, should_trigger_post_init)
     evaluator_instance.specific_config = specific_config
