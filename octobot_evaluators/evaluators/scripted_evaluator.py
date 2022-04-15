@@ -200,7 +200,7 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
 
     async def _pre_script_call(self, context):
         try:
-            import octobot_trading.modes.scripted_library.basic_keywords as basic_keywords
+            import octobot_trading.modes.script_keywords.basic_keywords as basic_keywords
             # Always register activation_topics use input to enable changing it from run metadata
             # (where user inputs are registered)
             activation_topic_values = [
