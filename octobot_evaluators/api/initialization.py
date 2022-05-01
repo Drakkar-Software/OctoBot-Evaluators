@@ -18,13 +18,13 @@ import async_channel.util as channel_util
 import octobot_tentacles_manager.api as api
 
 import octobot_commons.constants as common_constants
-import octobot_commons.channels_name as channels_name
 import octobot_commons.tentacles_management as tentacles_management
 import octobot_commons.time_frame_manager as time_frame_manager
 
 import octobot_evaluators.evaluators.channel as evaluator_channels
 import octobot_evaluators.constants as constants
 import octobot_evaluators.evaluators as evaluator
+import octobot_evaluators.util as util
 
 
 def init_time_frames_from_strategies(config, tentacles_setup_config) -> None:
@@ -37,7 +37,7 @@ def init_time_frames_from_strategies(config, tentacles_setup_config) -> None:
 
 
 def init_required_candles_count_from_evaluators_and_strategies(config, tentacles_setup_config) -> None:
-    candles_counts = [tentacle_class.get_required_candles_count(tentacles_setup_config)
+    candles_counts = [util.get_required_candles_count(tentacle_class, tentacles_setup_config)
                       for tentacle_class in get_activated_evaluators(tentacles_setup_config)]
     config[common_constants.CONFIG_TENTACLES_REQUIRED_CANDLES_COUNT] = max(candles_counts) if candles_counts \
         else common_constants.DEFAULT_IGNORED_VALUE

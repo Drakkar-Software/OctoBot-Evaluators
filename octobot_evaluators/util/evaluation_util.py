@@ -17,6 +17,7 @@ import octobot_commons.enums as enums
 import octobot_commons.constants as constants
 import octobot_commons.databases as databases
 import octobot_commons.time_frame_manager as time_frame_manager
+import octobot_tentacles_manager.api as tentacles_manager_api
 
 
 def get_eval_time(full_candle=None, time_frame=None, partial_candle=None, kline=None):
@@ -93,3 +94,10 @@ def local_cache_client(evaluator, symbol, time_frame, exchange_name=None):
 def get_related_cache_identifiers(evaluator):
     return [evaluator.get_name()] + [nested_evaluator.get_name()
                                      for nested_evaluator in evaluator.called_nested_evaluators]
+
+
+def get_required_candles_count(trading_mode_class, tentacles_setup_config):
+    return tentacles_manager_api.get_tentacle_config(tentacles_setup_config, trading_mode_class).get(
+        constants.CONFIG_TENTACLES_REQUIRED_CANDLES_COUNT,
+        constants.DEFAULT_IGNORED_VALUE
+    )

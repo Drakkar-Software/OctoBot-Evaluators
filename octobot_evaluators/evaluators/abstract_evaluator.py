@@ -166,13 +166,6 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
         """
         return True
 
-    @classmethod
-    def get_required_candles_count(cls, tentacles_setup_config: tm_configuration.TentaclesSetupConfiguration):
-        return api.get_tentacle_config(tentacles_setup_config, cls).get(
-            common_constants.CONFIG_TENTACLES_REQUIRED_CANDLES_COUNT,
-            common_constants.DEFAULT_IGNORED_VALUE
-        )
-
     def get_trigger_time_frames(self):
         return self.specific_config.get(common_constants.CONFIG_TRIGGER_TIMEFRAMES, common_constants.CONFIG_WILDCARD)
 
