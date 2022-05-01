@@ -22,3 +22,4 @@ cpdef object local_trading_context(object evaluator, str symbol, object time_fra
                                    object trigger_source=*, object trigger_value=*)
 cpdef object local_cache_client(object evaluator, str symbol, object time_frame, str exchange_name=*)
 cpdef list get_related_cache_identifiers(object evaluator)
+cpdef int get_required_candles_count(object trading_mode_class, object tentacles_setup_config)
