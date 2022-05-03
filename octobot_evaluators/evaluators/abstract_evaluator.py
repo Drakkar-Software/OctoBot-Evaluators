@@ -22,7 +22,6 @@ import async_channel.constants as channel_constants
 import async_channel.enums as channel_enums
 
 import octobot_commons.constants as common_constants
-import octobot_commons.databases as databases
 import octobot_commons.errors as commons_errors
 import octobot_commons.tentacles_management as tentacles_management
 
@@ -94,10 +93,6 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
 
         # True when this evaluator is only triggered on closed candles
         self.is_triggered_after_candle_close = False
-
-        # Other evaluators that might have been called by this evaluator.
-        # This evaluator is now responsible for managing their cache
-        self.called_nested_evaluators = set()
 
     def post_init(self, tentacles_setup_config):
         """
@@ -306,23 +301,8 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
         implement if necessary
         :return: None
         """
-        await self.close_caches()
         for consumer in self.consumers:
             await consumer.stop()
-
-    async def clear_all_cache(self):
-        for evaluator_identifier in util.get_related_cache_identifiers(self):
-            await databases.CacheManager().clear_cache(evaluator_identifier)
-
-    async def close_caches(self, reset_cache_db_ids=False):
-        for evaluator_identifier in util.get_related_cache_identifiers(self):
-            await databases.CacheManager().close_cache(
-                evaluator_identifier,
-                self.exchange_name,
-                common_constants.UNPROVIDED_CACHE_IDENTIFIER if self.get_is_symbol_wildcard() else self.symbol,
-                common_constants.UNPROVIDED_CACHE_IDENTIFIER if self.get_is_time_frame_wildcard() else self.time_frame.value,
-                reset_cache_db_ids=reset_cache_db_ids
-            )
 
     async def prepare(self) -> None:
         """
