@@ -247,8 +247,6 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
         if action == commons_enums.UserCommands.RELOAD_SCRIPT.value:
             # live_script = data[AbstractScriptedTradingMode.USER_COMMAND_RELOAD_SCRIPT_IS_LIVE]
             await self._reload_script()
-        if action == commons_enums.UserCommands.CLEAR_ALL_CACHE.value:
-            await self.clear_all_cache()
 
     async def _reload_script(self):
         importlib.reload(self.__class__.EVALUATOR_SCRIPT_MODULE)
@@ -258,7 +256,6 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
         if self.last_call:
             # todo cancel and restart live tasks
             # recall script with for are_data_initialized to false to re-write initial data
-            await self.close_caches(reset_cache_db_ids=True)
             run_data_db, symbol_db = self._get_run_and_symbol_dbs()
             time_frames = None if self.get_is_time_frame_wildcard() else (self.time_frame.value, )
             run_data_db.set_initialized_flags(False)

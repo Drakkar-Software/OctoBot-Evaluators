@@ -91,11 +91,6 @@ def local_cache_client(evaluator, symbol, time_frame, exchange_name=None):
         raise
 
 
-def get_related_cache_identifiers(evaluator):
-    return [evaluator.get_name()] + [nested_evaluator.get_name()
-                                     for nested_evaluator in evaluator.called_nested_evaluators]
-
-
 def get_required_candles_count(trading_mode_class, tentacles_setup_config):
     return tentacles_manager_api.get_tentacle_config(tentacles_setup_config, trading_mode_class).get(
         constants.CONFIG_TENTACLES_REQUIRED_CANDLES_COUNT,
