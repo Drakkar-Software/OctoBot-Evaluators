@@ -142,7 +142,7 @@ class MatrixChannel(evaluator_channels.EvaluatorChannel):
                            evaluator_type: object = channel_constants.CHANNEL_WILDCARD,
                            exchange_name: str = channel_constants.CHANNEL_WILDCARD,
                            time_frame=channel_constants.CHANNEL_WILDCARD,
-                           supervised: bool = False) -> MatrixChannelConsumer:
+                           supervised: bool = False):
         consumer_class = MatrixChannelSupervisedConsumer if supervised else MatrixChannelConsumer
         consumer = consumer_class(callback, size=size, priority_level=priority_level)
         await self._add_new_consumer_and_run(consumer,
