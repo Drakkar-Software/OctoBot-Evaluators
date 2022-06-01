@@ -20,7 +20,7 @@ import octobot_tentacles_manager.api as tentacles_api
 import octobot_evaluators.evaluators as evaluators
 import octobot_commons.enums as enums
 import octobot_commons.constants as constants
-import octobot_commons.symbol_util as symbol_util
+import octobot_commons.symbols.symbol_util as symbol_util
 import octobot_evaluators.evaluators.evaluator_factory as evaluator_factory
 from octobot_evaluators.evaluators.evaluator_factory import _extract_traded_pairs, _filter_pairs
 
@@ -40,7 +40,7 @@ time_frames = [enums.TimeFrames.ONE_HOUR, enums.TimeFrames.FOUR_HOURS]
 crypto_currency_name_by_crypto_currencies = {}
 symbols_by_crypto_currency_tickers = {}
 for name, symbol_list in symbols_by_crypto_currencies.items():
-    ticker = symbol_util.split_symbol(symbol_list[0])[0]
+    ticker = symbol_util.parse_symbol(symbol_list[0]).base
     crypto_currency_name_by_crypto_currencies[ticker] = name
     symbols_by_crypto_currency_tickers[ticker] = symbol_list
 
@@ -269,4 +269,4 @@ class ExchangeAPIMock:
         return None
 
     def get_base_currency(self, exchange_manager, symbol):
-        return symbol_util.split_symbol(symbol)[0]
+        return symbol_util.parse_symbol(symbol).base
