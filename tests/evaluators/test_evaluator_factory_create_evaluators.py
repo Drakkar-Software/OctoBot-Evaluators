@@ -17,7 +17,7 @@ import pytest
 from mock import patch
 import octobot_evaluators.evaluators.evaluator_factory as evaluator_factory
 from octobot_commons.enums import TimeFrames
-from octobot_commons.symbol_util import split_symbol
+import octobot_commons.symbols
 
 
 # All test coroutines will be treated as marked.
@@ -169,7 +169,7 @@ async def _create_evaluators(evaluator_parent_class, symbols_by_crypto_currencie
     crypto_currency_name_by_crypto_currencies = {}
     symbols_by_crypto_currency_tickers = {}
     for name, symbol_list in symbols_by_crypto_currencies.items():
-        ticker = split_symbol(symbol_list[0])[0]
+        ticker = octobot_commons.symbols.parse_symbol(symbol_list[0]).base
         crypto_currency_name_by_crypto_currencies[ticker] = name
         symbols_by_crypto_currency_tickers[ticker] = symbol_list
     with patch("octobot_evaluators.evaluators.evaluator_factory.create_evaluator", new=_mocked_create_evaluator), \
