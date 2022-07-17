@@ -15,6 +15,7 @@
 #  License along with this library.
 import asyncio
 import pytest
+import pytest_asyncio
 import os.path as path
 import aiohttp
 
@@ -41,14 +42,14 @@ def event_loop():
     loop.close()
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def matrix_id():
     created_matrix_id = evaluator_api.create_matrix()
     yield created_matrix_id
     matrices.Matrices.instance().del_matrix(created_matrix_id)
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def install_tentacles():
     def _cleanup(raises=True):
         if path.exists(constants.TENTACLES_PATH):
@@ -64,7 +65,7 @@ async def install_tentacles():
     _cleanup()
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def evaluators_and_matrix_channels(matrix_id):
     evaluators_channel = await channel_creator.create_channel_instance(evaluator_channels.EvaluatorsChannel,
                                                                        evaluator_channels.set_chan,

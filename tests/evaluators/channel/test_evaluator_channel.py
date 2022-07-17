@@ -14,10 +14,12 @@
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
 import pytest
+import pytest_asyncio
 
 from async_channel.util.channel_creator import create_channel_instance
 from octobot_evaluators.api.initialization import del_evaluator_channels
 from octobot_evaluators.evaluators.channel.evaluator_channel import get_chan, set_chan, EvaluatorChannel
+import octobot_commons.asyncio_tools as asyncio_tools
 
 from tests import matrix_id
 
@@ -28,11 +30,18 @@ async def evaluator_callback():
     pass
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def evaluator_channel(matrix_id):
-    del_evaluator_channels(matrix_id)
-    await create_channel_instance(EvaluatorChannel, set_chan, matrix_id=matrix_id)
-    return matrix_id
+    channel = None
+    try:
+        del_evaluator_channels(matrix_id)
+        channel = await create_channel_instance(EvaluatorChannel, set_chan, matrix_id=matrix_id)
+        yield matrix_id
+    finally:
+        if channel is not None:
+            # gracefully stop channel
+            await channel.stop()
+        del_evaluator_channels(matrix_id)
 
 
 @pytest.mark.asyncio
