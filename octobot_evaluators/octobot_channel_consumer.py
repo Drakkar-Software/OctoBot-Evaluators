@@ -79,4 +79,6 @@ async def _handle_creation(bot_id, action, data):
                             data[OctoBotChannelEvaluatorDataKeys.MATRIX_ID.value]})
 
         except Exception as e:
-            logging.get_logger(OCTOBOT_CHANNEL_EVALUATOR_CONSUMER_LOGGER_TAG).error(f"Error when creating new evaluator {e}")
+            logging.get_logger(OCTOBOT_CHANNEL_EVALUATOR_CONSUMER_LOGGER_TAG).exception(
+                e, True, f"Error when creating new evaluator {e}"
+            )
