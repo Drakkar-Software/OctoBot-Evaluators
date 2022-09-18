@@ -116,6 +116,7 @@ class StrategyEvaluator(evaluator.AbstractEvaluator):
         if self.consumer_instance:
             await evaluator_channels.get_chan(constants.MATRIX_CHANNEL,
                                               self.matrix_id).remove_consumer(self.consumer_instance)
+            self.consumer_instance = None
 
     def get_full_cycle_evaluator_types(self) -> tuple:
         # returns a tuple as it is faster to create than a list
