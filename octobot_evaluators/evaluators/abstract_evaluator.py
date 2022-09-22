@@ -20,6 +20,7 @@ import octobot_tentacles_manager.configuration as tm_configuration
 
 import async_channel.constants as channel_constants
 import async_channel.enums as channel_enums
+import async_channel.channels as channels
 
 import octobot_commons.constants as common_constants
 import octobot_commons.errors as commons_errors
@@ -83,9 +84,6 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
 
         # Active tells if this evaluator is currently activated (an evaluator can be paused)
         self.is_active: bool = True
-
-        # Evaluators Channel consumer instance
-        self.evaluators_consumer_instance = None
 
         self.eval_note_time_to_live = None
         self.eval_note_changed_time = None
@@ -290,15 +288,35 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
         """
         :return: success of the evaluator's start
         """
-        self.evaluators_consumer_instance = await evaluator_channels.get_chan(constants.EVALUATORS_CHANNEL,
-                                                                              self.matrix_id) \
-            .new_consumer(
+        self.consumers.append(
+            await evaluator_channels.get_chan(constants.EVALUATORS_CHANNEL, self.matrix_id).new_consumer(
                 self.evaluators_callback,
                 cryptocurrency=self.cryptocurrency if self.cryptocurrency else channel_constants.CHANNEL_WILDCARD,
                 symbol=self.symbol if self.symbol else channel_constants.CHANNEL_WILDCARD,
                 time_frame=self.time_frame if self.time_frame else channel_constants.CHANNEL_WILDCARD,
                 priority_level=self.priority_level,
             )
+        )
+
+        try:
+            import octobot_services.channel as services_channels
+            self.consumers.append(
+                await channels.get_chan(services_channels.UserCommandsChannel.get_name()).new_consumer(
+                    self.user_commands_callback,
+                    {"bot_id": bot_id, "subject": self.get_name()}
+                )
+            )
+        except KeyError:
+            # UserCommandsChannel might not be available
+            pass
+        except ImportError:
+            self.logger.warning("Can't connect to services channels")
+
+    async def user_commands_callback(self, bot_id, subject, action, data) -> None:
+        self.logger.debug(f"Received {action} command")
+        if action == commons_enums.UserCommands.RELOAD_CONFIG.value:
+            await self.reload_config(bot_id)
+            self.logger.debug("Reloaded configuration")
 
     async def stop(self) -> None:
         """
