@@ -16,7 +16,6 @@
 import importlib
 
 import async_channel.constants as channel_constants
-import async_channel.channels as channels
 
 import octobot_commons.channels_name as channels_name
 import octobot_commons.enums as commons_enums
@@ -242,10 +241,10 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
     def get_script(self):
         return self._script
 
-    async def _user_commands_callback(self, bot_id, subject, action, data) -> None:
-        self.logger.debug(f"Received {action} command.")
-        if action == commons_enums.UserCommands.RELOAD_SCRIPT.value:
-            # live_script = data[AbstractScriptedTradingMode.USER_COMMAND_RELOAD_SCRIPT_IS_LIVE]
+    async def user_commands_callback(self, bot_id, subject, action, data) -> None:
+        await super().user_commands_callback(bot_id, subject, action, data)
+        if action in (commons_enums.UserCommands.RELOAD_SCRIPT.value, commons_enums.UserCommands.RELOAD_CONFIG.value):
+            # also reload script on RELOAD_CONFIG
             await self._reload_script()
 
     async def _reload_script(self):
@@ -301,19 +300,8 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
                         new_consumer(self.evaluator_kline_callback, cryptocurrency=cryptocurrency,
                                      symbol=symbol, time_frame=time_frame, priority_level=self.priority_level)
                 )
-            import octobot_services.channel as services_channels
-            try:
-                consumers.append(
-                    await channels.get_chan(services_channels.UserCommandsChannel.get_name()).new_consumer(
-                        self._user_commands_callback,
-                        {"bot_id": bot_id, "subject": self.get_name()}
-                    )
-                )
-            except KeyError:
-                # UserCommandsChannel might not be available
-                pass
         except ImportError:
-            self.logger.warning("Can't connect to trading / services channels")
+            self.logger.warning("Can't connect to trading channels")
         return consumers
 
     def _get_channel_registration(self):
