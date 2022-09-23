@@ -361,7 +361,7 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
         await self.load_and_save_user_inputs(bot_id)
 
     @classmethod
-    def create_local_instance(cls, tentacles_setup_config, tentacle_config):
+    def create_local_instance(cls, _, tentacles_setup_config, tentacle_config):
         return evaluator_factory.create_temporary_evaluator_with_local_config(
             cls, tentacles_setup_config, tentacle_config, False
         )
