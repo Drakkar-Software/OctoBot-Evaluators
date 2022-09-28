@@ -21,6 +21,7 @@ import octobot_commons.channels_name as channels_name
 import octobot_commons.enums as commons_enums
 import octobot_commons.constants as commons_constants
 import octobot_commons.errors as commons_errors
+import octobot_commons.databases as commons_databases
 
 import octobot_evaluators.evaluators as evaluator
 import octobot_evaluators.util as evaluators_util
@@ -272,7 +273,7 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
                 trading_api.get_exchange_id_from_matrix_id(self.exchange_name, self.matrix_id)
             )
             bot_id = trading_api.get_bot_id(exchange_manager)
-            return trading_api.get_run_db(bot_id), trading_api.get_symbol_db(bot_id, self.exchange_name, self.symbol)
+            return commons_databases.get_run_db(bot_id), commons_databases.get_symbol_db(bot_id, self.exchange_name, self.symbol)
         except ImportError:
             self.logger.error("required OctoBot-trading to get a trading mode writer")
             raise
