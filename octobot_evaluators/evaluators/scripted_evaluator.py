@@ -273,7 +273,8 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
                 trading_api.get_exchange_id_from_matrix_id(self.exchange_name, self.matrix_id)
             )
             bot_id = trading_api.get_bot_id(exchange_manager)
-            return commons_databases.get_run_db(bot_id), commons_databases.get_symbol_db(bot_id, self.exchange_name, self.symbol)
+            return commons_databases.get_run_db(bot_id), commons_databases.get_symbol_db(bot_id, self.exchange_name,
+                                                                                         self.symbol)
         except ImportError:
             self.logger.error("required OctoBot-trading to get a trading mode writer")
             raise
