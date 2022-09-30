@@ -14,15 +14,15 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
-cimport octobot_commons.event_tree as event_tree
+cimport octobot_commons.tree as tree
 
 cimport octobot_evaluators.matrix.matrix as matrix
 
 cpdef matrix.Matrix get_matrix(str matrix_id)
 cpdef void set_tentacle_value(str matrix_id, list tentacle_path, object tentacle_type,
                               object tentacle_value, double timestamp=*)
-cpdef event_tree.EventTreeNode get_tentacle_node(str matrix_id, list tentacle_path)
-cpdef event_tree.EventTreeNode delete_tentacle_node(str matrix_id, list tentacle_path)
+cpdef tree.BaseTreeNode get_tentacle_node(str matrix_id, list tentacle_path)
+cpdef tree.BaseTreeNode delete_tentacle_node(str matrix_id, list tentacle_path)
 cpdef object get_tentacle_value(str matrix_id, list tentacle_path)
 cpdef list get_matrix_default_value_path(str tentacle_name,
                                          object tentacle_type,

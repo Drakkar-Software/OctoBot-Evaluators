@@ -15,21 +15,21 @@
 #  License along with this library.
 import uuid
 
-import octobot_commons.event_tree as event_tree
+import octobot_commons.tree as tree
 
 
 class Matrix:
     """
-    Matrix dataclass store tentacles data in a EventTree
+    Matrix dataclass store tentacles data in a BaseTree
     """
     __slots__ = ['matrix_id', 'matrix']
 
     def __init__(self):
         """
-        Initialize the matrix as an EventTree instance
+        Initialize the matrix as an BaseTree instance
         """
         self.matrix_id = str(uuid.uuid4())
-        self.matrix = event_tree.EventTree()
+        self.matrix = tree.BaseTree()
 
     def set_node_value(self, value, value_type, value_path, timestamp=0):
         """
@@ -50,7 +50,7 @@ class Matrix:
         """
         try:
             return list(self.matrix.get_node(node_path, starting_node=starting_node).children.values())
-        except event_tree.NodeExistsError:
+        except tree.NodeExistsError:
             return []
 
     def get_node_children_by_names_at_path(self, node_path, starting_node=None):
@@ -63,29 +63,29 @@ class Matrix:
         try:
             return {key: val
                     for key, val in self.matrix.get_node(node_path, starting_node=starting_node).children.items()}
-        except event_tree.NodeExistsError:
+        except tree.NodeExistsError:
             return {}
 
     def get_node_at_path(self, node_path, starting_node=None):
         """
-        Get the EventTreeNode at path
+        Get the BaseTreeNode at path
         :param node_path: the node path
         :param starting_node: the node to start the relative path
         :return: the node instance at path
         """
         try:
             return self.matrix.get_node(node_path, starting_node=starting_node)
-        except event_tree.NodeExistsError:
+        except tree.NodeExistsError:
             return None
 
     def delete_node_at_path(self, node_path, starting_node=None):
         """
-        Delete the EventTreeNode at path
+        Delete the BaseTreeNode at path
         :param node_path: the node path
         :param starting_node: the node to start the relative path
         :return: the deleted node
         """
         try:
             return self.matrix.delete_node(node_path, starting_node=starting_node)
-        except event_tree.NodeExistsError:
+        except tree.NodeExistsError:
             return None
