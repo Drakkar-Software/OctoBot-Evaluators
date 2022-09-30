@@ -25,10 +25,7 @@ import async_channel.channels as channels
 import octobot_commons.constants as common_constants
 import octobot_commons.errors as commons_errors
 import octobot_commons.enums as commons_enums
-import octobot_commons.dict_util as dict_util
 import octobot_commons.tentacles_management as tentacles_management
-import octobot_commons.configuration as configuration
-import octobot_commons.databases as databases
 
 import octobot_evaluators.evaluators.channel as evaluator_channels
 import octobot_evaluators.constants as constants
@@ -40,6 +37,7 @@ import octobot_evaluators.util as util
 
 class AbstractEvaluator(tentacles_management.AbstractTentacle):
     __metaclass__ = tentacles_management.AbstractTentacle
+    USER_INPUT_TENTACLE_TYPE = commons_enums.UserInputTentacleTypes.EVALUATOR
 
     def __init__(self, tentacles_setup_config: tm_configuration.TentaclesSetupConfiguration):
         super().__init__()
@@ -180,6 +178,9 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
     def use_cache(cls):
         return False
 
+    def get_local_config(self):
+        return self.specific_config
+
     def _get_tentacle_registration_topic(self, all_symbols_by_crypto_currencies, time_frames, real_time_time_frames):
         currencies = [self.cryptocurrency]
         symbols = [self.symbol]
@@ -199,7 +200,8 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
                                      if tf in trigger_timeframes]
         return currencies, symbols, available_time_frames
 
-    def initialize(self, all_symbols_by_crypto_currencies, time_frames, real_time_time_frames):
+    async def initialize(self, all_symbols_by_crypto_currencies, time_frames, real_time_time_frames, bot_id):
+        await self.reload_config(bot_id)
         currencies, symbols, time_frames = self._get_tentacle_registration_topic(all_symbols_by_crypto_currencies,
                                                                                  time_frames,
                                                                                  real_time_time_frames)
@@ -338,124 +340,31 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
         Start a task as matrix producer
         :return: None
         """
-        await self.reload_config(bot_id)
         if await self.start(bot_id):
             self.logger.debug("Evaluator started")
         else:
             self.logger.debug("Evaluator not started")
 
     async def reload_config(self, bot_id: str) -> None:
-        self.specific_config = api.get_tentacle_config(self.tentacles_setup_config, self.__class__)
-        try:
-            inputs = {}
-            self.init_user_inputs(inputs)
-            run_db = databases.RunDatabasesProvider.instance().get_run_db(bot_id)
-            for user_input in inputs.values():
-                await configuration.save_user_input(user_input, run_db)
-        except Exception as e:
-            self.logger.exception(e, True, f"Error when initializing user inputs: {e}")
+        self.set_default_config()
+        specific_config = api.get_tentacle_config(self.tentacles_setup_config, self.__class__)
+
+        if not specific_config and self.ALLOW_SUPER_CLASS_CONFIG:
+            # if nothing in config, try with any super-class' config file
+            for super_class in self.get_parent_evaluator_classes(AbstractEvaluator):
+                try:
+                    if specific_config := api.get_tentacle_config(self.tentacles_setup_config, super_class):
+                        break
+                except KeyError:
+                    pass  # super_class tentacle config not found
+        self.specific_config.update(specific_config)
+        await self.load_and_save_user_inputs(bot_id)
 
     @classmethod
-    async def get_raw_config_and_user_inputs(cls, tentacles_setup_config, bot_id):
-        specific_config = api.get_tentacle_config(tentacles_setup_config, cls)
-        if saved_user_inputs := await configuration.get_user_inputs(
-            databases.RunDatabasesProvider.instance().get_run_db(bot_id),
-            cls.get_name()
-        ):
-            # user inputs have been saved in run database, use those as they might contain additional
-            # (nested) user inputs
-            return specific_config, saved_user_inputs
-        # use user inputs from init_user_inputs
-        evaluator_instance = evaluator_factory.create_temporary_evaluator_with_local_config(
-            cls, tentacles_setup_config, specific_config, False
+    def create_local_instance(cls, tentacles_setup_config, tentacle_config):
+        return evaluator_factory.create_temporary_evaluator_with_local_config(
+            cls, tentacles_setup_config, tentacle_config, False
         )
-        user_inputs = {}
-        evaluator_instance.init_user_inputs(user_inputs)
-        return specific_config, list(user_inputs.values())
-
-    def user_input(
-            self,
-            name: str,
-            input_type,
-            def_val,
-            registered_inputs: list,
-            min_val=None,
-            max_val=None,
-            options=None,
-            title=None,
-            item_title=None,
-            other_schema_values=None,
-            editor_options=None,
-            read_only=False,
-            is_nested_config=None,
-            nested_tentacle=None,
-            parent_input_name=None,
-            show_in_summary=True,
-            show_in_optimizer=True,
-            path=None,
-            order=None,
-    ):
-        """
-        Set and return a user input value.
-        The returned value is set as an attribute named as the "name" param with " " replaced by "_"
-        in self.specific_config.
-        Types are: int, float, boolean, options, multiple-options, text, object
-        :return: the saved_config value if any, def_val otherwise
-        """
-        value = def_val
-        sanitized_name = configuration.sanitize_user_input_name(name)
-        parent = self.specific_config
-        if parent_input_name is not None:
-            found, nested_parent = dict_util.find_nested_value(
-                self.specific_config, configuration.sanitize_user_input_name(parent_input_name)
-            )
-            if found and isinstance(nested_parent, dict):
-                # non dict nested parents are not supported
-                parent = nested_parent
-            else:
-                parent = None
-        if parent is not None:
-            try:
-                value = parent[sanitized_name]
-            except KeyError:
-                # use default value
-                pass
-        input_key = f"{parent_input_name}{name}"
-        if input_key not in registered_inputs:
-            # do not register user input multiple times
-            registered_inputs[input_key] = configuration.format_user_input(
-                name,
-                input_type,
-                value,
-                def_val,
-                commons_enums.UserInputTentacleTypes.EVALUATOR.value,
-                self.get_name(),
-                min_val=min_val,
-                max_val=max_val,
-                options=options,
-                title=title,
-                item_title=item_title,
-                other_schema_values=other_schema_values,
-                editor_options=editor_options,
-                read_only=read_only,
-                is_nested_config=is_nested_config,
-                nested_tentacle=nested_tentacle,
-                parent_input_name=parent_input_name,
-                show_in_summary=show_in_summary,
-                show_in_optimizer=show_in_optimizer,
-                path=path,
-                order=order,
-            )
-        if parent is not None:
-            parent[sanitized_name] = value
-        return value
-
-    def init_user_inputs(self, inputs: dict) -> None:
-        """
-        Called right before starting the evaluator, should define all the evaluator's user inputs unless
-        those are defined somewhere else.
-        """
-        pass
 
     def set_default_config(self):
         """

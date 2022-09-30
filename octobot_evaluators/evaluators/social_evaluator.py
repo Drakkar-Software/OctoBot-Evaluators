@@ -25,30 +25,11 @@ import octobot_evaluators.evaluators as evaluator
 class SocialEvaluator(evaluator.AbstractEvaluator):
     __metaclass__ = evaluator.AbstractEvaluator
     SERVICE_FEED_CLASS = None
+    ALLOW_SUPER_CLASS_CONFIG = True
 
     def __init__(self, tentacles_setup_config):
         super().__init__(tentacles_setup_config)
-        self.load_config()
         self.exchange_id = None
-
-    def load_config(self):
-        try:
-            # try with this class name
-            self.specific_config = api.get_tentacle_config(self.tentacles_setup_config, self.__class__)
-        except KeyError:
-            self.specific_config = None  # tentacle config not found
-        if not self.specific_config:
-            # if nothing in config, try with any super-class' config file
-            for super_class in self.get_parent_evaluator_classes(SocialEvaluator):
-                try:
-                    self.specific_config = api.get_tentacle_config(self.tentacles_setup_config, super_class)
-                    if self.specific_config:
-                        return
-                except KeyError:
-                    pass  # super_class tentacle config not found
-        # set default config if nothing found
-        if not self.specific_config:
-            self.set_default_config()
 
     # Override if no service feed is required for a social evaluator
     async def start(self, bot_id: str) -> bool:

@@ -38,12 +38,8 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
         self._has_script_been_called_once = False
 
     def post_init(self, tentacles_setup_config):
-        self.load_config()
         # add config folder to importable files to import the user script
         tentacles_manager_api.import_user_tentacles_config_folder(tentacles_setup_config)
-
-    def load_config(self):
-        self.specific_config = tentacles_manager_api.get_tentacle_config(self.tentacles_setup_config, self.__class__)
 
     async def start(self, bot_id: str) -> bool:
         """
@@ -245,13 +241,13 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
         await super().user_commands_callback(bot_id, subject, action, data)
         if action in (commons_enums.UserCommands.RELOAD_SCRIPT.value, commons_enums.UserCommands.RELOAD_CONFIG.value):
             # also reload script on RELOAD_CONFIG
-            await self._reload_script()
+            await self._reload_script(bot_id)
 
-    async def _reload_script(self):
+    async def _reload_script(self, bot_id):
         importlib.reload(self.__class__.EVALUATOR_SCRIPT_MODULE)
         self.register_script_module(self.__class__.EVALUATOR_SCRIPT_MODULE)
         # reload config
-        self.load_config()
+        await self.reload_config(bot_id)
         if self.last_call:
             # todo cancel and restart live tasks
             # recall script with for are_data_initialized to false to re-write initial data
