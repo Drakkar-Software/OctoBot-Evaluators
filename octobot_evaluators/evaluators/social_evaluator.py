@@ -28,6 +28,7 @@ class SocialEvaluator(evaluator.AbstractEvaluator):
     def __init__(self, tentacles_setup_config):
         super().__init__(tentacles_setup_config)
         self.exchange_id = None
+        self.feed_config = {}
 
     # Override if no service feed is required for a social evaluator
     async def start(self, bot_id: str) -> bool:
@@ -42,7 +43,7 @@ class SocialEvaluator(evaluator.AbstractEvaluator):
                 import octobot_services.api as service_api
                 service_feed = service_api.get_service_feed(self.SERVICE_FEED_CLASS, bot_id)
                 if service_feed is not None:
-                    service_feed.update_feed_config(self.specific_config)
+                    service_feed.update_feed_config(self.feed_config)
                     await channels.get_chan(service_feed.FEED_CHANNEL.get_name()).new_consumer(self._feed_callback)
                     # store exchange_id to use it later for evaluation timestamps
                     import octobot_trading.api as exchange_api
