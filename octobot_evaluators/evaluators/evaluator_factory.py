@@ -41,6 +41,7 @@ async def create_evaluators(evaluator_parent_class,
     return [
         await create_evaluator(evaluator_class,
                                tentacles_setup_config,
+                               bot_id=bot_id,
                                matrix_id=matrix_id,
                                exchange_name=exchange_name,
                                cryptocurrency=cryptocurrency,
@@ -103,6 +104,7 @@ def _get_time_frames_to_create(evaluator_class, time_frames):
 
 async def create_evaluator(evaluator_class,
                            tentacles_setup_config: object,
+                           bot_id: str,
                            matrix_id: str,
                            exchange_name: str,
                            cryptocurrency: str = None,
@@ -124,7 +126,8 @@ async def create_evaluator(evaluator_class,
             eval_class_instance.time_frame = time_frame if time_frame else eval_class_instance.time_frame
             eval_class_instance.evaluator_type = evaluator.evaluator_class_str_to_matrix_type_dict[
                 eval_class_instance.__class__.mro()[constants.EVALUATOR_CLASS_TYPE_MRO_INDEX].__name__]
-            eval_class_instance.initialize(all_symbols_by_crypto_currencies, time_frames, real_time_time_frames)
+            await eval_class_instance.initialize(all_symbols_by_crypto_currencies, time_frames,
+                                                 real_time_time_frames, bot_id)
             await eval_class_instance.prepare()
             return eval_class_instance
     except Exception as e:

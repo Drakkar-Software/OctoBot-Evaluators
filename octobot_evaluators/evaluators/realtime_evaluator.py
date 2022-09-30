@@ -26,12 +26,7 @@ class RealTimeEvaluator(evaluator.AbstractEvaluator):
 
     def __init__(self, tentacles_setup_config):
         super().__init__(tentacles_setup_config)
-        self.load_config()
         self.available_time_frame = None
-
-    def load_config(self):
-        self.set_default_config()
-        self.specific_config.update(api.get_tentacle_config(self.tentacles_setup_config, self.__class__))
 
     def get_symbol_candles(self, exchange_name: str, exchange_id: str, symbol: str, time_frame):
         try:
