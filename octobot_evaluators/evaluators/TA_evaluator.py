@@ -16,7 +16,9 @@
 import async_channel.constants as channel_constants
 
 import octobot_commons.constants as common_constants
+import octobot_commons.enums as common_enums
 import octobot_commons.channels_name as channels_name
+import octobot_commons.tree as commons_tree
 
 import octobot_evaluators.constants as constants
 import octobot_evaluators.evaluators as evaluator
@@ -31,6 +33,8 @@ class TAEvaluator(evaluator.AbstractEvaluator):
 
         # True when this evaluator is only triggered on closed candles
         self.is_triggered_after_candle_close = True
+
+        self._price_init_timeout = 5 * common_constants.MINUTE_TO_SECONDS
 
     async def start(self, bot_id: str) -> bool:
         """
@@ -72,6 +76,15 @@ class TAEvaluator(evaluator.AbstractEvaluator):
 
     async def evaluator_ohlcv_callback(self, exchange: str, exchange_id: str, cryptocurrency: str, symbol: str,
                                        time_frame: str, candle: dict):
+        await commons_tree.EventProvider.instance().wait_for_event(
+            self.bot_id,
+            commons_tree.get_exchange_path(
+                exchange,
+                common_enums.InitializationEventExchangeTopics.PRICE.value,
+                symbol=symbol,
+            ),
+            self._price_init_timeout
+        )
         await self.ohlcv_callback(exchange, exchange_id, cryptocurrency, symbol, time_frame, candle, False)
 
     async def evaluators_callback(self,
