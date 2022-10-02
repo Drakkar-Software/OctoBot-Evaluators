@@ -44,6 +44,9 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
         # Evaluator matrix id
         self.matrix_id: str = None
 
+        # OctoBot id this evaluator has been started with
+        self.bot_id: str = None
+
         # Tentacle global setup configuration
         self.tentacles_setup_config: tm_configuration.TentaclesSetupConfiguration = tentacles_setup_config
 
@@ -290,6 +293,7 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
         """
         :return: success of the evaluator's start
         """
+        self.bot_id = bot_id
         self.consumers.append(
             await evaluator_channels.get_chan(constants.EVALUATORS_CHANNEL, self.matrix_id).new_consumer(
                 self.evaluators_callback,
