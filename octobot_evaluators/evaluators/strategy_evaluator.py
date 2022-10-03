@@ -48,10 +48,10 @@ class StrategyEvaluator(evaluator.AbstractEvaluator):
         Called right before starting the tentacle, should define all the tentacle's user inputs unless
         those are defined somewhere else.
         """
-        self.user_input(constants.STRATEGIES_REQUIRED_TIME_FRAME, common_enums.UserInputTypes.MULTIPLE_OPTIONS,
-                        [common_enums.TimeFrames.ONE_HOUR.value],
-                        inputs, options=[tf.value for tf in common_enums.TimeFrames],
-                        title="Time frame: The time frame to observe in order to spot changes.")
+        self.UI.user_input(constants.STRATEGIES_REQUIRED_TIME_FRAME, common_enums.UserInputTypes.MULTIPLE_OPTIONS,
+                           [common_enums.TimeFrames.ONE_HOUR.value],
+                           inputs, options=[tf.value for tf in common_enums.TimeFrames],
+                           title="Time frame: The time frame to observe in order to spot changes.")
 
     async def start(self, bot_id: str) -> bool:
         """
