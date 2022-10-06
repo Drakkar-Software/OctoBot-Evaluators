@@ -26,6 +26,7 @@ import octobot_evaluators.evaluators as evaluator
 
 class TAEvaluator(evaluator.AbstractEvaluator):
     __metaclass__ = evaluator.AbstractEvaluator
+    DEFAULT_LIVE_PRICE_INIT_TIMEOUT = 5 * common_constants.MINUTE_TO_SECONDS
 
     def __init__(self, tentacles_setup_config):
         super().__init__(tentacles_setup_config)
@@ -34,7 +35,7 @@ class TAEvaluator(evaluator.AbstractEvaluator):
         # True when this evaluator is only triggered on closed candles
         self.is_triggered_after_candle_close = True
 
-        self._price_init_timeout = 5 * common_constants.MINUTE_TO_SECONDS
+        self._price_init_timeout = self.DEFAULT_LIVE_PRICE_INIT_TIMEOUT
 
     async def start(self, bot_id: str) -> bool:
         """
@@ -49,7 +50,7 @@ class TAEvaluator(evaluator.AbstractEvaluator):
             exchange_id = exchange_api.get_exchange_id_from_matrix_id(self.exchange_name, self.matrix_id)
             time_frame_filter = [tf.value
                                  for tf in exchange_api.get_exchange_available_required_time_frames(
-                self.exchange_name, exchange_id)]
+                                    self.exchange_name, exchange_id)]
             if len(time_frame_filter) == 1:
                 time_frame_filter = time_frame_filter[0]
             await exchanges_channel.get_chan(channels_name.OctoBotTradingChannelsName.OHLCV_CHANNEL.value, exchange_id).\
@@ -60,10 +61,17 @@ class TAEvaluator(evaluator.AbstractEvaluator):
                     time_frame=self.time_frame.value if self.time_frame else time_frame_filter,
                     priority_level=self.priority_level,
             )
+            if exchange_api.get_is_backtesting(
+                    exchange_api.get_exchange_manager_from_exchange_name_and_id(self.exchange_name, exchange_id)
+            ):
+                self.use_backtesting_init_timeout()
             return True
         except ImportError as e:
             self.logger.error("Can't connect to OHLCV trading channel")
         return False
+
+    def use_backtesting_init_timeout(self):
+        self._price_init_timeout = 0
 
     async def reset_evaluation(self, cryptocurrency, symbol, time_frame):
         self.eval_note = common_constants.START_PENDING_EVAL_NOTE
