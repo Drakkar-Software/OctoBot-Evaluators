@@ -123,6 +123,7 @@ class StrategyEvaluator(evaluator.AbstractEvaluator):
         self.available_node_paths_cache = {}
 
     async def stop(self) -> None:
+        await super().stop()
         if self.consumer_instance:
             await evaluator_channels.get_chan(constants.MATRIX_CHANNEL,
                                               self.matrix_id).remove_consumer(self.consumer_instance)
