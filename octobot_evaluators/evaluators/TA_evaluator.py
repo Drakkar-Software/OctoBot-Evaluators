@@ -84,15 +84,18 @@ class TAEvaluator(evaluator.AbstractEvaluator):
 
     async def evaluator_ohlcv_callback(self, exchange: str, exchange_id: str, cryptocurrency: str, symbol: str,
                                        time_frame: str, candle: dict):
-        await commons_tree.EventProvider.instance().wait_for_event(
-            self.bot_id,
-            commons_tree.get_exchange_path(
-                exchange,
-                common_enums.InitializationEventExchangeTopics.PRICE.value,
-                symbol=symbol,
-            ),
-            self._price_init_timeout
-        )
+        if not self.get_is_symbol_wildcard():
+            # do not wait for price in symbol wildcard or it will prevent evaluations for all
+            # symbols waiting in this consumer queue
+            await commons_tree.EventProvider.instance().wait_for_event(
+                self.bot_id,
+                commons_tree.get_exchange_path(
+                    exchange,
+                    common_enums.InitializationEventExchangeTopics.PRICE.value,
+                    symbol=symbol,
+                ),
+                self._price_init_timeout
+            )
         await self.ohlcv_callback(exchange, exchange_id, cryptocurrency, symbol, time_frame, candle, False)
 
     async def evaluators_callback(self,
