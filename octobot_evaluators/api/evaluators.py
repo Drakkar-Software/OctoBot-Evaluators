@@ -58,17 +58,14 @@ def get_evaluator_classes_from_type(evaluator_type, tentacles_setup_config, acti
     return tentacles_management.get_all_classes_from_parent(evaluator.EvaluatorClassTypes[evaluator_type])
 
 
-async def initialize_evaluators(config, tentacles_setup_config) -> str:
+async def initialize_evaluators(config, tentacles_setup_config) -> None:
     """
     :param config: bot config
     :param tentacles_setup_config: tentacles configuration
-    :return: initialized matrix id
     """
     _init_time_frames(config, tentacles_setup_config)
     # take evaluators and strategies candles requirements into account if any
     api.init_required_candles_count_from_evaluators_and_strategies(config, tentacles_setup_config)
-
-    return create_matrix()
 
 
 def get_evaluators_time_frames(config) -> list:
