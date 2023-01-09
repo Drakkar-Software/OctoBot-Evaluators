@@ -363,6 +363,7 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
                     pass  # super_class tentacle config not found
         self.specific_config.update(specific_config)
         await self.load_and_save_user_inputs(bot_id)
+        self.logger.debug(f"Using config: {self.specific_config}")
 
     @classmethod
     def create_local_instance(cls, _, tentacles_setup_config, tentacle_config):
