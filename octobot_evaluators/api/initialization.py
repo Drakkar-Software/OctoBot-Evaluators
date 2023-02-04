@@ -28,12 +28,20 @@ import octobot_evaluators.util as util
 
 
 def init_time_frames_from_strategies(config, tentacles_setup_config) -> None:
-    time_frame_list = set()
-    for strategies_eval_class in get_activated_strategies_classes(tentacles_setup_config):
-        for time_frame in strategies_eval_class.get_required_time_frames(config, tentacles_setup_config):
-            time_frame_list.add(time_frame)
-    time_frame_list = time_frame_manager.sort_time_frames(list(time_frame_list))
-    config[common_constants.CONFIG_TIME_FRAME] = time_frame_list
+    config[common_constants.CONFIG_TIME_FRAME] = get_time_frames_from_strategies(config, tentacles_setup_config)
+
+
+def get_time_frames_from_strategies(config, tentacles_setup_config) -> list:
+    time_frame_list = set(
+        time_frame
+        for strategies_eval_class in get_activated_strategies_classes(tentacles_setup_config)
+        for time_frame in get_time_frames_from_strategy(strategies_eval_class, config, tentacles_setup_config)
+    )
+    return time_frame_manager.sort_time_frames(list(time_frame_list))
+
+
+def get_time_frames_from_strategy(strategy_class, config, tentacles_setup_config) -> list:
+    return strategy_class.get_required_time_frames(config, tentacles_setup_config)
 
 
 def init_required_candles_count_from_evaluators_and_strategies(config, tentacles_setup_config) -> None:
@@ -77,6 +85,7 @@ def _get_activated_classes(tentacles_setup_config, parent_class):
         for child_class in tentacles_management.get_all_classes_from_parent(parent_class)
         if api.is_tentacle_activated_in_tentacles_setup_config(tentacles_setup_config, child_class.get_name())
     ]
+
 
 async def create_evaluator_channels(matrix_id: str, is_backtesting: bool = False) -> None:
     await channel_util.create_all_subclasses_channel(evaluator_channels.EvaluatorChannel,
