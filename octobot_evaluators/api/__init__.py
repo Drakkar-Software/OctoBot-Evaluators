@@ -26,6 +26,7 @@ from octobot_evaluators.api.inspection import (
 from octobot_evaluators.api.evaluators import (
     get_evaluator_classes_from_type,
     get_evaluators_time_frames,
+    update_time_frames_config,
     create_matrix,
     stop_evaluator,
     stop_evaluator_channel,
@@ -35,6 +36,8 @@ from octobot_evaluators.api.evaluators import (
 )
 from octobot_evaluators.api.initialization import (
     init_time_frames_from_strategies,
+    get_time_frames_from_strategies,
+    get_time_frames_from_strategy,
     init_required_candles_count_from_evaluators_and_strategies,
     get_activated_evaluators,
     get_activated_strategies_classes,
@@ -61,6 +64,7 @@ __all__ = [
     "get_relevant_TAs_for_strategy",
     "get_evaluator_classes_from_type",
     "get_evaluators_time_frames",
+    "update_time_frames_config",
     "create_matrix",
     "stop_evaluator",
     "stop_evaluator_channel",
@@ -68,6 +72,8 @@ __all__ = [
     "initialize_evaluators",
     "create_and_start_all_type_evaluators",
     "init_time_frames_from_strategies",
+    "get_time_frames_from_strategies",
+    "get_time_frames_from_strategy",
     "init_required_candles_count_from_evaluators_and_strategies",
     "get_activated_evaluators",
     "get_activated_strategies_classes",

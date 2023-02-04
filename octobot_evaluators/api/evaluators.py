@@ -13,8 +13,6 @@
 #
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
-import copy
-
 import async_channel.channels as channel_instances
 
 import octobot_commons.constants as common_constants
@@ -23,9 +21,12 @@ import octobot_commons.tentacles_management as tentacles_management
 import octobot_commons.time_frame_manager as time_frame_manager
 
 import octobot_evaluators.api as api
+import octobot_evaluators.constants as constants
 import octobot_evaluators.evaluators.channel as evaluator_channels
 import octobot_evaluators.matrix as matrix
 import octobot_evaluators.evaluators as evaluator
+
+import octobot_tentacles_manager.api as tentacles_manager_api
 
 LOGGER_NAME = "EvaluatorsAPI"
 
@@ -70,6 +71,17 @@ async def initialize_evaluators(config, tentacles_setup_config) -> None:
 
 def get_evaluators_time_frames(config) -> list:
     return time_frame_manager.get_config_time_frame(config)
+
+
+def update_time_frames_config(evaluator_class, tentacles_setup_config, time_frames) -> None:
+    config_update = {
+        constants.STRATEGIES_REQUIRED_TIME_FRAME: [tf.value for tf in time_frames]
+    }
+    tentacles_manager_api.update_tentacle_config(
+        tentacles_setup_config,
+        evaluator_class,
+        config_update
+    )
 
 
 def _init_time_frames(config, tentacles_setup_config):
