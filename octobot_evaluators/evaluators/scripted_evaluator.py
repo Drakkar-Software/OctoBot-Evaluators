@@ -83,14 +83,14 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
                        commons_constants.MINUTE_TO_SECONDS
         await self._call_script(exchange, exchange_id, cryptocurrency, symbol,
                                 trigger_time,
-                                commons_enums.ActivationTopics.FULL_CANDLES.value,
+                                commons_enums.TriggerSource.OHLCV.value,
                                 time_frame=time_frame, candle=candle)
 
     async def evaluator_kline_callback(self, exchange: str, exchange_id: str, cryptocurrency: str, symbol: str,
                                        time_frame, kline: dict):
         await self._call_script(exchange, exchange_id, cryptocurrency, symbol,
                                 kline[commons_enums.PriceIndexes.IND_PRICE_TIME.value],
-                                commons_enums.ActivationTopics.IN_CONSTRUCTION_CANDLES.value,
+                                commons_enums.TriggerSource.KLINE.value,
                                 time_frame=time_frame, kline=kline)
 
     async def evaluator_manual_callback(self, context=None, ignore_cache=False, **kwargs):
@@ -176,9 +176,9 @@ class ScriptedEvaluator(evaluator.AbstractEvaluator):
                     return
             self.eval_note, from_cache = await self._get_cached_or_computed_value(context)
             eval_time = None
-            if trigger_source == commons_enums.ActivationTopics.FULL_CANDLES.value:
+            if trigger_source == commons_enums.TriggerSource.OHLCV.value:
                 eval_time = evaluators_util.get_eval_time(full_candle=candle, time_frame=time_frame)
-            elif trigger_source == commons_enums.ActivationTopics.IN_CONSTRUCTION_CANDLES.value:
+            elif trigger_source == commons_enums.TriggerSource.KLINE.value:
                 eval_time = evaluators_util.get_eval_time(partial_candle=kline)
             if eval_time is None:
                 self.logger.error("Can't compute evaluation time, using exchange time")
