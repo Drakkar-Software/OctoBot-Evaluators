@@ -124,6 +124,10 @@ class TAEvaluator(evaluator.AbstractEvaluator):
                         last_full_candle = exchange_api.get_candle_as_list(candles_data)
                         await self.ohlcv_callback(exchange_name, exchange_id, cryptocurrency,
                                                   symbol, time_frame.value, last_full_candle, True)
+            except KeyError:
+                self.logger.debug(
+                    f"Ignored re-evaluation trigger for {symbol} on {exchange_name}: missing {time_frame} data"
+                )
             except ImportError:
                 self.logger.error(f"Can't get OHLCV: requires OctoBot-Trading package installed")
         elif data[constants.EVALUATOR_CHANNEL_DATA_ACTION] == constants.RESET_EVALUATION:
