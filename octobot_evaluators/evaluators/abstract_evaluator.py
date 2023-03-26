@@ -37,6 +37,7 @@ import octobot_evaluators.util as util
 
 class AbstractEvaluator(tentacles_management.AbstractTentacle):
     __metaclass__ = tentacles_management.AbstractTentacle
+    HISTORIZE_USER_INPUT_CONFIG = True
     USER_INPUT_TENTACLE_TYPE = commons_enums.UserInputTentacleTypes.EVALUATOR
 
     def __init__(self, tentacles_setup_config: tm_configuration.TentaclesSetupConfiguration):
