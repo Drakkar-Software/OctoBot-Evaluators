@@ -17,3 +17,7 @@
 
 class UnsetTentacleEvaluation(Exception):
     pass
+
+
+class UnavailableEvaluatorError(Exception):
+    pass

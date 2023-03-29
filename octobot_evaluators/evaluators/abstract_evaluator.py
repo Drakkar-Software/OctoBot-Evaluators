@@ -25,6 +25,7 @@ import async_channel.channels as channels
 import octobot_commons.constants as common_constants
 import octobot_commons.errors as commons_errors
 import octobot_commons.enums as commons_enums
+import octobot_commons.logging as commons_logging
 import octobot_commons.tentacles_management as tentacles_management
 
 import octobot_evaluators.evaluators.channel as evaluator_channels
@@ -42,6 +43,8 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
 
     def __init__(self, tentacles_setup_config: tm_configuration.TentaclesSetupConfiguration):
         super().__init__()
+        self.logger = commons_logging.get_logger(self.get_name())
+
         # Evaluator matrix id
         self.matrix_id: str = None
 
@@ -181,6 +184,12 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
     @classmethod
     def use_cache(cls):
         return False
+
+    def enable_reevaluation(self) -> bool:
+        """
+        Override when artificial re-evaluations from the evaluator channel can be disabled
+        """
+        return True
 
     def get_local_config(self):
         return self.specific_config
