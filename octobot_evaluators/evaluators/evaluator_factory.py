@@ -137,7 +137,6 @@ async def create_evaluator(evaluator_class,
 
 def _instantiate_evaluator(evaluator_class, tentacles_setup_config, should_trigger_post_init):
     eval_class_instance = evaluator_class(tentacles_setup_config)
-    eval_class_instance.logger = logging.get_logger(evaluator_class.get_name())
     if should_trigger_post_init:
         eval_class_instance.post_init(tentacles_setup_config)
     return eval_class_instance
