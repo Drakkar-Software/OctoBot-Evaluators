@@ -215,9 +215,12 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
 
     async def initialize(self, all_symbols_by_crypto_currencies, time_frames, real_time_time_frames, bot_id):
         await self.reload_config(bot_id)
-        currencies, symbols, time_frames = self._get_tentacle_registration_topic(all_symbols_by_crypto_currencies,
-                                                                                 time_frames,
-                                                                                 real_time_time_frames)
+        currencies, symbols, time_frames = self._get_tentacle_registration_topic(
+            all_symbols_by_crypto_currencies, time_frames, real_time_time_frames
+        )
+        await self._init_registered_topics(all_symbols_by_crypto_currencies, currencies, symbols, time_frames)
+
+    async def _init_registered_topics(self, all_symbols_by_crypto_currencies, currencies, symbols, time_frames):
         for currency in currencies:
             for symbol in symbols:
                 if symbol is None or symbol in all_symbols_by_crypto_currencies[currency]:

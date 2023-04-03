@@ -67,7 +67,7 @@ class TAEvaluator(evaluator.AbstractEvaluator):
                 self.use_backtesting_init_timeout()
             return True
         except ImportError as e:
-            self.logger.error("Can't connect to OHLCV trading channel")
+            self.logger.error(f"Can't connect to OHLCV trading channel {e}")
         return False
 
     def use_backtesting_init_timeout(self):
