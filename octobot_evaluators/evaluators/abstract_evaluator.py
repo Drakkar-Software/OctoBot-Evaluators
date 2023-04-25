@@ -213,6 +213,19 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
                                      if tf in trigger_timeframes]
         return currencies, symbols, available_time_frames
 
+    def _is_in_backtesting(self):
+        try:
+            import octobot_trading.api as exchange_api
+            return exchange_api.get_is_backtesting(
+                exchange_api.get_exchange_manager_from_exchange_name_and_id(
+                    self.exchange_name,
+                    exchange_api.get_exchange_id_from_matrix_id(self.exchange_name, self.matrix_id)
+                )
+            )
+        except ImportError as e:
+            self.logger.error(f"Can't connect check if backtesting is enabled {e}")
+        return False
+
     async def initialize(self, all_symbols_by_crypto_currencies, time_frames, real_time_time_frames, bot_id):
         await self.reload_config(bot_id)
         currencies, symbols, time_frames = self._get_tentacle_registration_topic(
