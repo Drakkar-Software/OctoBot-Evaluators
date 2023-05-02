@@ -5,4 +5,4 @@ numpy==1.24.3
 Async-Channel>=2.2, <2.3
 OctoBot-Commons>=1.9, <1.10
 OctoBot-Tentacles-Manager>=2.9, <2.10
-OctoBot-Tulipy==0.4.2
+OctoBot-Tulipy>=0.4.3

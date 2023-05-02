@@ -34,7 +34,7 @@ setup(
     url='https://github.com/Drakkar-Software/OctoBot-Evaluators',
     license='LGPL-3.0',
     author='Drakkar-Software',
-    author_email='drakkar-software@protonmail.com',
+    author_email='contact@drakkar.software',
     description='OctoBot project evaluators package',
     packages=PACKAGES,
     include_package_data=True,
@@ -43,7 +43,6 @@ setup(
     test_suite="tests",
     zip_safe=False,
     data_files=[],
-    setup_requires=REQUIRED,
     install_requires=REQUIRED,
     python_requires=REQUIRES_PYTHON,
     classifiers=[
@@ -54,6 +53,5 @@ setup(
         'Operating System :: POSIX',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
-        'Programming Language :: Cython',
     ],
 )
