@@ -226,8 +226,10 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
             self.logger.error(f"Can't connect check if backtesting is enabled {e}")
         return False
 
-    async def initialize(self, all_symbols_by_crypto_currencies, time_frames, real_time_time_frames, bot_id):
-        await self.reload_config(bot_id)
+    async def initialize(
+        self, all_symbols_by_crypto_currencies, time_frames, real_time_time_frames, bot_id, specific_config=None
+    ):
+        await self.reload_config(bot_id, specific_config=specific_config)
         currencies, symbols, time_frames = self._get_tentacle_registration_topic(
             all_symbols_by_crypto_currencies, time_frames, real_time_time_frames
         )
@@ -375,9 +377,11 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
         else:
             self.logger.debug("Evaluator not started")
 
-    async def reload_config(self, bot_id: str) -> None:
+    async def reload_config(self, bot_id: str, specific_config=None) -> None:
         self.set_default_config()
-        specific_config = api.get_tentacle_config(self.tentacles_setup_config, self.__class__)
+        specific_config = specific_config or api.get_tentacle_config(
+            self.tentacles_setup_config, self.__class__
+        )
 
         if not specific_config and self.ALLOW_SUPER_CLASS_CONFIG:
             # if nothing in config, try with any super-class' config file
