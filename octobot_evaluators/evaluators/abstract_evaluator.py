@@ -185,6 +185,13 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
     def use_cache(cls):
         return False
 
+    @classmethod
+    def get_signals_history_type(cls):
+        """
+        Override when this evaluator uses a specific type of signal history
+        """
+        return None
+
     def enable_reevaluation(self) -> bool:
         """
         Override when artificial re-evaluations from the evaluator channel can be disabled
