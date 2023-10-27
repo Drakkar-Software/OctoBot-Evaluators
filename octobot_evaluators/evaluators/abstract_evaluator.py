@@ -14,6 +14,8 @@
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
 import time
+import asyncio
+import contextlib
 
 import octobot_tentacles_manager.api as api
 import octobot_tentacles_manager.configuration as tm_configuration
@@ -100,6 +102,9 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
 
         # True when this evaluator is only triggered on closed candles
         self.is_triggered_after_candle_close = False
+
+        # Cleared when starting an async evaluation (using self.async_evaluation()) and set afterwards
+        self._is_evaluation_completed: asyncio.Event = None
 
     def post_init(self, tentacles_setup_config):
         """
@@ -557,3 +562,18 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
                                   data):
         # Used to communicate between evaluators
         pass
+
+    @contextlib.asynccontextmanager
+    async def async_evaluation(self):
+        if self._is_evaluation_completed is None:
+            self._is_evaluation_completed = asyncio.Event()
+        try:
+            self._is_evaluation_completed.clear()
+            yield
+        finally:
+            self._is_evaluation_completed.set()
+
+    async def wait_for_async_evaluation_completion(self, timeout):
+        if self._is_evaluation_completed is None or self._is_evaluation_completed.is_set():
+            return
+        await asyncio.wait_for(self._is_evaluation_completed.wait(), timeout=timeout)
