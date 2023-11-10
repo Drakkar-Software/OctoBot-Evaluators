@@ -577,3 +577,8 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
         if self._is_evaluation_completed is None or self._is_evaluation_completed.is_set():
             return
         await asyncio.wait_for(self._is_evaluation_completed.wait(), timeout=timeout)
+
+    def is_in_async_evaluation(self):
+        if self._is_evaluation_completed is None:
+            return False
+        return not self._is_evaluation_completed.is_set()
