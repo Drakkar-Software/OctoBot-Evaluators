@@ -23,5 +23,5 @@ It is also possible to specify which module(s) to install by naming it(them). In
 python start.py tentacles --install forum_evaluator john_smith_macd_evaluator advanced_twitter_evaluator
 ```
 
-**You can find how to create your OctoBot evaluators and strategies [on the OctoBot guides](https://www.octobot.cloud/guides/octobot-tentacles-development/customize-your-octobot?utm_source=octobot&utm_medium=dk&utm_campaign=regular_open_source_content&utm_content=octobot_evaluators_readme).**
+**You can find how to create your OctoBot evaluators and strategies [on the OctoBot guides](https://www.octobot.cloud/en/guides/octobot-tentacles-development/customize-your-octobot?utm_source=octobot&utm_medium=dk&utm_campaign=regular_open_source_content&utm_content=octobot_evaluators_readme).**
 
