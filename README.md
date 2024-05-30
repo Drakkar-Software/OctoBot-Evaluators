@@ -25,3 +25,11 @@ python start.py tentacles --install forum_evaluator john_smith_macd_evaluator ad
 
 **You can find how to create your OctoBot evaluators and strategies [on the OctoBot guides](https://www.octobot.cloud/en/guides/octobot-tentacles-development/customize-your-octobot?utm_source=octobot&utm_medium=dk&utm_campaign=regular_open_source_content&utm_content=octobot_evaluators_readme).**
 
+
+# [Octobot Module Manager](https://github.com/Drakkar-Software/OctoBot-Tentacles-Manager)
+A module manager for your [OctoBot](https://github.com/Drakkar-Software/OctoBot) ! 
+
+- Install OctoBot-Tentacles-Manager from pip : 
+
+``` {.sourceCode .bash}
+$ python3 -m pip install OctoBot-Tentacles-Manager
