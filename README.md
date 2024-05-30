@@ -33,3 +33,6 @@ A module manager for your [OctoBot](https://github.com/Drakkar-Software/OctoBot)
 
 ``` {.sourceCode .bash}
 $ python3 -m pip install OctoBot-Tentacles-Manager
+```
+
+# [Customize your Octobot](https://www.octobot.cloud/en/guides/octobot-tentacles-development/customize-your-octobot)
