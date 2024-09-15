@@ -305,7 +305,9 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
                 elif cache_if_available and eval_note != common_constants.DO_NOT_CACHE:
                     await cache_client.set_cached_value(eval_note, cache_key=eval_time, flush_if_necessary=True)
             self.ensure_eval_note_is_not_expired()
-            self._log_on_invalid_eval_not_time(self.exchange_name, self.matrix_id, symbol, eval_time, time_frame)
+            if notify:
+                # skip warning when evaluation is not to be broadcasted (might be a simple reset)
+                self._log_on_invalid_eval_not_time(self.exchange_name, self.matrix_id, symbol, eval_time, time_frame)
             await evaluator_channels.get_chan(constants.MATRIX_CHANNEL,
                                               self.matrix_id).get_internal_producer().send_eval_note(
                 matrix_id=self.matrix_id,
