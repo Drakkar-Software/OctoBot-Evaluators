@@ -28,6 +28,7 @@ class SocialEvaluator(evaluator.AbstractEvaluator):
     def __init__(self, tentacles_setup_config):
         super().__init__(tentacles_setup_config)
         self.exchange_id = None
+        self.bot_id = None
         self.feed_config = {}
 
     # Override if no service feed is required for a social evaluator
@@ -35,13 +36,14 @@ class SocialEvaluator(evaluator.AbstractEvaluator):
         """
         :return: success of the evaluator's start
         """
+        self.bot_id = bot_id
         if self.SERVICE_FEED_CLASS is None:
             self.logger.error("SERVICE_FEED_CLASS is required to use a service feed. Consumer can't start.")
         else:
-            await super().start(bot_id)
+            await super().start(self.bot_id)
             try:
                 import octobot_services.api as service_api
-                service_feed = service_api.get_service_feed(self.SERVICE_FEED_CLASS, bot_id)
+                service_feed = service_api.get_service_feed(self.SERVICE_FEED_CLASS, self.bot_id)
                 if service_feed is not None:
                     service_feed.update_feed_config(self.feed_config)
                     await channels.get_chan(service_feed.FEED_CHANNEL.get_name()).new_consumer(self._feed_callback)
@@ -53,6 +55,17 @@ class SocialEvaluator(evaluator.AbstractEvaluator):
                 self.logger.exception(e, True, "Can't start: requires OctoBot-Services and OctoBot-Trading "
                                                "package installed")
         return False
+
+    def get_data_cache(self):
+        """
+        :return: the data cache from the service feed
+        """
+        try:
+            import octobot_services.api as service_api
+            return service_api.get_service_feed(self.SERVICE_FEED_CLASS, self.bot_id).data_cache
+        except ImportError as e:
+            self.logger.exception(e, True, "Can't get data cache: requires OctoBot-Services package installed")
+        return None
 
     def get_current_exchange_time(self):
         try:
