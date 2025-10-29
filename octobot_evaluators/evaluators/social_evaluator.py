@@ -14,6 +14,7 @@
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
 import abc 
+import typing
 
 import async_channel.channels as channels
 
@@ -56,13 +57,14 @@ class SocialEvaluator(evaluator.AbstractEvaluator):
                                                "package installed")
         return False
 
-    def get_data_cache(self):
+    def get_data_cache(self, current_time: float, key: typing.Optional[str] = None):
         """
+        :param current_time: the current time
         :return: the data cache from the service feed
         """
         try:
             import octobot_services.api as service_api
-            return service_api.get_service_feed(self.SERVICE_FEED_CLASS, self.bot_id).data_cache
+            return service_api.get_service_feed(self.SERVICE_FEED_CLASS, self.bot_id).get_data_cache(current_time, key)
         except ImportError as e:
             self.logger.exception(e, True, "Can't get data cache: requires OctoBot-Services package installed")
         return None
