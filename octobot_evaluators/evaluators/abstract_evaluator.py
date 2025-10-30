@@ -275,6 +275,8 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
                                    time_frame=None,
                                    eval_note=None,
                                    eval_time=0,
+                                   eval_note_description=None,
+                                   eval_note_metadata=None,
                                    notify=True,
                                    origin_consumer=None,
                                    cache_client=None,
@@ -286,6 +288,8 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
         :param time_frame: evaluated time frame
         :param eval_note: if None = self.eval_note
         :param eval_time: the time of the evaluation if relevant, default is 0
+        :param eval_note_description: the description of the evaluation if relevant
+        :param eval_note_metadata: the metadata of the evaluation if relevant
         :param notify: if true, will trigger matrix consumers
         :param origin_consumer: the sender consumer if it doesn't want to be notified
         :param cache_client: an existing cache client to avoid creating a local one
@@ -316,6 +320,8 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
                 eval_note=eval_note,
                 eval_note_type=self.get_eval_type(),
                 eval_time=eval_time,
+                eval_note_description=eval_note_description,
+                eval_note_metadata=eval_note_metadata,
                 exchange_name=self.exchange_name,
                 cryptocurrency=cryptocurrency,
                 symbol=symbol,
