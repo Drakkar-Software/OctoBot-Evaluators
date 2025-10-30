@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.9.10] - 2025-12-20
 ### Added
 - Add `current_time` to social evaluator `get_data_cache` method
+- Add `eval_note_description` and `eval_note_metadata` to evaluation_completed
 
 ## [1.9.9] - 2024-11-26
 ### Added 
