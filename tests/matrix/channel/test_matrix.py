@@ -30,6 +30,8 @@ async def matrix_callback(matrix_id,
                           evaluator_type,
                           eval_note,
                           eval_note_type,
+                          eval_note_description,
+                          eval_note_metadata,
                           eval_time,
                           exchange_name,
                           cryptocurrency,
@@ -74,9 +76,18 @@ async def test_evaluator_channel_send_eval_note():
                                                                                           evaluator_name="test",
                                                                                           evaluator_type="test2",
                                                                                           eval_note=1,
-                                                                                          eval_note_type=int)
+                                                                                          eval_note_type=int,
+                                                                                          eval_note_description="test description",
+                                                                                          eval_time=1000,
+                                                                                          eval_note_metadata={"test": "test"})
 
     assert Matrices.instance().get_matrix(matrix_id).get_node_at_path(
         get_tentacle_path(tentacle_name="test", tentacle_type="test2")).node_value == 1
+    assert Matrices.instance().get_matrix(matrix_id).get_node_at_path(
+        get_tentacle_path(tentacle_name="test", tentacle_type="test2")).node_description == "test description"
+    assert Matrices.instance().get_matrix(matrix_id).get_node_at_path(
+        get_tentacle_path(tentacle_name="test", tentacle_type="test2")).node_metadata == {"test": "test"}
+    assert Matrices.instance().get_matrix(matrix_id).get_node_at_path(
+        get_tentacle_path(tentacle_name="test", tentacle_type="test2")).node_value_time == 1000
     await get_chan(MATRIX_CHANNEL, MATRIX_TEST_ID).stop()
     Matrices.instance().del_matrix(matrix_id)
