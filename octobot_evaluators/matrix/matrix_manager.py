@@ -14,6 +14,7 @@
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
 import time
+import typing
 
 import octobot_commons.constants as common_constants
 import octobot_commons.enums as common_enums
@@ -26,7 +27,7 @@ import octobot_evaluators.errors as errors
 import octobot_evaluators.matrix as matrix
 
 
-def get_matrix(matrix_id):
+def get_matrix(matrix_id: str) -> matrix.Matrix:
     """
     Get the matrix from its id
     :param matrix_id: the matrix id
@@ -35,7 +36,7 @@ def get_matrix(matrix_id):
     return matrix.Matrices.instance().get_matrix(matrix_id)
 
 
-def set_tentacle_value(matrix_id, tentacle_path, tentacle_type, tentacle_value, timestamp=0):
+def set_tentacle_value(matrix_id: str, tentacle_path, tentacle_type, tentacle_value, timestamp=0):
     """
     Set the node value at tentacle path
     :param matrix_id: the matrix id
@@ -48,7 +49,7 @@ def set_tentacle_value(matrix_id, tentacle_path, tentacle_type, tentacle_value, 
                                          value_path=tentacle_path, timestamp=timestamp)
 
 
-def get_tentacle_node(matrix_id, tentacle_path):
+def get_tentacle_node(matrix_id: str, tentacle_path):
     """
     Return the node at tentacle path
     :param matrix_id: the matrix id
@@ -68,7 +69,7 @@ def delete_tentacle_node(matrix_id, tentacle_path):
     return get_matrix(matrix_id).delete_node_at_path(node_path=tentacle_path)
 
 
-def get_tentacle_value(matrix_id, tentacle_path):
+def get_tentacle_value(matrix_id: str, tentacle_path) -> typing.Any:
     """
     Get the value of the node at tentacle path
     :param matrix_id: the matrix id
@@ -81,7 +82,7 @@ def get_tentacle_value(matrix_id, tentacle_path):
     return None
 
 
-def get_tentacle_eval_time(matrix_id, tentacle_path):
+def get_tentacle_eval_time(matrix_id: str, tentacle_path) -> typing.Optional[float]:
     """
     Get the evaluation time of the node at tentacle path
     :param matrix_id: the matrix id
@@ -94,12 +95,12 @@ def get_tentacle_eval_time(matrix_id, tentacle_path):
     return None
 
 
-def get_matrix_default_value_path(tentacle_name,
-                                  tentacle_type,
-                                  exchange_name=None,
-                                  cryptocurrency=None,
-                                  symbol=None,
-                                  time_frame=None):
+def get_matrix_default_value_path(tentacle_name: str,
+                                  tentacle_type: str,
+                                  exchange_name: typing.Optional[str] = None,
+                                  cryptocurrency: typing.Optional[str] = None,
+                                  symbol: typing.Optional[str] = None,
+                                  time_frame: typing.Optional[str] = None) -> list[str]:
     """
     Create matrix value path with default path
     :param tentacle_name:
@@ -178,7 +179,11 @@ def get_latest_eval_time(matrix_id, exchange_name=None, tentacle_type=None, cryp
     return max(eval_times) if eval_times else None
 
 
-def get_tentacle_path(exchange_name=None, tentacle_type=None, tentacle_name=None) -> list:
+def get_tentacle_path(
+    exchange_name: typing.Optional[str] = None, 
+    tentacle_type: typing.Optional[str] = None, 
+    tentacle_name: typing.Optional[str] = None
+) -> list[str]:
     """
     Returns the path related to the tentacle name, type and exchange name
     :param tentacle_type: the tentacle type to add in the path, ignored if None
@@ -196,7 +201,11 @@ def get_tentacle_path(exchange_name=None, tentacle_type=None, tentacle_name=None
     return node_path
 
 
-def get_tentacle_value_path(cryptocurrency=None, symbol=None, time_frame=None) -> list:
+def get_tentacle_value_path(
+    cryptocurrency: typing.Optional[str] = None, 
+    symbol: typing.Optional[str] = None, 
+    time_frame: typing.Optional[str] = None
+) -> list[str]:
     """
     Returns the path related to symbol and / or time_frame values
     :param cryptocurrency: the cryptocurrency to add in the path, ignored if None
@@ -214,14 +223,14 @@ def get_tentacle_value_path(cryptocurrency=None, symbol=None, time_frame=None) -
     return node_path
 
 
-def get_evaluations_by_evaluator(matrix_id,
-                                 exchange_name=None,
-                                 tentacle_type=None,
-                                 cryptocurrency=None,
-                                 symbol=None,
-                                 time_frame=None,
-                                 allow_missing=True,
-                                 allowed_values=None) -> dict:
+def get_evaluations_by_evaluator(matrix_id: str,
+                                 exchange_name: typing.Optional[str] = None,
+                                 tentacle_type: typing.Optional[str] = None,
+                                 cryptocurrency: typing.Optional[str] = None,
+                                 symbol: typing.Optional[str] = None,
+                                 time_frame: typing.Optional[str] = None,
+                                 allow_missing: bool = True,
+                                 allowed_values: typing.Optional[list[typing.Any]] = None) -> dict[str, typing.Any]:
     """
     Return a dict of evaluation nodes by evaluator name
     :param matrix_id: the matrix id
@@ -256,8 +265,28 @@ def get_evaluations_by_evaluator(matrix_id,
                                                      f"{repr(eval_value)}).")
     return evaluations_by_evaluator
 
+def get_evaluation_descriptions_by_evaluator(matrix_id: str, 
+    exchange_name: typing.Optional[str] = None, 
+    tentacle_type: typing.Optional[str] = None, 
+    cryptocurrency: typing.Optional[str] = None, 
+    symbol: typing.Optional[str] = None, 
+    time_frame: typing.Optional[str] = None,
+    allow_missing: bool = True,
+    allowed_values: typing.Optional[list[str]] = None
+) -> dict[str, str]:
+    """
+    Return a dict of evaluation descriptions by evaluator name
+    :param matrix_id: the matrix id
+    :param exchange_name: the exchange name
+    :param tentacle_type: the tentacle type
+    :param cryptocurrency: the currency ticker
+    :param symbol: the traded pair
+    :param time_frame: the evaluation time frame
+    :return: the dict of evaluation descriptions by evaluator name
+    """
+    return None # TODO
 
-def get_available_time_frames(matrix_id, exchange_name, tentacle_type, cryptocurrency, symbol) -> list:
+def get_available_time_frames(matrix_id: str, exchange_name: str, tentacle_type: str, cryptocurrency: str, symbol: str) -> list[str]:
     """
     Return the list of available time frames for the given tentacle
     :param matrix_id: the matrix id
@@ -280,11 +309,11 @@ def get_available_time_frames(matrix_id, exchange_name, tentacle_type, cryptocur
         return []
 
 
-def get_available_symbols(matrix_id,
-                          exchange_name,
-                          cryptocurrency,
-                          tentacle_type=enums.EvaluatorMatrixTypes.TA.value,
-                          second_tentacle_type=enums.EvaluatorMatrixTypes.REAL_TIME.value) -> list:
+def get_available_symbols(matrix_id: str,
+                          exchange_name: str,
+                          cryptocurrency: str,
+                          tentacle_type: typing.Optional[str] = enums.EvaluatorMatrixTypes.TA.value,
+                          second_tentacle_type: typing.Optional[str] = enums.EvaluatorMatrixTypes.REAL_TIME.value) -> list[str]:
     """
     Return the list of available symbols for the given currency
     :param matrix_id: the matrix id
@@ -314,7 +343,7 @@ def get_available_symbols(matrix_id,
 
 
 def is_tentacle_value_valid(
-    matrix_id, tentacle_path, timestamp=0, delta=constants.EVALUATION_ALLOWED_TIME_DELTA
+    matrix_id: str, tentacle_path, timestamp=0, delta=constants.EVALUATION_ALLOWED_TIME_DELTA
 ) -> bool:
     """
     Check if the node is ready to be used
@@ -359,7 +388,7 @@ def is_evaluation_valid_in_time(
 
 
 def is_tentacles_values_valid(
-    matrix_id, tentacle_path_list, timestamp=0, delta=constants.EVALUATION_ALLOWED_TIME_DELTA
+    matrix_id: str, tentacle_path_list, timestamp=0, delta=constants.EVALUATION_ALLOWED_TIME_DELTA
 ) -> bool:
     """
     Check if each of the tentacle path value is valid
