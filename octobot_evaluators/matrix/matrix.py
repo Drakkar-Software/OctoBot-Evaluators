@@ -31,15 +31,17 @@ class Matrix:
         self.matrix_id = str(uuid.uuid4())
         self.matrix = tree.BaseTree()
 
-    def set_node_value(self, value, value_type, value_path, timestamp=0):
+    def set_node_value(self, value, value_type, value_path, timestamp=0, description=None, metadata=None):
         """
         Set the node value at node path
         :param value_path: the node path
         :param value_type: the node type
         :param value: the node value
         :param timestamp: the value modification timestamp.
+        :param description: the node description
+        :param metadata: the node metadata
         """
-        self.matrix.set_node_at_path(value, value_type, value_path, timestamp=timestamp)
+        self.matrix.set_node_at_path(value, value_type, value_path, timestamp=timestamp, description=description, metadata=metadata)
 
     def get_node_children_at_path(self, node_path, starting_node=None):
         """

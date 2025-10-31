@@ -16,6 +16,7 @@
 import time
 import asyncio
 import contextlib
+import typing
 
 import octobot_tentacles_manager.api as api
 import octobot_tentacles_manager.configuration as tm_configuration
@@ -48,10 +49,10 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
         self.logger = commons_logging.get_logger(self.get_name())
 
         # Evaluator matrix id
-        self.matrix_id: str = None
+        self.matrix_id: typing.Optional[str] = None
 
         # OctoBot id this evaluator has been started with
-        self.bot_id: str = None
+        self.bot_id: typing.Optional[str] = None
 
         # Tentacle global setup configuration
         self.tentacles_setup_config: tm_configuration.TentaclesSetupConfiguration = tentacles_setup_config
@@ -66,16 +67,16 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
         self.enabled: bool = self.is_enabled(self.tentacles_setup_config, False)
 
         # Specified Cryptocurrency for this instance (Should be None if wildcard)
-        self.cryptocurrency: str = None
+        self.cryptocurrency: typing.Optional[str] = None
 
         # Specified Cryptocurrency name for this instance (Should be None if wildcard)
-        self.cryptocurrency_name: str = None
+        self.cryptocurrency_name: typing.Optional[str] = None
 
         # Symbol is the cryptocurrency pair (Should be None if wildcard)
-        self.symbol: str = None
+        self.symbol: typing.Optional[str] = None
 
         # Evaluation related exchange name
-        self.exchange_name: str = None
+        self.exchange_name: typing.Optional[str] = None
 
         # Time_frame is the chart time frame (Should be None if wildcard)
         self.time_frame = None
@@ -101,13 +102,13 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
         # Define evaluators default consumer priority level
         self.priority_level: int = channel_enums.ChannelConsumerPriorityLevels.MEDIUM.value
 
-        self.consumers = []
+        self.consumers: list = []
 
         # True when this evaluator is only triggered on closed candles
-        self.is_triggered_after_candle_close = False
+        self.is_triggered_after_candle_close: bool = False
 
         # Cleared when starting an async evaluation (using self.async_evaluation()) and set afterwards
-        self._is_evaluation_completed: asyncio.Event = None
+        self._is_evaluation_completed: typing.Optional[asyncio.Event] = None
 
     def post_init(self, tentacles_setup_config):
         """
@@ -270,8 +271,8 @@ class AbstractEvaluator(tentacles_management.AbstractTentacle):
                         )
 
     async def evaluation_completed(self,
-                                   cryptocurrency: str = None,
-                                   symbol: str = None,
+                                   cryptocurrency: typing.Optional[str] = None,
+                                   symbol: typing.Optional[str] = None,
                                    time_frame=None,
                                    eval_note=None,
                                    eval_time=0,

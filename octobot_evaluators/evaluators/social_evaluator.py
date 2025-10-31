@@ -28,8 +28,8 @@ class SocialEvaluator(evaluator.AbstractEvaluator):
 
     def __init__(self, tentacles_setup_config):
         super().__init__(tentacles_setup_config)
-        self.exchange_id = None
-        self.bot_id = None
+        self.exchange_id: typing.Optional[str] = None
+        self.bot_id: typing.Optional[str] = None
         self.feed_config = {}
 
     # Override if no service feed is required for a social evaluator
