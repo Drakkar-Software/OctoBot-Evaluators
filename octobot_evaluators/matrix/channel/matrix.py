@@ -104,7 +104,9 @@ class MatrixChannelProducer(evaluator_channels.EvaluatorChannelProducer):
                 cryptocurrency=cryptocurrency,
                 symbol=symbol,
                 time_frame=time_frame
-            )
+            ),
+            description=eval_note_description,
+            metadata=eval_note_metadata
         )
         if notify:
             await self.send(matrix_id=matrix_id,

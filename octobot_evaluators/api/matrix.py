@@ -31,18 +31,20 @@ def get_node_children_by_names(matrix) -> dict:
 def get_children_list(matrix_node) -> dict:
     return matrix_node.children
 
-
 def has_children(matrix_node) -> bool:
     return bool(matrix_node.children)
-
 
 def get_value(matrix_node) -> object:
     return matrix_node.node_value
 
+def get_description(matrix_node) -> object:
+    return matrix_node.node_description
+
+def get_metadata(matrix_node) -> object:
+    return matrix_node.node_metadata
 
 def get_type(matrix_node) -> object:
     return matrix_node.node_type
-
 
 def get_time(matrix_node) -> object:
     return matrix_node.node_value_time

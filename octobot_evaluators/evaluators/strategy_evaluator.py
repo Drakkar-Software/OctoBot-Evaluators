@@ -14,6 +14,8 @@
 #  You should have received a copy of the GNU Lesser General Public
 #  License along with this library.
 
+import typing
+
 import octobot_commons.constants as common_constants
 import octobot_commons.enums as common_enums
 import octobot_commons.time_frame_manager as time_frame_manager
@@ -69,12 +71,12 @@ class StrategyEvaluator(evaluator.AbstractEvaluator):
         return True
 
     async def strategy_completed(self,
-                                 cryptocurrency: str = None,
-                                 symbol: str = None,
-                                 time_frame=None,
-                                 eval_note=None,
-                                 eval_time=0,
-                                 notify=True) -> None:
+                                 cryptocurrency: typing.Optional[str] = None,
+                                 symbol: typing.Optional[str] = None,
+                                 time_frame: typing.Optional[str] = None,
+                                 eval_note = None,
+                                 eval_time: int = 0,
+                                 notify: bool = True) -> None:
         """
         Main async method to notify that a strategy has updated its evaluation
         :param cryptocurrency: evaluated cryptocurrency
@@ -149,7 +151,7 @@ class StrategyEvaluator(evaluator.AbstractEvaluator):
         for full_cycle_evaluator in self.get_full_cycle_evaluator_types():
             if evaluator_type == full_cycle_evaluator:
                 # ensure this time frame is within the strategy's time frames
-                if common_enums.TimeFrames(time_frame) not in self.strategy_time_frames or \
+                if time_frame is None or common_enums.TimeFrames(time_frame) not in self.strategy_time_frames or \
                         not self.is_evaluator_cycle_complete(matrix_id,
                                                              evaluator_name,
                                                              evaluator_type,

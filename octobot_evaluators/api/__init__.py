@@ -56,6 +56,8 @@ from octobot_evaluators.api.matrix import (
     has_children,
     get_value,
     get_type,
+    get_description,
+    get_metadata,
     get_time,
 )
 
@@ -90,6 +92,8 @@ __all__ = [
     "has_children",
     "get_value",
     "get_type",
+    "get_description",
+    "get_metadata",
     "get_time",
 ]
 
