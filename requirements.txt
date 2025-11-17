@@ -1,5 +1,5 @@
 # Setup requirements
-numpy==1.26.3
+numpy==2.3.5
 
 # Drakkar-Software requirements
 Async-Channel>=2.2, <2.3
