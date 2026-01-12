@@ -1,3 +1,3 @@
 # Drakkar-Software requirements
-OctoBot-Commons[full]>=1.9, <1.10
+OctoBot-Commons[full]>=1.9, <1.11
 OctoBot-Tentacles-Manager[full]>=2.9, <2.10
